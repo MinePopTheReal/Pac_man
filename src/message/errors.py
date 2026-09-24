@@ -1,5 +1,6 @@
 from src.message.colors import TerminalColors as TC
 
+
 class Error(Exception):
     """
     The entire logic behind the creation of custom errors.
