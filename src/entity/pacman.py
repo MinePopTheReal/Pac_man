@@ -1,8 +1,8 @@
-from .characters import Character
+from .characters import Character, Direction
 
 
 class Pacman(Character):
-    def __init__(self, direction: str, postion: tuple[int, int],
-                 state: str, life: int) -> None:
-        super().__init__(direction, postion, state)
+    def __init__(self, direction: Direction, position: tuple[float, float],
+                 life: int, speed: float) -> None:
+        super().__init__(direction, position, speed)
         self.life = life
