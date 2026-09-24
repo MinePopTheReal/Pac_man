@@ -26,6 +26,7 @@ class Character(ABC):
     def movement(self, dt: float) -> None:
         y, x = self.position
         dir_y, dir_x = self.direction.value
-        new_pos_y = y + dir_y * (self.speed * dt)
-        new_pos_x = x + dir_x * (self.speed * dt)
+        distance = self.speed * dt
+        new_pos_y = y + dir_y * distance
+        new_pos_x = x + dir_x * distance
         self.position = (new_pos_y, new_pos_x)
