@@ -1,4 +1,4 @@
-from src.maze.cells import Cell
+from src.maze.cells import Cell, CellContents
 from src.message.errors import GridError
 from src.entity.characters import Direction
 
@@ -115,8 +115,35 @@ class Grid:
         center_x = (self.width - 1) // 2
         return (center_y, center_x)
 
-    def corners(self) -> list[tuple[int, int]]:
-        return [(0, 0)]
+    def corners_grid(self) -> list[tuple[int, int]]:
+        """Return the positions of the 4 corners of the grid.
+
+        Used to place the ghosts and the super-pacgums. The order is
+        always the same: top left, top right, bottom left, bottom right.
+
+        Returns:
+            list[tuple[int, int]]: The (y, x) positions of the 4 corners.
+        """
+        lst_corners: list[tuple[int, int]]
+        top_left = (0, 0)
+        top_right = (0, self.width - 1)
+        bot_left = (self.height - 1, 0)
+        bot_right = (self.height - 1, self.width - 1)
+        lst_corners = [top_left, top_right, bot_left, bot_right]
+        return lst_corners
 
     def remaining_pacgums(self) -> int:
-        return 0
+        """Count the cells that still contain something to eat.
+
+        Super-pacgums are counted: the level is won only when the maze
+        is empty.
+
+        Returns:
+            int: The number of pacgums and super-pacgums left.
+        """
+        count_pacgums = 0
+        for row in self.grid:
+            for cell in row:
+                if cell.content != CellContents.EMPTY:
+                    count_pacgums += 1
+        return count_pacgums
