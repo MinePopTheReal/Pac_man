@@ -1,16 +1,17 @@
 import pyglet
-from mazegenerator import MazeGenerator
+# from mazegenerator import MazeGenerator
 
-maze = MazeGenerator()
-maze_matrix = maze.maze
+
+# maze = MazeGenerator()
+# maze_matrix = maze.maze
 
 
 class MazeRenderer:
     def __init__(self, maze: list[list[int]]):
         self.maze: list[list[int]] = maze
 
-    def load_maze_sprite():
-        pass
+    # def load_maze_sprite():
+        # pass
 
 
 # for test
