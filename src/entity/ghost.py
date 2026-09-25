@@ -1,4 +1,4 @@
-from .characters import Character, Direction
+from src.entity.characters import Character, Direction
 from enum import Enum, auto
 
 

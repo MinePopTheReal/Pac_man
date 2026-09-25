@@ -1,4 +1,4 @@
-from src.maze.cells import Cell, CellContents
+from src.maze.cell import Cell, CellContents
 from src.message.errors import GridError
 from src.entity.characters import Direction
 
