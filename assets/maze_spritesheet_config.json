@@ -1,0 +1,53 @@
+{
+    "tile_size": 8,
+    "tiles": {
+        "double_corner": [
+            {
+                "x": 0,
+                "y": 8
+            }
+        ],
+
+        "corner": [ 
+            {
+                "x": 16,
+                "y": 8
+            }
+        ],
+
+        "double_line": [
+            {
+                "x": 8,
+                "y": 16
+            }
+        ],
+
+        "line": [
+            {
+                "x": 8,
+                "y": 8
+            }
+        ],
+
+        "line_and_corner_right": [
+            {
+                "x": 0,
+                "y": 16
+            }
+        ],
+
+        "line_and_corner_left": [
+            {
+                "x": 0,
+                "y": 16
+            }
+        ],
+
+        "black_tile": [
+            {
+                "x": 0,
+                "y": 0
+            }
+        ]
+    }
+}
