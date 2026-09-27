@@ -1,6 +1,6 @@
 from src.utils.file_manager import FileManager
 from json import loads
-# from dataclasses import dataclass
+from dataclasses import dataclass
 from pydantic import BaseModel, StrictInt, Field, ConfigDict, field_validator
 
 
@@ -32,8 +32,9 @@ class Spritesheet(BaseModel):
         ]
 
 
-# class SpritesheetsConfigs(dataclass):
-#     pass
+class SpritesheetsConfigs(dataclass):
+    maze_spritesheet: Spritesheet
+    entities_spritesheet: Spritesheet
 
 
 class SpritesheetConfigParser:
@@ -52,10 +53,15 @@ class SpritesheetConfigParser:
         spritesheet = Spritesheet(**file_datas)
         return spritesheet
 
-    def save_config(self) -> None:
-        # not finish
-        pass
+    def save_config(self) -> SpritesheetsConfigs:
+        maze_spritesheet = self.load_config(self.maze_config_file_path)
+        entities_spritesheet = self.load_config(self.entities_config_file_path)
+        return SpritesheetsConfigs(
+            maze_spritesheet=maze_spritesheet,
+            entities_spritesheet=entities_spritesheet
+        )
 
 
-# print(type([9, 0]))
-# SpritesheetConfigParser().load_maze_config()
+
+condfig = SpritesheetConfigParser().save_config()
+condfig.maze_spritesheet
