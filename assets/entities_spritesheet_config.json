@@ -300,24 +300,32 @@
             }
         ],
 
-        "ghosts_eyes_right": {
-            "x": 128,
-            "y": 128
-        },
+        "ghosts_eyes_right": [
+            {
+                "x": 128,
+                "y": 128
+            }
+        ],
 
-        "ghosts_eyes_left": {
-            "x": 144,
-            "y": 128
-        },
+        "ghosts_eyes_left": [
+            {
+                "x": 144,
+                "y": 128
+            }
+        ],
 
-        "ghosts_eyes_top": {
+        "ghosts_eyes_top": [
+            {
             "x": 160,
             "y": 128
-        },
+            }
+        ],
 
-        "ghosts_eyes_bottom": {
+        "ghosts_eyes_bottom": [
+            {
             "x": 176,
             "y": 128
-        }
+            }
+        ]
     }
 }
