@@ -18,6 +18,7 @@ class Character(ABC):
                     position (tuple[float, float]): Cell: (y, x) row, column
                     state (str): Character's state.
                     direction (str): character direction(UP, DOWN, LEFT, RIGHT)
+                    speed (float): character speed
                 """
         self.position = position
         self.direction = direction
