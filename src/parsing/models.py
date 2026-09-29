@@ -1,5 +1,5 @@
 from pydantic import BaseModel, StrictInt, Field, ConfigDict, field_validator
-from typing import TYPE_CHECKING
+
 
 class Coord(BaseModel):
     """
@@ -13,7 +13,7 @@ class Coord(BaseModel):
 class Spritesheet(BaseModel):
     """
     Check spritesheet config
-    """    
+    """
     model_config = ConfigDict(extra="forbid")
     tiles: dict[str, list[Coord]]
     tile_size: int = Field(ge=1)
@@ -22,7 +22,7 @@ class Spritesheet(BaseModel):
     @classmethod
     def create_coord(
         cls, values: dict[str, list[dict[str, int]]]
-    ) -> dict[str, Coord]:
+    ) -> dict[str, list[Coord]]:
         return {
             key: [Coord(**coord) for coord in value]
             for key, value in values.items()
