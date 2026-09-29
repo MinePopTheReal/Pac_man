@@ -22,6 +22,7 @@ class GameState:
         self.lives = lives
         self.score: int = 0
         self.level: int = 1
+        self.nb_pacgums: int
         self.status: GameStatus = GameStatus.PLAYING
         self.invincible: bool = False
         self.ghosts_frozen: bool = False
@@ -29,7 +30,7 @@ class GameState:
         self.ghosts = self._spawn_ghosts()
 
     def _spawn_pacman(self) -> Pacman:
-        y, x = self.grid.center_grid()
+        y, x = self.grid.center_grid
         pacman = Pacman(Direction.NONE, (float(y), float(x)), PACMAN_SPEED)
         return pacman
 
@@ -37,7 +38,7 @@ class GameState:
         lst_ghosts: list[Ghost] = []
         classes = [Shadow, Pokey, Bashful, Speedy]
 
-        for classe, corner in zip(classes, self.grid.corners_grid()):
+        for classe, corner in zip(classes, self.grid.corners_grid):
             y, x = corner
             ghost = classe(Direction.NONE, (float(y), float(x)),
                            GhostState.HUNTER, GHOST_SPEED)
@@ -69,3 +70,26 @@ class GameState:
         nx = math.ceil(x) if dx > 0 else math.floor(x) if dx < 0 else x
 
         return (float(ny), float(nx))
+
+    def _advance(self, character: Character, wanted: Direction,
+                 dt: float) -> None:
+        if self._is_on_cell(character.position):
+            py, px = character.position
+            character.direction = self._choose_direction(
+                int(py), int(px), wanted, character.direction)
+            if character.direction == Direction.NONE:
+                return
+
+        ty, tx = self._next_cell(character.position, character.direction)
+        y, x = character.position
+        remains = abs(ty - y) + abs(tx - x)
+
+        distance = character.speed * dt
+        if distance >= remains:
+            character.position = (ty, tx)
+        else:
+            character.movement(dt)
+
+    def update(self, dt: float) -> None:
+        if self.status != GameStatus.PLAYING:
+            return

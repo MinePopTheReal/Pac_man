@@ -9,16 +9,16 @@ class Grid:
     Cells are accessed as grid[y][x]: y is the row (0 at the top),
     x is the column (0 on the left).
     """
-    def __init__(self, grid: list[list[Cell]]) -> None:
-        """Create the grid and compute its size.
+    def __init__(self, cells: list[list[Cell]]) -> None:
+        """Create the cells and compute its size.
 
         Args:
-            grid (list[list[Cell]]): The rows of the maze, each row
+            cells (list[list[Cell]]): The rows of the maze, each row
                 being a list of cells. All rows must have the same length.
         """
-        self.grid = grid
-        self.height = len(self.grid)
-        self.width = len(self.grid[0])
+        self.cells = cells
+        self.height = len(self.cells)
+        self.width = len(self.cells[0])
 
     def in_grid(self, y: int, x: int) -> bool:
         """Check if a position is inside the grid.
@@ -50,7 +50,24 @@ class Grid:
         if not self.in_grid(y, x):
             raise GridError(f"coordinates ({y},{x}) are not in the grid, "
                             f"grid size is {self.height} * {self.width}")
-        return self.grid[y][x]
+        return self.cells[y][x]
+
+    def get_all_cells(self) -> list[tuple[int, int, Cell]]:
+        """Return every cell of the grid with its position.
+
+        Cells are listed row by row, from top to bottom, and from left
+        to right in each row. The cells are the grid's own objects, not
+        copies.
+
+        Returns:
+            list[tuple[int, int, Cell]]: One (y, x, cell) tuple per cell.
+        """
+        all_cells: list[tuple[int, int, Cell]] = []
+
+        for y, row in enumerate(self.cells):
+            for x, cell in enumerate(row):
+                all_cells.append((y, x, cell))
+        return all_cells
 
     def has_wall(self, y: int, x: int, direction: Direction) -> bool:
         """Check if the cell at (y, x) has a wall on the given side.
@@ -101,6 +118,7 @@ class Grid:
 
         return self.in_grid(ny, nx)
 
+    @property
     def center_grid(self) -> tuple[int, int]:
         """Return the position of the middle cell of the grid.
 
@@ -115,6 +133,7 @@ class Grid:
         center_x = (self.width - 1) // 2
         return (center_y, center_x)
 
+    @property
     def corners_grid(self) -> list[tuple[int, int]]:
         """Return the positions of the 4 corners of the grid.
 
@@ -142,7 +161,7 @@ class Grid:
             int: The number of pacgums and super-pacgums left.
         """
         count_pacgums = 0
-        for row in self.grid:
+        for row in self.cells:
             for cell in row:
                 if cell.content != CellContents.EMPTY:
                     count_pacgums += 1
