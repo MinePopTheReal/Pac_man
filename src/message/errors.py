@@ -32,9 +32,16 @@ class RenderError(Error):
 
     default_type = "Render"
 
+    
 class ParsingError(Error):
     """Exception raised by parser."""
     
     default_type = "Parsing"
+
+
+class GridError(Error):
+    """Exception raised when accessing a position outside the grid."""
+
+    default_type = "Grid"
 
 # add your own error
