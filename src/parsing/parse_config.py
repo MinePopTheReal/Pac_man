@@ -1,5 +1,4 @@
 from json import loads, JSONDecodeError
-from re import sub, escape, DOTALL
 from pydantic import BaseModel
 from typing import TypeVar
 
@@ -10,13 +9,61 @@ from src.message.errors import ParsingError
 class ConfigParser:
     """
     Parser for json config
-    """    
+    """
 
     T = TypeVar('T', bound=BaseModel)
 
     def __init__(self) -> None:
-        self.single_line_comment_markers = ["#", "//"]
-        self.multi_line_comment_markers = [("/*", "*/")]
+        self.multi_line_comment_markers = [
+            ("/*", "*/"),
+            ("#", "\n"),
+            ("//", "\n")
+            ]
+
+    @staticmethod
+    def _is_in_string(text: str, curr_state: bool, i: int) -> bool:
+        """
+        checks whether the cursor is within a string
+
+        Args:
+            text (str): the text we want to check
+            curr_state (bool): whether we're already in a string or not
+            i (int): the benchmark against which to reassess
+
+        Returns:
+            bool: whether or not we are in a string
+        """
+        in_string = curr_state
+        if text[i] == '"':
+            nb_escape = 0
+            j = i - 1
+
+            while j > 0 and text[j] == "\\":
+                nb_escape += 1
+                j -= 1
+
+            if nb_escape % 2 == 0:
+                in_string = not in_string
+        return in_string
+
+    def _check_comment_traces(self, text: str) -> None:
+        """
+        Checks to see if there are any comments that have been
+        closed but not opened
+
+        Args:
+            text (str): the text we want to check
+        """
+        i = 0
+        in_string = False
+        while i < len(text):
+            in_string = self._is_in_string(text, in_string, i)
+
+            if not in_string:
+                for _, end_marker in self.multi_line_comment_markers:
+                    if end_marker != "\n" and text.startswith(end_marker, i):
+                        raise ParsingError("Missing comment marker")
+            i += 1
 
     def _remove_comment(self, file_content: str) -> str:
         """
@@ -27,36 +74,53 @@ class ConfigParser:
 
         Returns:
             str: Return the contents of the file without the comments
-        """        
+        """
+        i = 0
         text = file_content
-        for start_marker, end_maker in self.multi_line_comment_markers:
-            pattern = rf"{escape(start_marker)}.*?{escape(end_maker)}"
-            text = sub(pattern, "", text, flags=DOTALL)
-        for single_marker in self.single_line_comment_markers:
-            text = sub(rf"{single_marker}.*", "", text)
-        for start_marker, end_maker in self.multi_line_comment_markers:
-            if start_marker in text or end_maker in text:
-                raise ParsingError("Missing comment marker")
+        in_string = False
+
+        while (i < len(text)):
+            in_string = self._is_in_string(text, in_string, i)
+
+            if not in_string:
+
+                for start_marker, end_marker in self.multi_line_comment_markers:
+                    if text.startswith(start_marker, i):
+                        start = i
+
+                        while i < len(text) and (
+                            not text[:i].endswith(end_marker) or in_string
+                        ):
+                            in_string = self._is_in_string(text, in_string, i)
+                            i += 1
+                        text = text[:start] + text[i:]
+                        i = start
+            i += 1
+
+        self._check_comment_traces(text)
         return text
 
-    def load_config(self, path: str, return_type: type[T]) -> type[T]:
+    def load_config(self, path: str, return_type: type[T]) -> T:
         """
-        load, clean and create obj 
+        load, clean and create obj
 
         Args:
             path (str): path to the onfig file
-            return_type (type[T]): pydantic model for the return 
+            return_type (type[T]): pydantic model for the return
 
         Returns:
             type[T]: config into pydantic model
-        """        
+        """
         file_content = FileManager.read(path)
 
         clean_file_Content = self._remove_comment(file_content)
+        print(clean_file_Content)
         try:
             file_datas = loads(clean_file_Content)
         except JSONDecodeError as e:
-            raise ParsingError("An error occurred while loading the file")
+            raise ParsingError(
+                "An error occurred while loading the file"
+            ) from e
 
         obj = return_type(**file_datas)
         return obj
