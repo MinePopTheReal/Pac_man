@@ -1,6 +1,6 @@
 from src.entity import (Speedy, Shadow, Bashful, Pokey,
                         Pacman, Character, Direction, Ghost, GhostState)
-from src.maze import Grid, CellContents  # type: ignore
+from src.maze import Grid, CellContents
 from enum import Enum, auto
 import math
 
