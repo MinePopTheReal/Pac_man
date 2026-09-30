@@ -1,6 +1,6 @@
 from src.entity import (Speedy, Shadow, Bashful, Pokey,
                         Pacman, Character, Direction, Ghost, GhostState)
-from src.maze import Grid
+from src.maze import Grid, CellContents  # type: ignore
 from enum import Enum, auto
 import math
 
@@ -22,7 +22,7 @@ class GameState:
         self.lives = lives
         self.score: int = 0
         self.level: int = 1
-        self.nb_pacgums: int
+        self.wanted_direction: Direction = Direction.NONE
         self.status: GameStatus = GameStatus.PLAYING
         self.invincible: bool = False
         self.ghosts_frozen: bool = False
@@ -90,6 +90,18 @@ class GameState:
         else:
             character.movement(dt)
 
+    def select_direction(self, direction: Direction) -> None:
+        self.wanted_direction = direction
+
     def update(self, dt: float) -> None:
         if self.status != GameStatus.PLAYING:
             return
+
+        self._advance(self.pacman, self.wanted_direction, dt)
+
+        if self._is_on_cell(self.pacman.position):
+            y, x = self.pacman.position
+            cell = self.grid.get_cell(int(y), int(x))
+            eaten = cell.update_cell_content()
+            if eaten == CellContents.PACGUM:
+                pass
