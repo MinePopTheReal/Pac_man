@@ -38,7 +38,7 @@ class ConfigParser:
             nb_escape = 0
             j = i - 1
 
-            while j > 0 and text[j] == "\\":
+            while j >= 0 and text[j] == "\\":
                 nb_escape += 1
                 j -= 1
 
