@@ -84,7 +84,9 @@ class ConfigParser:
 
             if not in_string:
 
-                for start_marker, end_marker in self.multi_line_comment_markers:
+                for start_marker, end_marker in (
+                    self.multi_line_comment_markers
+                ):
                     if text.startswith(start_marker, i):
                         start = i
 
@@ -114,7 +116,6 @@ class ConfigParser:
         file_content = FileManager.read(path)
 
         clean_file_Content = self._remove_comment(file_content)
-        print(clean_file_Content)
         try:
             file_datas = loads(clean_file_Content)
         except JSONDecodeError as e:
