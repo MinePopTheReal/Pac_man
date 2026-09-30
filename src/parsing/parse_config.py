@@ -84,7 +84,9 @@ class ConfigParser:
 
             if not in_string:
 
-                for start_marker, end_marker in self.multi_line_comment_markers:
+                for start_marker, end_marker in (
+                    self.multi_line_comment_markers
+                ):
                     if text.startswith(start_marker, i):
                         start = i
 
