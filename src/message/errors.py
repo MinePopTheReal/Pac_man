@@ -32,4 +32,10 @@ class RenderError(Error):
 
     default_type = "Render"
 
+
+class GridError(Error):
+    """Exception raised when accessing a position outside the grid."""
+
+    default_type = "Grid"
+
 # add your own error
