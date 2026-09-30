@@ -116,7 +116,6 @@ class ConfigParser:
         file_content = FileManager.read(path)
 
         clean_file_Content = self._remove_comment(file_content)
-        print(clean_file_Content)
         try:
             file_datas = loads(clean_file_Content)
         except JSONDecodeError as e:
