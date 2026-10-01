@@ -26,6 +26,7 @@ class GameState:
         self.config: GameConfig = config
         self.rng = random.Random()
         self.lives: int = self.config.lives
+        self.eaten_ghost: int = 0
         self.score: int = 0
         self.level: int = 1
         self.wanted_direction: Direction = Direction.NONE
@@ -50,6 +51,18 @@ class GameState:
                            GhostState.HUNTER, GHOST_SPEED)
             lst_ghosts.append(ghost)
         return lst_ghosts
+
+    def _reset_position(self) -> None:
+        y, x = self.grid.center_grid
+        self.pacman.position = (float(y), float(x))
+        self.pacman.direction = Direction.NONE
+        self.wanted_direction = Direction.NONE
+
+        for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
+            y, x = corner
+            ghost.direction = Direction.NONE
+            ghost.position = (float(y), float(x))
+            ghost.state = GhostState.HUNTER
 
     @staticmethod
     def _is_on_cell(coord: tuple[float, float]) -> bool:
@@ -110,20 +123,10 @@ class GameState:
                     return
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
-                    self.score += self.config.points_ghost
+                    points_ghost = self.config.points_ghost
+                    self.score += points_ghost * (2**self.eaten_ghost)
+                    self.eaten_ghost += 1
                     ghost.state = GhostState.EATEN
-
-    def _reset_position(self) -> None:
-        y, x = self.grid.center_grid
-        self.pacman.position = (float(y), float(x))
-        self.pacman.direction = Direction.NONE
-        self.wanted_direction = Direction.NONE
-
-        for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
-            y, x = corner
-            ghost.direction = Direction.NONE
-            ghost.position = (float(y), float(x))
-            ghost.state = GhostState.HUNTER
 
     def select_direction(self, direction: Direction) -> None:
         self.wanted_direction = direction
