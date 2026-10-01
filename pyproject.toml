@@ -5,13 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-
     "flake8>=7.4.1",
     "mazegenerator",
     "mypy>=2.3.1",
     "numpy>=2.5.3",
     "pyglet>=2.1.16",
     "pydantic>=2.13.5",
+    "pillow>=12.3.0",
 ]
 
 [tool.uv.sources]
