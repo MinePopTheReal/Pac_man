@@ -1,12 +1,16 @@
 from src.entity import (Speedy, Shadow, Bashful, Pokey,
                         Pacman, Character, Direction, Ghost, GhostState)
 from src.maze import Grid, CellContents
+from src.parsing.models import GameConfig
+from src.game_state.collision import collides
 from enum import Enum, auto
 import math
+import random
 
 
 PACMAN_SPEED = 4.0
 GHOST_SPEED = 3.0
+LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
 
 class GameStatus(Enum):
@@ -17,9 +21,11 @@ class GameStatus(Enum):
 
 
 class GameState:
-    def __init__(self, grid: Grid, lives: int = 3) -> None:
+    def __init__(self, grid: Grid, config: GameConfig) -> None:
         self.grid = grid
-        self.lives = lives
+        self.config: GameConfig = config
+        self.rng = random.Random()
+        self.lives: int = self.config.lives
         self.score: int = 0
         self.level: int = 1
         self.wanted_direction: Direction = Direction.NONE
@@ -90,6 +96,35 @@ class GameState:
         else:
             character.movement(dt)
 
+    def _check_ghost_collision(self) -> None:
+        for ghost in self.ghosts:
+            if ghost.state == GhostState.HUNTER:
+                if collides(self.pacman.position, ghost.position):
+                    if self.invincible:
+                        continue
+                    self.lives -= 1
+                    if self.lives == 0:
+                        self.status = GameStatus.LOST
+                        return
+                    self._reset_position()
+                    return
+            elif ghost.state == GhostState.HUNTED:
+                if collides(self.pacman.position, ghost.position):
+                    self.score += self.config.points_ghost
+                    ghost.state = GhostState.EATEN
+
+    def _reset_position(self) -> None:
+        y, x = self.grid.center_grid
+        self.pacman.position = (float(y), float(x))
+        self.pacman.direction = Direction.NONE
+        self.wanted_direction = Direction.NONE
+
+        for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
+            y, x = corner
+            ghost.direction = Direction.NONE
+            ghost.position = (float(y), float(x))
+            ghost.state = GhostState.HUNTER
+
     def select_direction(self, direction: Direction) -> None:
         self.wanted_direction = direction
 
@@ -104,4 +139,40 @@ class GameState:
             cell = self.grid.get_cell(int(y), int(x))
             eaten = cell.update_cell_content()
             if eaten == CellContents.PACGUM:
-                pass
+                self.score += self.config.points_pacgum
+            elif eaten == CellContents.SUPER_PACGUM:
+                self.score += self.config.points_super_pacgum
+            if (eaten != CellContents.EMPTY
+               and self.grid.remaining_pacgums() == 0):
+                self.status = GameStatus.WON
+
+        if not self.ghosts_frozen:
+            for ghost in self.ghosts:
+                self._advance(ghost, self.rng.choice(LST_DIRECTION), dt)
+        self._check_ghost_collision()
+
+
+# if __name__ == "__main__":
+    # from src.maze.loader import generate_maze
+    # from src.parsing.parse_config import ConfigParser
+
+    # config = ConfigParser().load_config('config.json', GameConfig)
+    # gs = GameState(generate_maze(
+    #     config.height, config.width, config.seed, config.pacgum), config)
+    # print(gs.lives - 1, gs.config.points_pacgum)
+
+    # try:
+    #     generate_maze(500, 500, 42, 42)
+    # except ValueError as e:
+    #     print(e)
+
+    # from src.maze.loader import generate_maze
+    # config = GameConfig()
+    # gs = GameState(generate_maze(config.height, config.width,
+    #                              config.seed, config.pacgum), config)
+    # print('départ', gs.pacman.position, gs.score)
+    # gs.select_direction(Direction.RIGHT)
+    # for _ in range(120):
+    #     gs.update(1 / 60)
+    # print('après 2 s', gs.pacman.position, gs.score, gs.status)
+    # print([g.position for g in gs.ghosts])

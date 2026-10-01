@@ -41,7 +41,7 @@ class GameConfig(BaseModel):
     points_super_pacgum: StrictInt = Field(default=50, ge=0)
     points_ghost: StrictInt = Field(default=200, ge=0)
     seed: StrictInt = Field(default=42, ge=0)
-    level_max_time: StrictInt = Field(default=90, ge=1)
+    level_max_time: StrictInt = Field(default=90, ge=1, le=600)
     width: StrictInt = Field(default=22, ge=14, le=50)
     height: StrictInt = Field(default=22, ge=10, le=50)
     nb_level: StrictInt = Field(default=10, ge=10)
