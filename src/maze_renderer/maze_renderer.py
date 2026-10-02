@@ -4,11 +4,12 @@ from pyglet import image
 from src.parsing.parse_config import ConfigParser
 from src.parsing.models import Spritesheet
 from src.maze.loader import generate_maze
+from src.maze.grid import Direction
 from src.maze.cell import Cell
 
 
-
 class Rotation(IntEnum):
+    R0 = 0
     R90 = 90
     R180 = 180
     R270 = 270
@@ -27,11 +28,14 @@ class MazeRenderer:
         self.spritesheet_config: Spritesheet = self._load_maze_sprite_config()
         self.spritesheet_data: bytes = self._load_sprite_data()
 
+        self.bytes_number_per_pixel: int = 3
+
         self.maze_height = len(self.maze)
         self.maze_width = len(self.maze[0])
 
-        self.buffer_pitch: int = self.maze_width * self.spritesheet_config.tile_size * 3 * 4
+        self.buffer_pitch: int = self.maze_width * self.spritesheet_config.tile_size * 3 * self.bytes_number_per_pixel
         self.buffer = bytearray(self.maze_height * self.spritesheet_config.tile_size * 3 * self.buffer_pitch)
+
 
     def _load_maze_sprite_config(self):
         parser = ConfigParser()
@@ -44,46 +48,123 @@ class MazeRenderer:
 
         self.pitch = raw_spritesheet.pitch
 
-        image_data = raw_spritesheet.get_data("RGBA", self.pitch)
+        image_data = raw_spritesheet.get_data("RGB", self.pitch)
         return image_data
-
-    # def _create_empty_buffer(self, tile_size, maze_height, maze_width):
-    #     # self.buffer = np.zeros(
-    #     #     (
-    #     #         tile_size * maze_height * 3,
-    #     #         tile_size * maze_width * 3,
-    #     #         3
-    #     #     ),
-    #     #     dtype=np.uint8
-    #     # )
 
 
     def create_maze_render(self):
-
-
-        # self._create_empty_buffer(
-        #     self.spritesheet_config.tile_size, 
-        #     maze_height, 
-        #     maze_width
-        # )
-
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
                 self._create_tiles_for_one_coord(maze_x, maze_y)
 
-    def _choose_tile(cell):
-        ...
+    def _is_on_the_edge(self, sub_x: int, sub_y:int, x: int, y: int):
+        if (
+            y == 0 and sub_y == 0
+            or x == self.maze_width - 1 and sub_x == 2
+            or y == self.maze_height - 1 and sub_y == 2
+            or x == 0  and sub_x == 0
+        ):
+            return True
+        return False
+
+    def is_full_cell(self, cell: Cell):
+        if (
+            cell.there_is_wall(Direction.UP)
+            and cell.there_is_wall(Direction.DOWN)
+            and cell.there_is_wall(Direction.LEFT)
+            and cell.there_is_wall(Direction.RIGHT)
+        ):
+            return True
+        return False
+
+    def _choose_tiles(self, x: int, y: int) -> list[list[tuple[str, Rotation]]]:
+        side_coords = [
+            (Direction.UP, 1, 0, Rotation.R0),
+            (Direction.LEFT, 0, 1, Rotation.R270),
+            (Direction.RIGHT, 2, 1, Rotation.R90),
+            (Direction.DOWN, 1, 2, Rotation.R180)
+        ]
+
+        corner_coords = [
+            (0, 0, Rotation.R0),
+            (2, 0, Rotation.R90),
+            (0, 2, Rotation.R180),
+            (2, 2, Rotation.R270)
+        ]
+
+        tile = "black_tile"
+        rotation = Rotation.R0
+
+        tiles = []
+
+        for temp_y in range(3):
+            tiles.append([])
+            for _ in range(3):
+                tiles[temp_y].append((tile, rotation))
+
+        cell = self.maze[y][x]
+        for direction, side_x, side_y, rotation in side_coords:
+
+            tile = "black_tile"
+            if cell.there_is_wall(direction):
+                if self._is_on_the_edge(side_x, side_y, x, y):
+                    tile = "double_line"
+                else:
+                    tile = "line"
+            tiles[side_y][side_x] = (tile, rotation)
+
+        for corner_x, corner_y, rotation in corner_coords:
+            if 
+            # if self._is_on_the_edge(corner_x, corner_y, x, y):
+                
+        #     is_corner = False
+
+        #     if (
+        #         cell.there_is_wall(direction_1)
+        #         and cell.there_is_wall(direction_2)
+        #     ):
+        #         is_corner = True
+
+        #     if is_corner:
+        #         if (y == 0 and (x == 0 or x == self.maze_width)
+        #             or y == self.maze_height and (x == 0 or x == self.maze_width)):
+        #             tile = "double_corner"
+        #         elif (
+        #             y == 0 
+        #             or x == 0 
+        #             or y == self.maze_height 
+        #             or x == self.maze_width
+        #         ):
+        #             tile = "line_and_corner_right" if direction_1 is Direction.RIGHT or direction_2 is Direction.RIGHT else "line_and_corner_left"
+        #         else:
+        #             tile = "corner"
+        #     else:
+        #         if (y == 0 and (x == 0 or x == self.maze_width)
+        #             or y == self.maze_height and (x == 0 or x == self.maze_width)):
+        #             tile = "double_line"
+        #         else:
+        #             tile = "line"
+
+        #     tiles[corner_y][corner_x] = (tile, rotation)
+
+        return tiles
+
 
     def _create_tiles_for_one_coord(self, maze_x: int, maze_y: int):
-        cell = self.maze[maze_y][maze_x]
         tile_size = self.spritesheet_config.tile_size
+
+        tiles = self._choose_tiles(maze_x, maze_y)
 
         for sub_y in [maze_y * 3, maze_y * 3 + 1, maze_y * 3 + 2]:
             for sub_x in [maze_x * 3, maze_x * 3 + 1, maze_x * 3 + 2]:
-                tile_1 = self._take_tile("corner")
+                tile_name, rotation = tiles[sub_y % 3][sub_x % 3]
+
+                tile = self._take_tile(tile_name)
+                tile = self._rotate_tile(tile, rotation)
+
                 self._copy_tile_into_buffer(
-                    tile_1,
-                    sub_x * tile_size,   # conversion unité de tuile -> pixels
+                    tile,
+                    sub_x * tile_size,
                     sub_y * tile_size,
                 )
 
@@ -100,8 +181,11 @@ class MazeRenderer:
 
 
     def _rotate_tile(self, bytes_tile: bytearray, deg: Rotation): # util func for animation
-        temp_tile: bytearray = bytearray(self.spritesheet_config.tile_size * 4 * self.spritesheet_config.tile_size)
-        
+        temp_tile: bytearray = bytearray(self.spritesheet_config.tile_size * 3 * self.spritesheet_config.tile_size)
+
+        if deg == Rotation.R0:
+            return bytes_tile
+
         formula = {
             Rotation.R90: self.R90,
             Rotation.R180: self.R180,
@@ -110,14 +194,13 @@ class MazeRenderer:
 
         for y_px in range (self.spritesheet_config.tile_size):
             for x_px in range (self.spritesheet_config.tile_size):
-                pitch = y_px * self.spritesheet_config.tile_size * 4
-                pixel_data = bytes_tile[x_px * 4 + pitch:x_px * 4 + pitch + 4]
+                pitch = y_px * self.spritesheet_config.tile_size * self.bytes_number_per_pixel
+                pixel_data = bytes_tile[x_px * self.bytes_number_per_pixel + pitch:x_px * self.bytes_number_per_pixel + pitch + self.bytes_number_per_pixel]
 
                 new_x, new_y = formula[deg](x_px, y_px)
-                new_pitch = new_y * self.spritesheet_config.tile_size * 4
-                temp_tile[new_x * 4 + new_pitch:new_x * 4 + new_pitch + 4] = pixel_data
+                new_pitch = new_y * self.spritesheet_config.tile_size * self.bytes_number_per_pixel
+                temp_tile[new_x * self.bytes_number_per_pixel + new_pitch:new_x * self.bytes_number_per_pixel + new_pitch + self.bytes_number_per_pixel] = pixel_data
         return temp_tile
-        # for nb_rotate in range(deg % 90):
 
     def _take_tile(self, tile_name: str): # util func for animation
         temp_tile: bytearray = bytearray()
@@ -125,30 +208,25 @@ class MazeRenderer:
         tile_coord = self.spritesheet_config.tiles[tile_name][0]
 
         for y_px in range(self.spritesheet_config.tile_size):
-            tile_x = ((tile_coord.y + y_px) * abs(self.pitch) + tile_coord.x * 4)
-            temp_tile += bytearray(self.spritesheet_data[tile_x:tile_x + self.spritesheet_config.tile_size * 4])
+            tile_x = ((tile_coord.y + y_px) * abs(self.pitch) + tile_coord.x * self.bytes_number_per_pixel)
+            temp_tile += bytearray(self.spritesheet_data[tile_x:tile_x + self.spritesheet_config.tile_size * self.bytes_number_per_pixel])
         return temp_tile
 
     def _copy_tile_into_buffer(self, tile: bytearray, x: int, y: int):
         for y_px in range(self.spritesheet_config.tile_size):
-            tile_pitch = y_px * self.spritesheet_config.tile_size * 4
+            tile_pitch = y_px * self.spritesheet_config.tile_size * self.bytes_number_per_pixel
 
-            buffer_x = ((y + y_px) * abs(self.buffer_pitch) + x * 4)
+            buffer_x = ((y + y_px) * abs(self.buffer_pitch) + x * self.bytes_number_per_pixel)
 
-            self.buffer[buffer_x:buffer_x + self.spritesheet_config.tile_size * 4] = tile[tile_pitch:tile_pitch + self.spritesheet_config.tile_size * 4]
+            self.buffer[buffer_x:buffer_x + self.spritesheet_config.tile_size * self.bytes_number_per_pixel] = tile[tile_pitch:tile_pitch + self.spritesheet_config.tile_size * self.bytes_number_per_pixel]
 
     def test_display(self, array: bytearray | None = None):
         from math import sqrt
         from PIL import Image
 
-        print(array)
-        size = int(sqrt(len(array or self.buffer) / 4))
-        print(size)
-        print(len(array))
-        img = Image.frombytes("RGBA", (size, size), array or self.buffer)
-        img = img.resize((size * 20, size * 20), Image.NEAREST)
+        size = int(sqrt(len(array or self.buffer) / self.bytes_number_per_pixel))
+        img = Image.frombytes("RGB", (size, size), array or self.buffer)
         img.save("debug/debug_render_1.png")
-        img.show()
 
 # # for test
 # class Graphic:
@@ -170,11 +248,17 @@ class MazeRenderer:
 
 
 if __name__ == "__main__":
-    maze = generate_maze(25, 25, 42)
+    maze = generate_maze(20, 20, 42)
     renderer = MazeRenderer(maze.grid)
 
-    # renderer.create_maze_render()
-    tile_1 = renderer._take_tile("corner")
-    tile_2 = renderer._rotate_tile(tile_1, Rotation.R90)
+    renderer.create_maze_render()
+    # tile_1 = renderer._take_tile("line")
+    # tile_2 = renderer._rotate_tile(tile_1, Rotation.R90)
+    # renderer._choose_tiles(1, 1)
+    # renderer._create_tiles_for_one_coord(5, 6)
+    # renderer._create_tiles_for_one_coord(5, 6)
+    
+    # renderer._create_tiles_for_one_coord(5, 6)
 
-    renderer.test_display(tile_2)
+
+    renderer.test_display()
