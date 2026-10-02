@@ -11,6 +11,7 @@ import random
 PACMAN_SPEED = 4.0
 GHOST_SPEED = 3.0
 LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
+TIME_HUNT_GHOSTS = 10.0
 
 
 class GameStatus(Enum):
@@ -26,7 +27,8 @@ class GameState:
         self.config: GameConfig = config
         self.rng = random.Random()
         self.lives: int = self.config.lives
-        self.eaten_ghost: int = 0
+        self.time_hunt_ghosts: float = 0.0
+        self.eaten_ghosts: int = 0
         self.score: int = 0
         self.level: int = 1
         self.wanted_direction: Direction = Direction.NONE
@@ -63,6 +65,7 @@ class GameState:
             ghost.direction = Direction.NONE
             ghost.position = (float(y), float(x))
             ghost.state = GhostState.HUNTER
+        self.time_hunt_ghosts = 0.0
 
     @staticmethod
     def _is_on_cell(coord: tuple[float, float]) -> bool:
@@ -124,9 +127,24 @@ class GameState:
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
                     points_ghost = self.config.points_ghost
-                    self.score += points_ghost * (2**self.eaten_ghost)
-                    self.eaten_ghost += 1
+                    self.score += points_ghost * (2**self.eaten_ghosts)
+                    self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
+
+    def _start_ghosts_hunt(self) -> None:
+        self.time_hunt_ghosts = TIME_HUNT_GHOSTS
+        for ghost in self.ghosts:
+            if ghost.state == GhostState.HUNTER:
+                ghost.state = GhostState.HUNTED
+
+    def _update_time_ghost_hunt(self, dt: float) -> None:
+        if self.time_hunt_ghosts > 0:
+            self.time_hunt_ghosts -= dt
+            if self.time_hunt_ghosts <= 0:
+                self.time_hunt_ghosts = 0.0
+                for ghost in self.ghosts:
+                    if ghost.state == GhostState.HUNTED:
+                        ghost.state = GhostState.HUNTER
 
     def select_direction(self, direction: Direction) -> None:
         self.wanted_direction = direction
@@ -145,6 +163,8 @@ class GameState:
                 self.score += self.config.points_pacgum
             elif eaten == CellContents.SUPER_PACGUM:
                 self.score += self.config.points_super_pacgum
+                self.eaten_ghosts = 0
+                self._start_ghosts_hunt()
             if (eaten != CellContents.EMPTY
                and self.grid.remaining_pacgums() == 0):
                 self.status = GameStatus.WON
@@ -152,10 +172,11 @@ class GameState:
         if not self.ghosts_frozen:
             for ghost in self.ghosts:
                 self._advance(ghost, self.rng.choice(LST_DIRECTION), dt)
+        self._update_time_ghost_hunt(dt)
         self._check_ghost_collision()
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     # from src.maze.loader import generate_maze
     # from src.parsing.parse_config import ConfigParser
 
@@ -170,12 +191,33 @@ class GameState:
     #     print(e)
 
     # from src.maze.loader import generate_maze
+
     # config = GameConfig()
     # gs = GameState(generate_maze(config.height, config.width,
     #                              config.seed, config.pacgum), config)
-    # print('départ', gs.pacman.position, gs.score)
-    # gs.select_direction(Direction.RIGHT)
-    # for _ in range(120):
-    #     gs.update(1 / 60)
-    # print('après 2 s', gs.pacman.position, gs.score, gs.status)
-    # print([g.position for g in gs.ghosts])
+    # for ghost in gs.ghosts:
+    #     ghost.position = gs.pacman.position
+    #     ghost.state = GhostState.HUNTED
+    # gs._check_ghost_collision()
+    # print(gs.score)
+
+    from src.maze.loader import generate_maze
+    from src.parsing.parse_config import ConfigParser
+
+    config = ConfigParser().load_config('config.json', GameConfig)
+    gs = GameState(generate_maze(config.height, config.width,
+                                 config.seed, config.pacgum), config)
+    gs.ghosts_frozen = True
+    y, x = gs.pacman.position
+    gs.grid.get_cell(int(y), int(x)).content = CellContents.SUPER_PACGUM
+    gs.update(0.01)
+    print('juste après :', gs.time_hunt_ghosts,
+          [g.state.name for g in gs.ghosts])
+    for _ in range(500):
+        gs.update(0.01)
+    print('après 5 s   :', round(gs.time_hunt_ghosts, 2),
+          [g.state.name for g in gs.ghosts])
+    for _ in range(600):
+        gs.update(0.01)
+    print('après 9 s   :', round(gs.time_hunt_ghosts),
+          [g.state.name for g in gs.ghosts])
