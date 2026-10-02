@@ -91,7 +91,7 @@ class ConfigParser:
                         start = i
 
                         while i < len(text) and (
-                            not text[:i].endswith(end_marker) or in_string
+                            not text[i:].startswith(end_marker) or in_string
                         ):
                             in_string = self._is_in_string(text, in_string, i)
                             i += 1
