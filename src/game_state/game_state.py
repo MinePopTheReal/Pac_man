@@ -11,7 +11,6 @@ import random
 PACMAN_SPEED = 4.0
 GHOST_SPEED = 3.0
 LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
-TIME_HUNT_GHOSTS = 10.0
 
 
 class GameStatus(Enum):
@@ -51,7 +50,7 @@ class GameState:
         for classe, corner in zip(classes, self.grid.corners_grid):
             y, x = corner
             ghost = classe(Direction.NONE, (float(y), float(x)),
-                           GhostState.HUNTER, GHOST_SPEED)
+                           GhostState.HUNTER, GHOST_SPEED, 0.0)
             lst_ghosts.append(ghost)
         return lst_ghosts
 
@@ -66,6 +65,7 @@ class GameState:
             ghost.direction = Direction.NONE
             ghost.position = (float(y), float(x))
             ghost.state = GhostState.HUNTER
+            ghost.respawn_timer = 0.0
         self.time_hunt_ghosts = 0.0
 
     def _maps_for_corners(self) -> list[list[list[int]]]:
@@ -152,9 +152,10 @@ class GameState:
                     self.score += points_ghost * (2**self.eaten_ghosts)
                     self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
+                    ghost.respawn_timer = self.config.timer_respawn_ghost
 
     def _start_ghosts_hunt(self) -> None:
-        self.time_hunt_ghosts = TIME_HUNT_GHOSTS
+        self.time_hunt_ghosts = self.config.timer_hunt_ghosts
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
                 ghost.state = GhostState.HUNTED
@@ -167,6 +168,14 @@ class GameState:
                 for ghost in self.ghosts:
                     if ghost.state == GhostState.HUNTED:
                         ghost.state = GhostState.HUNTER
+
+    def _update_respawn(self, dt: float) -> None:
+        for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
+            if ghost.state == GhostState.EATEN and ghost.position == corner:
+                ghost.respawn_timer -= dt
+                if ghost.respawn_timer <= 0:
+                    ghost.respawn_timer = 0.0
+                    ghost.state = GhostState.HUNTER
 
     def select_direction(self, direction: Direction) -> None:
         self.wanted_direction = direction
@@ -203,6 +212,7 @@ class GameState:
                     wanted = self.rng.choice(LST_DIRECTION)
                 self._advance(ghost, wanted, dt)
         self._update_time_ghost_hunt(dt)
+        self._update_respawn(dt)
         self._check_ghost_collision()
 
 

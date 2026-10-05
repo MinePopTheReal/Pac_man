@@ -10,30 +10,36 @@ class GhostState(Enum):
 
 class Ghost(Character):
     def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+                 state: GhostState, speed: float,
+                 respawn_timer: float = 0.0) -> None:
         super().__init__(direction, position, speed)
         self.state = state
+        self.respawn_timer = respawn_timer
 
 
 class Shadow(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
-        super().__init__(direction, position, state, speed)
+                 state: GhostState, speed: float,
+                 respawn_timer: float) -> None:
+        super().__init__(direction, position, state, speed, respawn_timer)
 
 
 class Speedy(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
-        super().__init__(direction, position, state, speed)
+                 state: GhostState, speed: float,
+                 respawn_timer: float) -> None:
+        super().__init__(direction, position, state, speed, respawn_timer)
 
 
 class Bashful(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
-        super().__init__(direction, position, state, speed)
+                 state: GhostState, speed: float,
+                 respawn_timer: float) -> None:
+        super().__init__(direction, position, state, speed, respawn_timer)
 
 
 class Pokey(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
-        super().__init__(direction, position, state, speed)
+                 state: GhostState, speed: float,
+                 respawn_timer: float) -> None:
+        super().__init__(direction, position, state, speed, respawn_timer)
