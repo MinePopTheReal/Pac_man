@@ -37,6 +37,7 @@ class GameState:
         self.ghosts_frozen: bool = False
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
+        self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
 
     def _spawn_pacman(self) -> Pacman:
         y, x = self.grid.center_grid
@@ -66,6 +67,27 @@ class GameState:
             ghost.position = (float(y), float(x))
             ghost.state = GhostState.HUNTER
         self.time_hunt_ghosts = 0.0
+
+    def _maps_for_corners(self) -> list[list[list[int]]]:
+        lst_maps: list[list[list[int]]] = []
+        for corner in self.grid.corners_grid:
+            y, x = corner
+            lst_maps.append(self.grid.distances_from_cell(y, x))
+        return lst_maps
+
+    def _direction_home(self, y: int, x: int,
+                        mapp: list[list[int]]) -> Direction:
+        d = mapp[y][x]
+        if d <= 0:
+            return Direction.NONE
+        for direction in LST_DIRECTION:
+            if self.grid.can_move(y, x, direction):
+                dy, dx = direction.value
+                ny = y + dy
+                nx = x + dx
+                if mapp[int(ny)][int(nx)] == d - 1:
+                    return direction
+        return Direction.NONE
 
     @staticmethod
     def _is_on_cell(coord: tuple[float, float]) -> bool:
@@ -170,20 +192,28 @@ class GameState:
                 self.status = GameStatus.WON
 
         if not self.ghosts_frozen:
-            for ghost in self.ghosts:
-                self._advance(ghost, self.rng.choice(LST_DIRECTION), dt)
+            for ghost, mapp in zip(self.ghosts, self.corner_maps):
+                y, x = ghost.position
+                if ghost.state == GhostState.EATEN:
+                    if self._is_on_cell((y, x)):
+                        wanted = self._direction_home(int(y), int(x), mapp)
+                    else:
+                        wanted = ghost.direction
+                else:
+                    wanted = self.rng.choice(LST_DIRECTION)
+                self._advance(ghost, wanted, dt)
         self._update_time_ghost_hunt(dt)
         self._check_ghost_collision()
 
 
-if __name__ == "__main__":
-    # from src.maze.loader import generate_maze
-    # from src.parsing.parse_config import ConfigParser
+# if __name__ == "__main__":
+#     from src.maze.loader import generate_maze
+#     from src.parsing.parse_config import ConfigParser
 
-    # config = ConfigParser().load_config('config.json', GameConfig)
-    # gs = GameState(generate_maze(
-    #     config.height, config.width, config.seed, config.pacgum), config)
-    # print(gs.lives - 1, gs.config.points_pacgum)
+#     config = ConfigParser().load_config('config.json', GameConfig)
+#     gs = GameState(generate_maze(
+#         config.height, config.width, config.seed, config.pacgum), config)
+#     print(gs.lives - 1, gs.config.points_pacgum)
 
     # try:
     #     generate_maze(500, 500, 42, 42)
@@ -201,23 +231,24 @@ if __name__ == "__main__":
     # gs._check_ghost_collision()
     # print(gs.score)
 
-    from src.maze.loader import generate_maze
-    from src.parsing.parse_config import ConfigParser
+    # from src.maze.loader import generate_maze
+    # from src.parsing.parse_config import ConfigParser
 
-    config = ConfigParser().load_config('config.json', GameConfig)
-    gs = GameState(generate_maze(config.height, config.width,
-                                 config.seed, config.pacgum), config)
-    gs.ghosts_frozen = True
-    y, x = gs.pacman.position
-    gs.grid.get_cell(int(y), int(x)).content = CellContents.SUPER_PACGUM
-    gs.update(0.01)
-    print('juste après :', gs.time_hunt_ghosts,
-          [g.state.name for g in gs.ghosts])
-    for _ in range(500):
-        gs.update(0.01)
-    print('après 5 s   :', round(gs.time_hunt_ghosts, 2),
-          [g.state.name for g in gs.ghosts])
-    for _ in range(600):
-        gs.update(0.01)
-    print('après 9 s   :', round(gs.time_hunt_ghosts),
-          [g.state.name for g in gs.ghosts])
+    # config = ConfigParser().load_config('config.json', GameConfig)
+    # gs = GameState(generate_maze(config.height, config.width,
+    #                              config.seed, config.pacgum), config)
+    # gs.ghosts_frozen = True
+    # y, x = gs.pacman.position
+    # gs.grid.get_cell(int(y), int(x)).content = CellContents.SUPER_PACGUM
+    # gs.update(0.01)
+    # print('juste après :', gs.time_hunt_ghosts,
+    #       [g.state.name for g in gs.ghosts])
+    # for _ in range(500):
+    #     gs.update(0.01)
+    # print('après 5 s   :', round(gs.time_hunt_ghosts, 2),
+    #       [g.state.name for g in gs.ghosts])
+    # for _ in range(600):
+    #     gs.update(0.01)
+    # print('après 9 s   :', round(gs.time_hunt_ghosts),
+    #       [g.state.name for g in gs.ghosts])
+    # print(gs.path_to_corner(5, 5))

@@ -1,6 +1,10 @@
 from src.maze.cell import Cell, CellContents
 from src.message.errors import GridError
 from src.entity.characters import Direction
+from collections import deque
+
+
+LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
 
 class Grid:
@@ -166,3 +170,22 @@ class Grid:
                 if cell.content != CellContents.EMPTY:
                     count_pacgums += 1
         return count_pacgums
+
+    def distances_from_cell(self, y0: int, x0: int) -> list[list[int]]:
+        dist = [[-1 for _ in range(self.width)]
+                for _ in range(self.height)]
+        dist[y0][x0] = 0
+        queue: deque[tuple[int, int]] = deque([(y0, x0)])
+
+        while queue:
+            y, x = queue.popleft()
+            for direction in LST_DIRECTION:
+                if self.can_move(y, x, direction):
+                    dy, dx = direction.value
+                    ny = y + dy
+                    nx = x + dx
+                    if dist[ny][nx] == -1:
+                        dist[ny][nx] = dist[y][x] + 1
+                        queue.append((ny, nx))
+
+        return dist
