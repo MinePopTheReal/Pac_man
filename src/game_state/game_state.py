@@ -50,7 +50,7 @@ class GameState:
         for classe, corner in zip(classes, self.grid.corners_grid):
             y, x = corner
             ghost = classe(Direction.NONE, (float(y), float(x)),
-                           GhostState.HUNTER, GHOST_SPEED, 0.0)
+                           GhostState.HUNTER, GHOST_SPEED)
             lst_ghosts.append(ghost)
         return lst_ghosts
 
@@ -169,7 +169,7 @@ class GameState:
                     if ghost.state == GhostState.HUNTED:
                         ghost.state = GhostState.HUNTER
 
-    def _update_respawn(self, dt: float) -> None:
+    def _update_respawn_ghost(self, dt: float) -> None:
         for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
             if ghost.state == GhostState.EATEN and ghost.position == corner:
                 ghost.respawn_timer -= dt
@@ -212,7 +212,7 @@ class GameState:
                     wanted = self.rng.choice(LST_DIRECTION)
                 self._advance(ghost, wanted, dt)
         self._update_time_ghost_hunt(dt)
-        self._update_respawn(dt)
+        self._update_respawn_ghost(dt)
         self._check_ghost_collision()
 
 
