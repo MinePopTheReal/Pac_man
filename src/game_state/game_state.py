@@ -3,6 +3,7 @@ from src.entity import (Speedy, Shadow, Bashful, Pokey,
 from src.maze import Grid, CellContents
 from src.parsing.models import GameConfig
 from src.game_state.collision import collides
+from src.maze.loader import generate_maze
 from enum import Enum, auto
 import math
 import random
@@ -21,15 +22,15 @@ class GameStatus(Enum):
 
 
 class GameState:
-    def __init__(self, grid: Grid, config: GameConfig) -> None:
-        self.grid = grid
+    def __init__(self, config: GameConfig) -> None:
         self.config: GameConfig = config
         self.rng = random.Random()
+        self.level: int = 1
+        self.grid: Grid = self._new_grid()
         self.lives: int = self.config.lives
         self.time_hunt_ghosts: float = 0.0
         self.eaten_ghosts: int = 0
         self.score: int = 0
-        self.level: int = 1
         self.wanted_direction: Direction = Direction.NONE
         self.status: GameStatus = GameStatus.PLAYING
         self.invincible: bool = False
@@ -67,6 +68,24 @@ class GameState:
             ghost.state = GhostState.HUNTER
             ghost.respawn_timer = 0.0
         self.time_hunt_ghosts = 0.0
+
+    def _new_grid(self) -> Grid:
+        seed = self.config.seed if self.level == 1 else 0
+        return generate_maze(self.config.height, self.config.width, seed,
+                             self.config.pacgum)
+
+    def _build_level(self) -> None:
+        self.grid = self._new_grid()
+        self.corner_maps = self._maps_for_corners()
+        self._reset_position()
+        self.eaten_ghosts = 0
+
+    def _next_level(self) -> None:
+        if self.level < self.config.nb_level:
+            self.level += 1
+            self._build_level()
+        else:
+            self.status = GameStatus.WON
 
     def _maps_for_corners(self) -> list[list[list[int]]]:
         lst_maps: list[list[list[int]]] = []
@@ -198,7 +217,8 @@ class GameState:
                 self._start_ghosts_hunt()
             if (eaten != CellContents.EMPTY
                and self.grid.remaining_pacgums() == 0):
-                self.status = GameStatus.WON
+                self._next_level()
+                return
 
         if not self.ghosts_frozen:
             for ghost, mapp in zip(self.ghosts, self.corner_maps):
@@ -219,11 +239,14 @@ class GameState:
 # if __name__ == "__main__":
 #     from src.maze.loader import generate_maze
 #     from src.parsing.parse_config import ConfigParser
-
-#     config = ConfigParser().load_config('config.json', GameConfig)
-#     gs = GameState(generate_maze(
-#         config.height, config.width, config.seed, config.pacgum), config)
-#     print(gs.lives - 1, gs.config.points_pacgum)
+#     try:
+#         config = ConfigParser().load_config('config.json', GameConfig)
+#     except Exception as e:
+#         print(e)
+#     else:
+#         gs = GameState(generate_maze(
+#             config.height, config.width, config.seed, config.pacgum), config)
+#         print(gs.lives - 1, gs.config.points_pacgum)
 
     # try:
     #     generate_maze(500, 500, 42, 42)
