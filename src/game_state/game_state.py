@@ -10,6 +10,8 @@ import random
 
 
 PACMAN_SPEED = 4.0
+SPEED_MULTIPLIER = 2.0
+SPEED_REDUCTION = 0.5
 GHOST_SPEED = 3.0
 
 
@@ -27,13 +29,16 @@ class GameState:
         self.level: int = 1
         self.grid: Grid = self._new_grid()
         self.lives: int = self.config.lives
+        self.cheat_mode: bool = False
+        self.invincible: bool = False
+        self.ghosts_frozen: bool = False
+        self.fast: bool = False
+        self.slow: bool = False
         self.time_hunt_ghosts: float = 0.0
         self.eaten_ghosts: int = 0
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
         self.status: GameStatus = GameStatus.PLAYING
-        self.invincible: bool = False
-        self.ghosts_frozen: bool = False
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
@@ -136,6 +141,43 @@ class GameState:
                     ghost.respawn_timer = 0.0
                     ghost.state = GhostState.HUNTER
 
+    def switch_cheat_mode(self) -> None:
+        self.cheat_mode = not self.cheat_mode
+
+    def switch_invincible(self) -> None:
+        if self.cheat_mode:
+            self.invincible = not self.invincible
+
+    def switch_ghosts_frozen(self) -> None:
+        if self.cheat_mode:
+            self.ghosts_frozen = not self.ghosts_frozen
+
+    def skip_level(self) -> None:
+        if self.cheat_mode:
+            self._next_level()
+
+    def add_extra_life(self) -> None:
+        if self.cheat_mode:
+            self.lives += 1
+
+    def switch_speed_pacman(self) -> None:
+        if self.cheat_mode:
+            self.fast = not self.fast
+            if self.fast:
+                self.pacman.speed = PACMAN_SPEED * SPEED_MULTIPLIER
+            else:
+                self.pacman.speed = PACMAN_SPEED
+
+    def switch_slow_ghosts(self) -> None:
+        if self.cheat_mode:
+            self.slow = not self.slow
+            if self.slow:
+                for ghost in self.ghosts:
+                    ghost.speed = GHOST_SPEED * SPEED_REDUCTION
+            else:
+                for ghost in self.ghosts:
+                    ghost.speed = GHOST_SPEED
+
     def select_direction(self, direction: Direction) -> None:
         self.wanted_direction = direction
 
@@ -176,17 +218,19 @@ class GameState:
         self._update_respawn_ghost(dt)
         self._check_ghost_collision()
 
-# if __name__ == "__main__":
-#     from src.maze.loader import generate_maze
-#     from src.parsing.parse_config import ConfigParser
-#     try:
-#         config = ConfigParser().load_config('config.json', GameConfig)
-#     except Exception as e:
-#         print(e)
-#     else:
-#         gs = GameState(generate_maze(
-#             config.height, config.width, config.seed, config.pacgum), config)
-#         print(gs.lives - 1, gs.config.points_pacgum)
+
+if __name__ == "__main__":
+    #     from src.maze.loader import generate_maze
+    #     from src.parsing.parse_config import ConfigParser
+    #     try:
+    #         config = ConfigParser().load_config('config.json', GameConfig)
+    #     except Exception as e:
+    #         print(e)
+    #     else:
+    #         gs = GameState(generate_maze(
+    #             config.height, config.width, config.seed, config.pacgum),
+    #             config)
+    #         print(gs.lives - 1, gs.config.points_pacgum)
 
     # try:
     #     generate_maze(500, 500, 42, 42)
@@ -225,3 +269,20 @@ class GameState:
     # print('après 9 s   :', round(gs.time_hunt_ghosts),
     #       [g.state.name for g in gs.ghosts])
     # print(gs.path_to_corner(5, 5))
+
+    from src.parsing.models import GameConfig
+    gs = GameState(GameConfig())
+    gs.switch_invincible()
+    print('sans mode triche :', gs.invincible)
+    gs.switch_cheat_mode()
+    print('mode triche :', gs.cheat_mode)
+    gs.switch_invincible()
+    print('invincible :', gs.invincible)
+    gs.switch_invincible()
+    print('invincible :', gs.invincible)
+    gs.switch_speed_pacman()
+    print('vitesse :', gs.pacman.speed)
+    gs.switch_speed_pacman()
+    print('vitesse :', gs.pacman.speed)
+    gs.switch_cheat_mode()
+    print('mode triche :', gs.cheat_mode)
