@@ -1,17 +1,16 @@
 from src.entity import (Speedy, Shadow, Bashful, Pokey,
-                        Pacman, Character, Direction, Ghost, GhostState)
-from src.maze import Grid, CellContents
+                        Pacman, Direction, Ghost, GhostState)
+from src.maze import Grid, CellContents, LST_DIRECTION
 from src.parsing.models import GameConfig
 from src.game_state.collision import collides
 from src.maze.loader import generate_maze
+from src.game_state.movement import (is_on_cell, advance, direction_home)
 from enum import Enum, auto
-import math
 import random
 
 
 PACMAN_SPEED = 4.0
 GHOST_SPEED = 3.0
-LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
 
 class GameStatus(Enum):
@@ -94,65 +93,6 @@ class GameState:
             lst_maps.append(self.grid.distances_from_cell(y, x))
         return lst_maps
 
-    def _direction_home(self, y: int, x: int,
-                        mapp: list[list[int]]) -> Direction:
-        d = mapp[y][x]
-        if d <= 0:
-            return Direction.NONE
-        for direction in LST_DIRECTION:
-            if self.grid.can_move(y, x, direction):
-                dy, dx = direction.value
-                ny = y + dy
-                nx = x + dx
-                if mapp[int(ny)][int(nx)] == d - 1:
-                    return direction
-        return Direction.NONE
-
-    @staticmethod
-    def _is_on_cell(coord: tuple[float, float]) -> bool:
-        y, x = coord
-        return y.is_integer() and x.is_integer()
-
-    def _choose_direction(self, y: int, x: int,
-                          wanted: Direction, current: Direction) -> Direction:
-        if self.grid.can_move(y, x, wanted):
-            return wanted
-        if self.grid.can_move(y, x, current):
-            return current
-        return Direction.NONE
-
-    def _next_cell(self, coord: tuple[float, float],
-                   direction: Direction) -> tuple[float, float]:
-        y, x = coord
-        dy, dx = direction.value
-
-        if self._is_on_cell(coord):
-            return (float(y + dy), float(x + dx))
-
-        ny = math.ceil(y) if dy > 0 else math.floor(y) if dy < 0 else y
-        nx = math.ceil(x) if dx > 0 else math.floor(x) if dx < 0 else x
-
-        return (float(ny), float(nx))
-
-    def _advance(self, character: Character, wanted: Direction,
-                 dt: float) -> None:
-        if self._is_on_cell(character.position):
-            py, px = character.position
-            character.direction = self._choose_direction(
-                int(py), int(px), wanted, character.direction)
-            if character.direction == Direction.NONE:
-                return
-
-        ty, tx = self._next_cell(character.position, character.direction)
-        y, x = character.position
-        remains = abs(ty - y) + abs(tx - x)
-
-        distance = character.speed * dt
-        if distance >= remains:
-            character.position = (ty, tx)
-        else:
-            character.movement(dt)
-
     def _check_ghost_collision(self) -> None:
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
@@ -203,9 +143,9 @@ class GameState:
         if self.status != GameStatus.PLAYING:
             return
 
-        self._advance(self.pacman, self.wanted_direction, dt)
+        advance(self.pacman, self.wanted_direction, dt, self.grid)
 
-        if self._is_on_cell(self.pacman.position):
+        if is_on_cell(self.pacman.position):
             y, x = self.pacman.position
             cell = self.grid.get_cell(int(y), int(x))
             eaten = cell.update_cell_content()
@@ -224,17 +164,17 @@ class GameState:
             for ghost, mapp in zip(self.ghosts, self.corner_maps):
                 y, x = ghost.position
                 if ghost.state == GhostState.EATEN:
-                    if self._is_on_cell((y, x)):
-                        wanted = self._direction_home(int(y), int(x), mapp)
+                    if is_on_cell((y, x)):
+                        wanted = direction_home(int(y), int(x), mapp,
+                                                self.grid)
                     else:
                         wanted = ghost.direction
                 else:
                     wanted = self.rng.choice(LST_DIRECTION)
-                self._advance(ghost, wanted, dt)
+                advance(ghost, wanted, dt, self.grid)
         self._update_time_ghost_hunt(dt)
         self._update_respawn_ghost(dt)
         self._check_ghost_collision()
-
 
 # if __name__ == "__main__":
 #     from src.maze.loader import generate_maze
