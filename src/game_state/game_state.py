@@ -5,6 +5,7 @@ from src.parsing.models import GameConfig
 from src.game_state.collision import collides
 from src.maze.loader import generate_maze
 from src.game_state.movement import (is_on_cell, advance, direction_home)
+from src.game_state.cheats import Cheats
 from enum import Enum, auto
 import random
 
@@ -51,8 +52,8 @@ class GameState:
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
         status (GameStatus): PLAYING, PAUSED, LOST or WON.
-        cheat_mode, invincible, ghosts_frozen, fast, slow (bool):
-            Which cheats are on.
+        cheats (Cheats): Which cheats are on, for example
+            cheats.enabled or cheats.invincible.
 
     Positions are (y, x) = (row, column) in cells, not pixels: multiply
     by the tile size to draw, and swap to (x, y) for the screen.
@@ -68,11 +69,7 @@ class GameState:
         self.level: int = 1
         self.grid: Grid = self._new_grid()
         self.lives: int = self.config.lives
-        self.cheat_mode: bool = False
-        self.invincible: bool = False
-        self.ghosts_frozen: bool = False
-        self.fast: bool = False
-        self.slow: bool = False
+        self.cheats: Cheats = Cheats()
         self.level_time_left: float = float(self.config.level_max_time)
         self.time_hunt_ghosts: float = 0.0
         self.eaten_ghosts: int = 0
@@ -191,7 +188,7 @@ class GameState:
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
                 if collides(self.pacman.position, ghost.position):
-                    if self.invincible:
+                    if self.cheats.invincible:
                         continue
                     self.lives -= 1
                     if self.lives == 0:
@@ -260,42 +257,42 @@ class GameState:
         The other cheat methods do nothing while the cheat mode is off.
         Cheats already on stay on when the cheat mode is turned off.
         """
-        self.cheat_mode = not self.cheat_mode
+        self.cheats.enabled = not self.cheats.enabled
 
     def switch_invincible(self) -> None:
         """Cheat: turn invincibility on or off (ghosts cannot kill Pac-Man)."""
-        if self.cheat_mode:
-            self.invincible = not self.invincible
+        if self.cheats.enabled:
+            self.cheats.invincible = not self.cheats.invincible
 
     def switch_ghosts_frozen(self) -> None:
         """Cheat: stop or restart the ghosts."""
-        if self.cheat_mode:
-            self.ghosts_frozen = not self.ghosts_frozen
+        if self.cheats.enabled:
+            self.cheats.ghosts_frozen = not self.cheats.ghosts_frozen
 
     def skip_level(self) -> None:
         """Cheat: finish the current level at once (wins after the last)."""
-        if self.cheat_mode:
+        if self.cheats.enabled:
             self._next_level()
 
     def add_extra_life(self) -> None:
         """Cheat: give Pac-Man one more life."""
-        if self.cheat_mode:
+        if self.cheats.enabled:
             self.lives += 1
 
     def switch_speed_pacman(self) -> None:
         """Cheat: make Pac-Man twice as fast, or back to normal speed."""
-        if self.cheat_mode:
-            self.fast = not self.fast
-            if self.fast:
+        if self.cheats.enabled:
+            self.cheats.fast = not self.cheats.fast
+            if self.cheats.fast:
                 self.pacman.speed = PACMAN_SPEED * SPEED_MULTIPLIER
             else:
                 self.pacman.speed = PACMAN_SPEED
 
     def switch_slow_ghosts(self) -> None:
         """Cheat: make the ghosts twice as slow, or back to normal speed."""
-        if self.cheat_mode:
-            self.slow = not self.slow
-            if self.slow:
+        if self.cheats.enabled:
+            self.cheats.slow = not self.cheats.slow
+            if self.cheats.slow:
                 for ghost in self.ghosts:
                     ghost.speed = GHOST_SPEED * SPEED_REDUCTION
             else:
@@ -360,12 +357,12 @@ class GameState:
                 self._next_level()
                 return
 
-        if not self.ghosts_frozen:
-            for ghost, mapp in zip(self.ghosts, self.corner_maps):
+        if not self.cheats.ghosts_frozen:
+            for ghost, maze in zip(self.ghosts, self.corner_maps):
                 y, x = ghost.position
                 if ghost.state == GhostState.EATEN:
                     if is_on_cell((y, x)):
-                        wanted = direction_home(int(y), int(x), mapp,
+                        wanted = direction_home(int(y), int(x), maze,
                                                 self.grid)
                     else:
                         wanted = ghost.direction

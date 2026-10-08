@@ -113,7 +113,7 @@ def advance(character: Character, wanted: Direction, dt: float,
         character.move(dt)
 
 
-def direction_home(y: int, x: int, mapp: list[list[int]],
+def direction_home(y: int, x: int, maze: list[list[int]],
                    grid: Grid) -> Direction:
     """Give the direction that brings an eaten ghost closer to its corner.
 
@@ -123,7 +123,7 @@ def direction_home(y: int, x: int, mapp: list[list[int]],
     Args:
         y (int): The row of the ghost's cell.
         x (int): The column of the ghost's cell.
-        mapp (list[list[int]]): The distance map of the ghost's corner
+        maze (list[list[int]]): The distance map of the ghost's corner
             (see Grid.distances_from_cell).
         grid (Grid): The maze.
 
@@ -131,14 +131,14 @@ def direction_home(y: int, x: int, mapp: list[list[int]],
         Direction: The direction to take, or Direction.NONE if the ghost
             is already in its corner.
     """
-    d = mapp[y][x]
-    if d <= 0:
+    step = maze[y][x]
+    if step <= 0:
         return Direction.NONE
     for direction in LST_DIRECTION:
         if grid.can_move(y, x, direction):
             dy, dx = direction.value
             ny = y + dy
             nx = x + dx
-            if mapp[ny][nx] == d - 1:
+            if maze[ny][nx] == step - 1:
                 return direction
     return Direction.NONE
