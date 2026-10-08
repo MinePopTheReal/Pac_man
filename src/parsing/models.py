@@ -1,5 +1,5 @@
 from pydantic import (BaseModel, StrictInt, Field, ConfigDict, field_validator,
-                      ValidationError, ValidationInfo,
+                      ValidationError, ValidationInfo, StrictFloat,
                       ValidatorFunctionWrapHandler, model_validator)
 from typing import Any
 from src.message.warning import WarningMessage
@@ -45,8 +45,8 @@ class GameConfig(BaseModel):
     width: StrictInt = Field(default=22, ge=14, le=50)
     height: StrictInt = Field(default=22, ge=10, le=50)
     nb_level: StrictInt = Field(default=10, ge=10)
-    timer_hunt_ghosts: float = Field(default=10.0, ge=1)
-    timer_respawn_ghost: float = Field(default=5.0, ge=1)
+    timer_hunt_ghosts: StrictFloat = Field(default=10.0, ge=1)
+    timer_respawn_ghost: StrictFloat = Field(default=5.0, ge=1)
 
     @field_validator("*", mode="wrap")
     @classmethod
