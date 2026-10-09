@@ -1,20 +1,17 @@
 from src.entity import (Speedy, Shadow, Bashful, Pokey,
                         Pacman, Direction, Ghost, GhostState)
-from src.maze import Grid, CellContents, LST_DIRECTION
+from src.maze import Grid, CellContents
 from src.parsing.models import GameConfig
 from src.game_state.collision import collides
 from src.maze.loader import generate_maze
 from src.game_state.movement import (is_on_cell, advance, direction_home)
 from src.game_state.cheats import Cheats
+from src.game_state.direction_ghost import direction_toward
 from enum import Enum, auto
-import random
 
 
-# Speeds are in cells per second.
 PACMAN_SPEED = 4.0
-# Cheat: Pac-Man speed is multiplied by this.
 SPEED_MULTIPLIER = 2.0
-# Cheat: ghost speed is multiplied by this.
 SPEED_REDUCTION = 0.5
 GHOST_SPEED = 3.0
 
@@ -65,7 +62,6 @@ class GameState:
             config (GameConfig): The game settings read from config.json.
         """
         self.config: GameConfig = config
-        self.rng = random.Random()
         self.level: int = 1
         self.grid: Grid = self._new_grid()
         self.lives: int = self.config.lives
@@ -367,7 +363,13 @@ class GameState:
                     else:
                         wanted = ghost.direction
                 else:
-                    wanted = self.rng.choice(LST_DIRECTION)
+                    if is_on_cell(ghost.position):
+                        pac_y, pac_x = self.pacman.position
+                        wanted = direction_toward(self.grid, int(y), int(x),
+                                                  ghost.direction,
+                                                  (round(pac_y), round(pac_x)))
+                    else:
+                        wanted = ghost.direction
                 advance(ghost, wanted, dt, self.grid)
         self._update_time_ghost_hunt(dt)
         self._update_respawn_ghost(dt)
