@@ -13,6 +13,7 @@ class Ghost(Character):
                  state: GhostState, speed: float) -> None:
         super().__init__(direction, position, speed)
         self.state = state
+        self.respawn_timer: float = 0.0
 
 
 class Shadow(Ghost):

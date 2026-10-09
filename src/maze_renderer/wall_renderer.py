@@ -47,7 +47,8 @@ class WallRenderer:
 
         self.spritesheet = SpriteSheetManager(
             self.paths["config"],
-            self.paths["image"]
+            self.paths["image"],
+            "RGB"
         )
 
         self.buffer_pitch: int = self.maze_width \
@@ -312,7 +313,7 @@ class WallRenderer:
                 for sub_y in [maze_y * 3, maze_y * 3 + 1, maze_y * 3 + 2]:
                     for sub_x in [maze_x * 3, maze_x * 3 + 1, maze_x * 3 + 2]:
                         tile_name, rotation = tiles[sub_y % 3][sub_x % 3]
-                        tile = self.spritesheet.take_tile(tile_name)
+                        tile = self.spritesheet.take_tile(tile_name, 0)
                         tile = self.spritesheet.rotate_tile(tile, rotation)
 
                         self.spritesheet.copy_tile_into_buffer(
@@ -322,3 +323,4 @@ class WallRenderer:
                             sub_x * tile_size,
                             sub_y * tile_size,
                         )
+        return self.buffer

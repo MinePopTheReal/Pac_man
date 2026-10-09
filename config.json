@@ -1,0 +1,47 @@
+# Pac-Man configuration file.
+# Lines starting with '#' are comments. Comments with '//' and '/* */'
+# are also supported. Missing or invalid values are replaced by their
+# default value, with a warning. Unknown keys are ignored.
+{
+    # File where the top 10 highscores are saved (default: "highscores.json")
+    "highscore_filename": "highscores.json",
+
+    # Number of lives at the start of the game (min 1, default: 3)
+    "lives": 3,
+
+    # Number of pacgums placed in each maze, super-pacgums not included
+    # (min 0, default: 42). Capped to the number of free cells.
+    "pacgum": 42,
+
+    # Points earned for each pacgum eaten (min 0, default: 10)
+    "points_pacgum": 10,
+
+    # Points earned for each super-pacgum eaten (min 0, default: 50)
+    "points_super_pacgum": 50,
+
+    # Points earned for each ghost eaten (min 0, default: 200)
+    "points_ghost": 200,
+
+    # Seed of the first level's maze, the next levels are random.
+    # 0 makes the first level random too (min 0, default: 42)
+    "seed": 42,
+
+    # Time limit of each level, in seconds (min 1, default: 90)
+    "level_max_time": 90,
+
+    # Width of the maze, in cells (min 14, max 50, default: 22)
+    "width": 22,
+
+    # Height of the maze, in cells (min 10, max 50, default: 22)
+    "height": 22,
+
+    # Number of levels to complete to win the game (min 10, default: 10)
+    "nb_level": 10,
+
+    # Time during which ghosts can be eaten, in seconds (min 1, default: 10.0)
+    "timer_hunt_ghosts": 10.0,
+
+    # Time an eaten ghost waits in its corner, in seconds (min 1, default: 5.0)
+    "timer_respawn_ghost": 5.0
+
+}

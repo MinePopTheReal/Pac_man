@@ -16,14 +16,20 @@ class SpriteSheetManager():
     """
     A utility function for taking a sprite sheet and manipulating its sprites
     """    
-    def __init__(self, config_path: str, image_path: str) -> None:
-        self.format = "RGB"
+    def __init__(self, config_path: str, image_path: str, format) -> None:
+        self.format = format
         self.bytes_number_per_pixel: int = len(self.format)
 
         self.spritesheet_config: Spritesheet = self._load_spritesheet_config(
             config_path
         )
         self.spritesheet, self.pitch, = self._load_spritesheet(image_path)
+
+    def _create_buffer(self, tile_width, tile_height):
+        w_pitch = tile_height * self.spritesheet_config.tile_size * self.bytes_number_per_pixel
+        h_pitch = tile_width * self.spritesheet_config.tile_size
+        buffer = bytearray(w_pitch * h_pitch)
+        return buffer
 
     def _load_spritesheet_config(self, config_path: str) -> Spritesheet:
         """
@@ -141,7 +147,7 @@ class SpriteSheetManager():
                     ] = pixel_data
         return temp_tile
 
-    def take_tile(self, tile_name: str) -> bytearray:
+    def take_tile(self, tile_name: str, frame: int) -> bytearray:
         """Retrieve a tile from the sprite sheet using the configuration
         and the image
 
@@ -153,15 +159,17 @@ class SpriteSheetManager():
         """        
         temp_tile: bytearray = bytearray()
 
-        coord = self.spritesheet_config.tiles[tile_name][0]
+        coord = self.spritesheet_config.tiles[tile_name][frame]
         bpp = self.bytes_number_per_pixel
         tile_size = self.spritesheet_config.tile_size
 
         for y_px in range(tile_size):
             position = (coord.y + y_px) * abs(self.pitch) + coord.x * bpp
+            # print(self.spritesheet[position:position + tile_size * bpp])
             temp_tile += bytearray(
                 self.spritesheet[position:position + tile_size * bpp]
                 )
+
         return temp_tile
 
     def copy_tile_into_buffer(

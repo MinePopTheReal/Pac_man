@@ -1,6 +1,10 @@
 from src.maze.cell import Cell, CellContents
 from src.message.errors import GridError
 from src.entity.characters import Direction
+from collections import deque
+
+
+LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
 
 class Grid:
@@ -9,16 +13,16 @@ class Grid:
     Cells are accessed as grid[y][x]: y is the row (0 at the top),
     x is the column (0 on the left).
     """
-    def __init__(self, grid: list[list[Cell]]) -> None:
-        """Create the grid and compute its size.
+    def __init__(self, cells: list[list[Cell]]) -> None:
+        """Create the cells and compute its size.
 
         Args:
-            grid (list[list[Cell]]): The rows of the maze, each row
+            cells (list[list[Cell]]): The rows of the maze, each row
                 being a list of cells. All rows must have the same length.
         """
-        self.grid = grid
-        self.height = len(self.grid)
-        self.width = len(self.grid[0])
+        self.cells = cells
+        self.height = len(self.cells)
+        self.width = len(self.cells[0])
 
     def in_grid(self, y: int, x: int) -> bool:
         """Check if a position is inside the grid.
@@ -50,7 +54,24 @@ class Grid:
         if not self.in_grid(y, x):
             raise GridError(f"coordinates ({y},{x}) are not in the grid, "
                             f"grid size is {self.height} * {self.width}")
-        return self.grid[y][x]
+        return self.cells[y][x]
+
+    def get_all_cells(self) -> list[tuple[int, int, Cell]]:
+        """Return every cell of the grid with its position.
+
+        Cells are listed row by row, from top to bottom, and from left
+        to right in each row. The cells are the grid's own objects, not
+        copies.
+
+        Returns:
+            list[tuple[int, int, Cell]]: One (y, x, cell) tuple per cell.
+        """
+        all_cells: list[tuple[int, int, Cell]] = []
+
+        for y, row in enumerate(self.cells):
+            for x, cell in enumerate(row):
+                all_cells.append((y, x, cell))
+        return all_cells
 
     def has_wall(self, y: int, x: int, direction: Direction) -> bool:
         """Check if the cell at (y, x) has a wall on the given side.
@@ -101,6 +122,7 @@ class Grid:
 
         return self.in_grid(ny, nx)
 
+    @property
     def center_grid(self) -> tuple[int, int]:
         """Return the position of the middle cell of the grid.
 
@@ -115,6 +137,7 @@ class Grid:
         center_x = (self.width - 1) // 2
         return (center_y, center_x)
 
+    @property
     def corners_grid(self) -> list[tuple[int, int]]:
         """Return the positions of the 4 corners of the grid.
 
@@ -142,8 +165,27 @@ class Grid:
             int: The number of pacgums and super-pacgums left.
         """
         count_pacgums = 0
-        for row in self.grid:
+        for row in self.cells:
             for cell in row:
                 if cell.content != CellContents.EMPTY:
                     count_pacgums += 1
         return count_pacgums
+
+    def distances_from_cell(self, y0: int, x0: int) -> list[list[int]]:
+        dist = [[-1 for _ in range(self.width)]
+                for _ in range(self.height)]
+        dist[y0][x0] = 0
+        queue: deque[tuple[int, int]] = deque([(y0, x0)])
+
+        while queue:
+            y, x = queue.popleft()
+            for direction in LST_DIRECTION:
+                if self.can_move(y, x, direction):
+                    dy, dx = direction.value
+                    ny = y + dy
+                    nx = x + dx
+                    if dist[ny][nx] == -1:
+                        dist[ny][nx] = dist[y][x] + 1
+                        queue.append((ny, nx))
+
+        return dist
