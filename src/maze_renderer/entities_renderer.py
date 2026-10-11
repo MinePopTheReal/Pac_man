@@ -8,20 +8,85 @@ from src.utils.sprite_sheet_manager import SpriteSheetManager
 from pyglet.window import key
 from pyglet import gl
 
+from dataclasses import dataclass
 
+@dataclass
+class CharactersSprites():
+    up: list[bytearray]
+    right: list[bytearray]
+    down: list[bytearray]
+    left: list[bytearray]
 
+@dataclass
+class PacManSprites():
+    normal: CharactersSprites
 
+@dataclass
+class GhostsSprites():
+    normal: CharactersSprites
+    dead: CharactersSprites
+    fear_blue: list[bytearray]
+    fear_white: list[bytearray]
 
+@dataclass
+class PacGumSprites():
+    super_pacgum: bytearray
+    pacgum: bytearray
+    
 
+class EntitiesRenderer:
+    def __init__(self):
+        self.spritessheet = SpriteSheetManager(
+            "assets/entities_spritesheet_config.json",
+            "assets/entities_spritesheet.png",
+            "RGBA"
+        )
+        
 
+        self.frame = 0
 
+    def take_pacman_tiles(self):
+        return PacManSprites(
+            normal=CharactersSprites(
+                up=[self.spritessheet.take_tile("pacman_up")],
+                right=self.spritessheet.take_tile("pacman_right"),
+                down=self.spritessheet.take_tile("pacman_down"),
+                left=self.spritessheet.take_tile("pacman_left")
+            )
+        )
 
+    def take_ghosts_tiles(self):
+        return GhostsSprites(
+            normal=CharactersSprites(
+                up=self.spritessheet.take_tile("pacman_up"),
+                right=self.spritessheet.take_tile("pacman_right"),
+                down=self.spritessheet.take_tile("pacman_down"),
+                left=self.spritessheet.take_tile("pacman_left")
+            ),
+            dead=CharactersSprites(
+                up=self.spritessheet.take_tile("pacman_up"),
+                right=self.spritessheet.take_tile("pacman_right"),
+                down=self.spritessheet.take_tile("pacman_down"),
+                left=self.spritessheet.take_tile("pacman_left")
+            ),
+            fear_blue=self.spritessheet.take_tile("pacman_up"),
+            fear_white=self.spritessheet.take_tile("pacman_up") 
+        )
 
+    def take_pacgums_tiles(self):
+        return PacGumSprites(
+            super_pacgum_tile=self.spritessheet.take_tile("super_pacgum")[0],
+            super_pacgum_tile=self.spritessheet.take_tile("pacgum")[0]
+        )
 
+    def update_pacman_render(self):
+        ...
 
+    def update_ghosts_render(self):
+        ...
 
-
-
+    def update_pacgums_render(self):
+        ...
 
 
 window = window.Window(800, 600, "PacMan")
@@ -141,7 +206,7 @@ def on_draw():
     tile = update_pacman_render()
     pacman_img = image.ImageData(16, 16, "RGBA", bytes(tile), pitch=-16 * 4)
     print((int(y) + 8) * 8 + 3, (int(x) + 8) * 8 + 3)
-    sleep(0.2)
-    pacman_img.blit((int(y) + 8) * 8 + 3, (int(x) + 8) * 8 + 3)
+    # sleep(0.2)
+    pacman_img.blit((int(x) + 8) * 8 + 3, (int(y) + 8) * 8 + 3)
 
 app.run()
