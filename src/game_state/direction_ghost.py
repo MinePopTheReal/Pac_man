@@ -4,7 +4,7 @@ from src.entity.characters import Direction
 
 
 def direction_toward(grid: Grid, y: int, x: int, current: Direction,
-                     dist_map: list[list[int]]) -> Direction:
+                     dist_map: list[list[int]], run_away: bool) -> Direction:
     dir_y, dir_x = current.value
     opposite = Direction((-dir_y, -dir_x))
     best_direction: Direction = Direction.NONE
@@ -20,6 +20,8 @@ def direction_toward(grid: Grid, y: int, x: int, current: Direction,
             distance = dist_map[ny][nx]
             if distance == -1:
                 continue
+            if run_away:
+                distance = - distance
             if distance < best_distance:
                 best_direction = direction
                 best_distance = distance

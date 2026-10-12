@@ -210,6 +210,8 @@ class GameState:
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
                 ghost.state = GhostState.HUNTED
+                dy, dx = ghost.direction.value
+                ghost.direction = Direction((-dy, -dx))
 
     def _update_time_ghost_hunt(self, dt: float) -> None:
         """Count down the super-pacgum effect; at the end, ghosts hunt again.
@@ -378,9 +380,11 @@ class GameState:
                         wanted = ghost.direction
                 else:
                     if is_on_cell(ghost.position):
-                        wanted = direction_toward(self.grid, int(y), int(x),
-                                                  ghost.direction,
-                                                  self.pacman_map)
+                        wanted = direction_toward(
+                            self.grid, int(y), int(x),
+                            ghost.direction,
+                            self.pacman_map,
+                            ghost.state == GhostState.HUNTED)
                     else:
                         wanted = ghost.direction
                 advance(ghost, wanted, dt, self.grid)
