@@ -75,6 +75,9 @@ class GameState:
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
+        self.pacman_map_cell: tuple[int, int] = (-1, -1)
+        self.pacman_map: list[list[int]] = []
+        self._update_pacman_map()
 
     def _spawn_pacman(self) -> Pacman:
         """Create Pac-Man in the middle of the maze.
@@ -144,6 +147,7 @@ class GameState:
         """
         self.grid = self._new_grid()
         self.corner_maps = self._maps_for_corners()
+        self.pacman_map_cell = (-1, -1)
         self._reset_position()
         self.level_time_left = float(self.config.level_max_time)
         self.eaten_ghosts = 0
@@ -246,6 +250,14 @@ class GameState:
         if self.level_time_left <= 0:
             self.level_time_left = 0.0
             self.status = GameStatus.LOST
+
+    def _update_pacman_map(self) -> None:
+        py, px = self.pacman.position
+        y = round(py)
+        x = round(px)
+        if self.pacman_map_cell != (y, x):
+            self.pacman_map = self.grid.distances_from_cell(y, x)
+            self.pacman_map_cell = (y, x)
 
     def switch_cheat_mode(self) -> None:
         """Turn the cheat mode on or off.
@@ -353,6 +365,8 @@ class GameState:
                 self._next_level()
                 return
 
+        self._update_pacman_map()
+
         if not self.cheats.ghosts_frozen:
             for ghost, maze in zip(self.ghosts, self.corner_maps):
                 y, x = ghost.position
@@ -364,10 +378,9 @@ class GameState:
                         wanted = ghost.direction
                 else:
                     if is_on_cell(ghost.position):
-                        pac_y, pac_x = self.pacman.position
                         wanted = direction_toward(self.grid, int(y), int(x),
                                                   ghost.direction,
-                                                  (round(pac_y), round(pac_x)))
+                                                  self.pacman_map)
                     else:
                         wanted = ghost.direction
                 advance(ghost, wanted, dt, self.grid)
