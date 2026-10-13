@@ -99,7 +99,7 @@ class GameState:
             list[Ghost]: The 4 ghosts, all HUNTER.
         """
         lst_ghosts: list[Ghost] = []
-        classes = [Shadow, Pokey, Bashful, Speedy]
+        classes: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
 
         for classe, corner in zip(classes, self.grid.corners_grid):
             y, x = corner
@@ -260,6 +260,19 @@ class GameState:
         if self.pacman_map_cell != (y, x):
             self.pacman_map = self.grid.distances_from_cell(y, x)
             self.pacman_map_cell = (y, x)
+
+    def _chase_map(self, ghost: Ghost,
+                   corner_map: list[list[int]],
+                   corner: tuple[int, int]) -> list[list[int]]:
+        shad_y, shad_x = self.ghosts[0].position
+        target = ghost.position_target(self.pacman_map_cell,
+                                       self.pacman.direction,
+                                       (round(shad_y), round(shad_x)),
+                                       corner)
+        ty, tx = target
+        y = min(max(ty, 0), self.grid.height)
+        x = min(max(tx, 0), self.grid.width)
+        
 
     def switch_cheat_mode(self) -> None:
         """Turn the cheat mode on or off.
