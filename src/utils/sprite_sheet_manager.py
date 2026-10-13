@@ -147,7 +147,7 @@ class SpriteSheetManager():
                     ] = pixel_data
         return temp_tile
 
-    def take_tile(self, tile_name: str, frame: int) -> bytearray:
+    def take_tiles(self, tile_name: str) -> bytearray:
         """Retrieve a tile from the sprite sheet using the configuration
         and the image
 
@@ -157,28 +157,32 @@ class SpriteSheetManager():
         Returns:
             bytearray: the tile
         """        
-        temp_tile: bytearray = bytearray()
 
-        coord = self.spritesheet_config.tiles[tile_name][frame]
+        frames: list[bytearray] = []
+
+        frames_coord = self.spritesheet_config.tiles[tile_name]
         bpp = self.bytes_number_per_pixel
         tile_size = self.spritesheet_config.tile_size
 
-        for y_px in range(tile_size):
-            position = (coord.y + y_px) * abs(self.pitch) + coord.x * bpp
-            # print(self.spritesheet[position:position + tile_size * bpp])
-            temp_tile += bytearray(
-                self.spritesheet[position:position + tile_size * bpp]
-                )
+        for frame_coord in frames_coord:
+            temp_tile: bytearray = bytearray()
+            for y_px in range(tile_size):
+                position = (frame_coord.y + y_px) * abs(self.pitch) + frame_coord.x * bpp
+                temp_tile += bytearray(
+                    self.spritesheet[position:position + tile_size * bpp]
+                    )
+            frames.append(temp_tile)
 
-        return temp_tile
+        return frames
 
     def copy_tile_into_buffer(
         self,
         buffer: bytearray,
         buffer_pitch: int,
         tile: bytearray,
-        buffer_x: int,
-        buffer_y: int
+        x_px: float,
+        y_px: float,
+        zoom: int
     ) -> None:
         """Allows you to copy a tile into a larger buffer
         that is modified directly
@@ -194,9 +198,9 @@ class SpriteSheetManager():
         tile_size = self.spritesheet_config.tile_size
         bpp = self.bytes_number_per_pixel
 
-        for y_px in range(tile_size):
-            tile_pitch = y_px * tile_size * bpp
-            position = (buffer_y + y_px) * abs(buffer_pitch) + buffer_x * bpp
+        for px in range(tile_size):
+            tile_pitch = px * tile_size * bpp
+            position = (y_px + px) * abs(buffer_pitch) + x_px * bpp
             buffer[
                 position:position + tile_size * bpp
                 ] = tile[tile_pitch:tile_pitch + tile_size * bpp]

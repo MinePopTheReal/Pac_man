@@ -35,33 +35,12 @@ class WallRenderer:
         (2, 2): ("TL", 1, 1)
     }
 
-    def __init__(self, maze: list[list[Cell]]):
-        self.paths: dict[str, str] = {
-            "image": "assets/maze_spritesheet.png",
-            "config": "assets/maze_spritesheet_config.json"
-            }
-
+    def __init__(self, maze: list[list[Cell]], spritesheet: SpriteSheetManager):
         self.maze: list[list[Cell]] = maze
         self.maze_height = len(self.maze)
         self.maze_width = len(self.maze[0])
 
-        self.spritesheet = SpriteSheetManager(
-            self.paths["config"],
-            self.paths["image"],
-            "RGB"
-        )
-
-        self.buffer_pitch: int = self.maze_width \
-            * self.spritesheet.spritesheet_config.tile_size \
-            * 3 \
-            * self.spritesheet.bytes_number_per_pixel
-
-        self.buffer = bytearray(
-            self.maze_height
-            * self.spritesheet.spritesheet_config.tile_size
-            * 3
-            * self.buffer_pitch
-            )
+        self.spritesheet = spritesheet
 
     def is_full_cell(self, cell: Cell) -> bool:
         """Checks whether a cell has 4 walls
@@ -300,7 +279,7 @@ class WallRenderer:
             tiles[corner_y][corner_x] = tile
         return tiles
 
-    def create_maze_render(self):
+    def create_maze_render(self, maze, buffer: bytearray):
         """
         Create the buffer and fill it while staying within the maze walls
         """
@@ -313,7 +292,7 @@ class WallRenderer:
                 for sub_y in [maze_y * 3, maze_y * 3 + 1, maze_y * 3 + 2]:
                     for sub_x in [maze_x * 3, maze_x * 3 + 1, maze_x * 3 + 2]:
                         tile_name, rotation = tiles[sub_y % 3][sub_x % 3]
-                        tile = self.spritesheet.take_tile(tile_name, 0)
+                        tile = self.spritesheet.take_tiles(tile_name)[0]
                         tile = self.spritesheet.rotate_tile(tile, rotation)
 
                         self.spritesheet.copy_tile_into_buffer(

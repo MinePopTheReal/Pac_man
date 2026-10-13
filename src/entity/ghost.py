@@ -19,22 +19,26 @@ class Ghost(Character):
 class Shadow(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
+        self.name = "blinky"
         super().__init__(direction, position, state, speed)
 
 
 class Speedy(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
+        self.name = "pinky"
         super().__init__(direction, position, state, speed)
 
 
 class Bashful(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
+        self.name = "inky"
         super().__init__(direction, position, state, speed)
 
 
 class Pokey(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
+        self.name = "clyde"
         super().__init__(direction, position, state, speed)

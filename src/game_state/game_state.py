@@ -86,7 +86,7 @@ class GameState:
         Returns:
             Pacman: Pac-Man, not moving yet.
         """
-        y, x = self.grid.center_grid
+        y, x = 1, 1
         pacman = Pacman(Direction.NONE, (float(y), float(x)), PACMAN_SPEED)
         return pacman
 
@@ -117,7 +117,9 @@ class GameState:
         speed cheats stay on.
         """
         y, x = self.grid.center_grid
+        print("prev", self.pacman.position)
         self.pacman.position = (float(y), float(x))
+        print("after", self.pacman.position)
         self.pacman.direction = Direction.NONE
         self.wanted_direction = Direction.NONE
 

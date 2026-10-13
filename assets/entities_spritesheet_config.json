@@ -125,7 +125,7 @@
                 "y": 64
             }
         ],
-        "blinky_bottom_1": [
+        "blinky_bottom": [
             {
                 "x": 96,
                 "y": 64
@@ -255,7 +255,7 @@
                 "y": 112
             }
         ],
-        "ghosts_fear_blue_1": [
+        "ghosts_fear_blue": [
             {
                 "x": 64,
                 "y": 16
@@ -265,7 +265,7 @@
                 "y": 16
             }
         ],
-        "ghosts_fear_white_1": [
+        "ghosts_fear_white": [
             {
                 "x": 96,
                 "y": 16
