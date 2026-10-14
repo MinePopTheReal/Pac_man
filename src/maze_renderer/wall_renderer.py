@@ -35,10 +35,10 @@ class WallRenderer:
         (2, 2): ("TL", 1, 1)
     }
 
-    def __init__(self, maze: list[list[Cell]], spritesheet: SpriteSheetManager):
-        self.maze: list[list[Cell]] = maze
-        self.maze_height = len(self.maze)
-        self.maze_width = len(self.maze[0])
+    def __init__(self, spritesheet: SpriteSheetManager):
+        # self.maze: list[list[Cell]] = maze
+        # self.maze_height = len(self.maze)
+        # self.maze_width = len(self.maze[0])
 
         self.spritesheet = spritesheet
 
@@ -279,10 +279,15 @@ class WallRenderer:
             tiles[corner_y][corner_x] = tile
         return tiles
 
-    def create_maze_render(self, maze, buffer: bytearray):
+    def create_maze_render(self, maze: list[list[Cell]], buffer: bytearray, buffer_pitch: int, zoom: int):
         """
         Create the buffer and fill it while staying within the maze walls
         """
+        self.maze = maze
+
+        self.maze_height = len(self.maze)
+        self.maze_width = len(self.maze[0])
+
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
                 tile_size = self.spritesheet.spritesheet_config.tile_size
@@ -296,10 +301,11 @@ class WallRenderer:
                         tile = self.spritesheet.rotate_tile(tile, rotation)
 
                         self.spritesheet.copy_tile_into_buffer(
-                            self.buffer,
-                            self.buffer_pitch,
+                            buffer,
+                            buffer_pitch,
                             tile,
                             sub_x * tile_size,
                             sub_y * tile_size,
+                            zoom
                         )
-        return self.buffer
+        # return self.buffer

@@ -200,7 +200,7 @@ class SpriteSheetManager():
 
         for px in range(tile_size):
             tile_pitch = px * tile_size * bpp
-            position = (y_px + px) * abs(buffer_pitch) + x_px * bpp
+            position = (y_px + px)  * zoom * (abs(buffer_pitch)) + (x_px * zoom) * bpp
             buffer[
                 position:position + tile_size * bpp
                 ] = tile[tile_pitch:tile_pitch + tile_size * bpp]

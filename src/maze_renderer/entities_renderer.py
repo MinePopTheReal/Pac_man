@@ -17,11 +17,6 @@ from dataclasses import dataclass
 @dataclass
 class CharactersSprites():
     sprites_for_direction: dict[Direction, list[bytearray]]
-    
-    # up: list[bytearray]
-    # right: list[bytearray]
-    # down: list[bytearray]
-    # left: list[bytearray]
 
 @dataclass
 class PacManSprites():
@@ -42,32 +37,34 @@ class PacGumSprites():
     
 
 class EntitiesRenderer:
-    def __init__(self, game_state: GameState, buffer: bytearray, spritesheet: SpriteSheetManager):
+    def __init__(self, game_state: GameState, buffer: bytearray, buffer_pitch: int, spritesheet: SpriteSheetManager, zoom: int):
 
         self.game_state = game_state
+
+        self.spritesheet = spritesheet
+        
+        self.zoom = zoom
 
         self.pacman_sprites = self.load_pacman_sprites()
         self.pacgums_sprites = self.load_pacgums_sprites()
         self.ghosts_sprites = self.load_ghosts_sprites()
 
         self.buffer: bytearray = buffer
+        self.buffer_pitch: int = buffer_pitch
 
         self.previous_direction: Direction = Direction.NONE
 
         self.frame = 0
 
     def load_pacman_sprites(self):
-        frames = self.spritessheet.take_tiles("pacman_top")
-        coords = self.spritessheet.spritesheet_config.tiles["pacman_top"]
-
         return PacManSprites(
             normal=CharactersSprites({
-                Direction.UP: self.spritessheet.take_tiles("pacman_top"),
-                Direction.RIGHT: self.spritessheet.take_tiles("pacman_right"),
-                Direction.DOWN: self.spritessheet.take_tiles("pacman_bottom"),
-                Direction.LEFT: self.spritessheet.take_tiles("pacman_left")
+                Direction.UP: self.spritesheet.take_tiles("pacman_top"),
+                Direction.RIGHT: self.spritesheet.take_tiles("pacman_right"),
+                Direction.DOWN: self.spritesheet.take_tiles("pacman_bottom"),
+                Direction.LEFT: self.spritesheet.take_tiles("pacman_left")
             }),
-            death=self.spritessheet.take_tiles("pacman_death")
+            death=self.spritesheet.take_tiles("pacman_death")
         )
 
     def load_ghosts_sprites(self):
@@ -103,30 +100,30 @@ class EntitiesRenderer:
         for ghost_name, sprite_name in normal_sprite.items():
             loaded_sprites[ghost_name] = GhostsSprites(
                 normal=CharactersSprites({
-                    Direction.UP: self.spritessheet.take_tiles(sprite_name[0]),
-                    Direction.RIGHT: self.spritessheet.take_tiles(sprite_name[1]),
-                    Direction.DOWN: self.spritessheet.take_tiles(sprite_name[2]),
-                    Direction.LEFT: self.spritessheet.take_tiles(sprite_name[3])
+                    Direction.UP: self.spritesheet.take_tiles(sprite_name[0]),
+                    Direction.RIGHT: self.spritesheet.take_tiles(sprite_name[1]),
+                    Direction.DOWN: self.spritesheet.take_tiles(sprite_name[2]),
+                    Direction.LEFT: self.spritesheet.take_tiles(sprite_name[3])
                 }),
                 death=CharactersSprites({
-                    Direction.UP: self.spritessheet.take_tiles("ghosts_eyes_top"),
-                    Direction.RIGHT: self.spritessheet.take_tiles("ghosts_eyes_right"),
-                    Direction.DOWN: self.spritessheet.take_tiles("ghosts_eyes_bottom"),
-                    Direction.LEFT: self.spritessheet.take_tiles("ghosts_eyes_left")
+                    Direction.UP: self.spritesheet.take_tiles("ghosts_eyes_top"),
+                    Direction.RIGHT: self.spritesheet.take_tiles("ghosts_eyes_right"),
+                    Direction.DOWN: self.spritesheet.take_tiles("ghosts_eyes_bottom"),
+                    Direction.LEFT: self.spritesheet.take_tiles("ghosts_eyes_left")
                 }),
-                fear_blue=self.spritessheet.take_tiles("ghosts_fear_blue"),
-                fear_white=self.spritessheet.take_tiles("ghosts_fear_white") 
+                fear_blue=self.spritesheet.take_tiles("ghosts_fear_blue"),
+                fear_white=self.spritesheet.take_tiles("ghosts_fear_white") 
             )
         return loaded_sprites
 
     def load_pacgums_sprites(self):
         return PacGumSprites(
-            super_pacgum=self.spritessheet.take_tiles("super_pacgum")[0],
-            pacgum=self.spritessheet.take_tiles("pacgum")[0]
+            super_pacgum=self.spritesheet.take_tiles("super_pacgum")[0],
+            pacgum=self.spritesheet.take_tiles("pacgum")[0]
         )
 
     @staticmethod
-    def float_to_pixel(position_x: float, position_y: float):
+    def float_to_pixel(position_x: float, position_y: float, zoom: int):
         return (int(position_x * 8 * 3), int(position_y * 8 * 3))
 
     def update_pacman_render(self):
@@ -141,13 +138,14 @@ class EntitiesRenderer:
             self.previous_direction = direction
             sprite = self.pacman_sprites.normal.sprites_for_direction[direction][self.frame % len(self.pacman_sprites.normal.sprites_for_direction[direction])]
 
-        new_position = self.float_to_pixel(pos_x, pos_y)
-        self.spritessheet.copy_tile_into_buffer(
+        new_position = self.float_to_pixel(pos_x, pos_y, self.zoom)
+        self.spritesheet.copy_tile_into_buffer(
             self.buffer,
-            wall_renderer.maze_width * 3 * 8 * 4,
+            self.buffer_pitch,
             sprite,
             new_position[0] + 4,
-            new_position[1] + 4
+            new_position[1] + 4,
+            self.zoom
         )
 
     def update_ghosts_render(self):
@@ -180,13 +178,14 @@ class EntitiesRenderer:
                 else:
                     sprite = self.ghosts_sprites[ghost.name].death.sprites_for_direction[direction][self.frame % len(self.ghosts_sprites[ghost.name].death.sprites_for_direction[direction])]
             
-            new_position = self.float_to_pixel(pos_x, pos_y)
-            self.spritessheet.copy_tile_into_buffer(
+            new_position = self.float_to_pixel(pos_x, pos_y, self.zoom)
+            self.spritesheet.copy_tile_into_buffer(
                 self.buffer,
-                wall_renderer.maze_width * 3 * 8 * 4,
+                self.buffer_pitch,
                 sprite,
                 new_position[0] + 4,
-                new_position[1] + 4
+                new_position[1] + 4,
+                self.zoom
             )
             
 
@@ -199,13 +198,14 @@ class EntitiesRenderer:
                     sprite = self.pacgums_sprites.super_pacgum
                 else:
                     continue
-                new_position = self.float_to_pixel(x, y)
-                self.spritessheet.copy_tile_into_buffer(
+                new_position = self.float_to_pixel(x, y, self.zoom)
+                self.spritesheet.copy_tile_into_buffer(
                     self.buffer,
-                    wall_renderer.maze_width * 3 * 8 * 4,
+                    self.buffer_pitch,
                     sprite,
                     new_position[0] + 4,
-                    new_position[1] + 4
+                    new_position[1] + 4,
+                    self.zoom
                 )
             
 
@@ -214,7 +214,7 @@ class EntitiesRenderer:
         # self.update_pacman_render()
 
     def update_position(self):
-        self.buffer[:] = b'\x00' * len(buffer)
+        self.buffer[:] = b'\x00' * len(self.buffer)
         # if not in pause
         if self.game_state.status == GameStatus.PLAYING:
             self.update_pacgums_render()
@@ -228,19 +228,23 @@ class Render(window.Window):
         display_data = display.get_display()
         screen = display_data.get_default_screen()
 
-        self.window = window.Window(screen.width, screen.height, "PacMan")
+        super().__init__(width=screen.width, height=screen.height, caption="Pac-Man")
+
+        # self.window = window.Window(screen.width, screen.height, "PacMan")
+
+        self.curr_level = -1
 
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         
 
         # Spritesheets
-        self.maze_spritessheet = SpriteSheetManager(
+        self.maze_spritesheet = SpriteSheetManager(
             "assets/maze_spritesheet_config.json",
             "assets/maze_spritesheet.png",
             "RGB"
         )
-        self.entities_spritessheet = SpriteSheetManager(
+        self.entities_spritesheet = SpriteSheetManager(
             "assets/entities_spritesheet_config.json",
             "assets/entities_spritesheet.png",
             "RGBA"
@@ -253,30 +257,37 @@ class Render(window.Window):
 
         # Buffer
         initial_maze_width = game_config.width * \
-            self.maze_spritessheet.spritesheet_config.tile_size * \
+            self.maze_spritesheet.spritesheet_config.tile_size * \
             3
 
         initial_maze_height = game_config.height * \
-            self.maze_spritessheet.spritesheet_config.tile_size * \
+            self.maze_spritesheet.spritesheet_config.tile_size * \
             3
 
-        zoom_multiplier = min(
-            int(screen.width / initial_maze_width),
-            int(screen.height / initial_maze_height)
-            )
+        print(screen.width, screen.height)
 
-        width = initial_maze_width * zoom_multiplier * \
-            self.maze_spritessheet.bytes_number_per_pixel
+        self.zoom_multiplier = max(1, min(
+                screen.width // initial_maze_width,
+                screen.height // initial_maze_height
+            ))
 
-        height = initial_maze_height * zoom_multiplier
+        self.maze_width = initial_maze_width * self.zoom_multiplier
+        self.maze_height = initial_maze_height * self.zoom_multiplier
 
-        maze_buffer = self._create_buffer(width, height)
-        entities_buffer = self._create_buffer(width, height)
+        self.maze_pitch = self.maze_width * self.maze_spritesheet.bytes_number_per_pixel
+        self.entities_pitch = self.maze_width * self.entities_spritesheet.bytes_number_per_pixel
+
+        self.maze_buffer = self._create_buffer(self.maze_pitch, self.maze_height)
+        self.entities_buffer = self._create_buffer(self.entities_pitch, self.maze_height)
+
+        self.wall_renderer = WallRenderer(self.maze_spritesheet)
 
         self.entities_renderer = EntitiesRenderer(
             self.game_state, 
-            entities_buffer, 
-            self.entities_spritessheet
+            self.entities_buffer, 
+            self.entities_pitch,
+            self.entities_spritesheet,
+            self.zoom_multiplier
         )
 
 
@@ -286,46 +297,42 @@ class Render(window.Window):
             key.S: Direction.DOWN,
             key.A: Direction.LEFT
         }
+        
+        clock.schedule_interval(self.entities_renderer.update_animation, 0.11)
+        clock.schedule_interval(self.game_state.update, 0.01)
 
     @staticmethod
     def _create_buffer(width, height):
         return bytearray(width * height)
 
-
-    # @window.event
     def on_key_press(self, symbol, modifiers):
         direction = self.direction_input.get(symbol)
         if direction is not None:
             self.game_state.wanted_direction = direction
-        
-    # @window.event
-    def on_draw(self): 
-        curr_level = -1
-        if curr_level != self.game_state.level:
-            wall_renderer = WallRenderer()
-            
-            maze_img = wall_renderer.create_maze_render()
+
+    def on_draw(self):
+        if self.curr_level != self.game_state.level:
+            self.wall_renderer.create_maze_render(self.game_state.grid.cells, self.maze_buffer, self.maze_pitch, self.zoom_multiplier)
+            self.curr_level = self.game_state.level
+            # print(self.maze_buffer)
+
+
+        maze_img = image.ImageData(
+            self.maze_width, self.maze_height,
+            "RGB",
+            bytes(self.maze_buffer),
+            pitch=-self.maze_pitch
+        )
+
+        self.clear()
+        self.entities_renderer.update_position()
     
-            img = image.ImageData(
-                width, height,
-                "RGB",
-                bytes(maze_img),
-                pitch=-width * 3
-            )
-            curr_level = self.game_state.level
+        entities_img = image.ImageData(self.maze_width, self.maze_height, "RGBA", bytes(self.entities_buffer), pitch=-self.entities_pitch)
     
-        window.clear()
-        entities_renderer.update_position()
-    
-        pacman_img = image.ImageData(width, height, "RGBA", bytes(buffer), pitch=-buffer_pitch)
-    
-        img.blit(100, window.height - 50 - height)
-        pacman_img.blit(100, window.height - 50 - height)
+        maze_img.blit(100, self.height - 50 - self.maze_height)
+        entities_img.blit(100, self.height - 50 - self.maze_height)
 
 render = Render()
 # # test to run pipeline
-
-# clock.schedule_interval(entities_renderer.update_animation, 0.11)
-# clock.schedule_interval(game_state.update, 0.01)
 
 app.run()
