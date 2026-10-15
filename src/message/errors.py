@@ -35,7 +35,7 @@ class RenderError(Error):
 
 class ParsingError(Error):
     """Exception raised by parser."""
-    
+
     default_type = "Parsing"
 
 
