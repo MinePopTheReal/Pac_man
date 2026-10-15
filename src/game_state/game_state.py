@@ -486,13 +486,15 @@ class GameState:
         if self.status != GameStatus.PLAYING:
             return
 
-        if not self.started and self.pacman.direction != Direction.NONE:
-            self.started = True
-
-        if self.started:
-            self._update_level_timer(dt)
-            if self.status == GameStatus.LOST:
+        if not self.started:
+            if self.wanted_direction != Direction.NONE:
+                self.started = True
+            else:
                 return
+
+        self._update_level_timer(dt)
+        if self.status == GameStatus.LOST:
+            return
 
         advance(self.pacman, self.wanted_direction, dt, self.grid)
 
@@ -501,8 +503,7 @@ class GameState:
 
         self._update_pacman_map()
 
-        if self.started:
-            self._move_ghosts(dt)
+        self._move_ghosts(dt)
 
         self._update_time_ghost_hunt(dt)
         self._update_respawn_ghost(dt)
