@@ -2,6 +2,7 @@ from src.utils.sprite_sheet_manager import Rotation, SpriteSheetManager
 from src.maze.grid import Direction
 from src.maze.cell import Cell
 
+from numpy import ndarray
 
 class WallRenderer:
     """
@@ -279,7 +280,7 @@ class WallRenderer:
             tiles[corner_y][corner_x] = tile
         return tiles
 
-    def create_maze_render(self, maze: list[list[Cell]], buffer: bytearray, buffer_pitch: int, zoom: int):
+    def create_maze_render(self, maze: list[list[Cell]], buffer_view: ndarray, zoom: int):
         """
         Create the buffer and fill it while staying within the maze walls
         """
@@ -290,22 +291,22 @@ class WallRenderer:
 
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
-                tile_size = self.spritesheet.spritesheet_config.tile_size
+                tile_size = self.spritesheet.spritesheet_config.tile_size * zoom
 
                 tiles = self._choose_tiles(maze_x, maze_y)
 
                 for sub_y in [maze_y * 3, maze_y * 3 + 1, maze_y * 3 + 2]:
                     for sub_x in [maze_x * 3, maze_x * 3 + 1, maze_x * 3 + 2]:
                         tile_name, rotation = tiles[sub_y % 3][sub_x % 3]
-                        tile = self.spritesheet.take_tiles(tile_name)[0]
-                        tile = self.spritesheet.rotate_tile(tile, rotation)
-
+                        # tile = self.spritesheet.take_tiles(tile_name, zoom)[0]
+                        # tile = self.spritesheet.rotate_tile(tile, rotation, zoom)
                         self.spritesheet.copy_tile_into_buffer(
-                            buffer,
-                            buffer_pitch,
-                            tile,
+                            buffer_view,
+                            tile_name,
+                            rotation,
                             sub_x * tile_size,
                             sub_y * tile_size,
-                            zoom
+                            zoom,
+                            0
                         )
         # return self.buffer

@@ -13,7 +13,7 @@ from enum import Enum, auto
 PACMAN_SPEED = 4.0
 SPEED_MULTIPLIER = 2.0
 SPEED_REDUCTION = 0.5
-GHOST_SPEED = 3.0
+GHOST_SPEED = 2.0
 
 
 class GameStatus(Enum):
@@ -85,7 +85,7 @@ class GameState:
         Returns:
             Pacman: Pac-Man, not moving yet.
         """
-        y, x = 1, 1
+        y, x = self.grid.center_grid
         pacman = Pacman(Direction.NONE, (float(y), float(x)), PACMAN_SPEED)
         return pacman
 
