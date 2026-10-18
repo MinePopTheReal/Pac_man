@@ -17,24 +17,24 @@ from dataclasses import dataclass
 
 @dataclass
 class CharactersSprites():
-    sprites_for_direction: dict[Direction, list[bytearray]]
+    sprites_for_direction: dict[Direction, str]
 
 @dataclass
 class PacManSprites():
     normal: CharactersSprites
-    death: list[bytearray]
+    death: str
 
 @dataclass
 class GhostsSprites():
     normal: CharactersSprites
     death: CharactersSprites
-    fear_blue: list[bytearray]
-    fear_white: list[bytearray]
+    fear_blue: str
+    fear_white: str
 
 @dataclass
 class PacGumSprites():
-    super_pacgum: bytearray
-    pacgum: bytearray
+    super_pacgum: str
+    pacgum: str
     
 
 class EntitiesRenderer:
@@ -46,34 +46,26 @@ class EntitiesRenderer:
 
         self.zoom = zoom
 
-        # self.pacman_sprites = self.load_pacman_sprites()
-        # self.pacgums_sprites = self.load_pacgums_sprites()
-        # self.ghosts_sprites = self.load_ghosts_sprites()
+        self.pacman_sprites_name = self.load_pacman_sprites()
+        self.pacgums_sprites_name = self.load_pacgums_sprites()
+        self.ghosts_sprites_name = self.load_ghosts_sprites()
 
         self.buffer_view: ndarray = buffer_view
         self.buffer_pitch: int = buffer_pitch
 
         self.previous_direction: Direction = Direction.NONE
 
-        self.pacman_sprite_name = {
-            Direction.UP: "pacman_top",
-            Direction.RIGHT: "pacman_right",
-            Direction.DOWN: "pacman_bottom",
-            Direction.LEFT: "pacman_left"
-        }
-
-
         self.frame = 0
 
     def load_pacman_sprites(self):
         return PacManSprites(
             normal=CharactersSprites({
-                Direction.UP: self.spritesheet.take_tiles("pacman_top", self.zoom),
-                Direction.RIGHT: self.spritesheet.take_tiles("pacman_right", self.zoom),
-                Direction.DOWN: self.spritesheet.take_tiles("pacman_bottom", self.zoom),
-                Direction.LEFT: self.spritesheet.take_tiles("pacman_left", self.zoom)
+                Direction.UP: "pacman_top",
+                Direction.RIGHT: "pacman_right",
+                Direction.DOWN: "pacman_bottom",
+                Direction.LEFT: "pacman_left"
             }),
-            death=self.spritesheet.take_tiles("pacman_death", self.zoom)
+            death="pacman_death"
         )
 
     def load_ghosts_sprites(self):
@@ -109,120 +101,101 @@ class EntitiesRenderer:
         for ghost_name, sprite_name in normal_sprite.items():
             loaded_sprites[ghost_name] = GhostsSprites(
                 normal=CharactersSprites({
-                    Direction.UP: self.spritesheet.take_tiles(sprite_name[0], self.zoom),
-                    Direction.RIGHT: self.spritesheet.take_tiles(sprite_name[1], self.zoom),
-                    Direction.DOWN: self.spritesheet.take_tiles(sprite_name[2], self.zoom),
-                    Direction.LEFT: self.spritesheet.take_tiles(sprite_name[3], self.zoom)
+                    Direction.UP: sprite_name[0],
+                    Direction.RIGHT: sprite_name[1],
+                    Direction.DOWN: sprite_name[2],
+                    Direction.LEFT: sprite_name[3]
                 }),
                 death=CharactersSprites({
-                    Direction.UP: self.spritesheet.take_tiles("ghosts_eyes_top", self.zoom),
-                    Direction.RIGHT: self.spritesheet.take_tiles("ghosts_eyes_right", self.zoom),
-                    Direction.DOWN: self.spritesheet.take_tiles("ghosts_eyes_bottom", self.zoom),
-                    Direction.LEFT: self.spritesheet.take_tiles("ghosts_eyes_left", self.zoom)
+                    Direction.UP: "ghosts_eyes_top",
+                    Direction.RIGHT: "ghosts_eyes_right",
+                    Direction.DOWN: "ghosts_eyes_bottom",
+                    Direction.LEFT: "ghosts_eyes_left"
                 }),
-                fear_blue=self.spritesheet.take_tiles("ghosts_fear_blue", self.zoom),
-                fear_white=self.spritesheet.take_tiles("ghosts_fear_white", self.zoom) 
+                fear_blue="ghosts_fear_blue",
+                fear_white="ghosts_fear_white"
             )
         return loaded_sprites
 
     def load_pacgums_sprites(self):
         return PacGumSprites(
-            super_pacgum=self.spritesheet.take_tiles("super_pacgum", self.zoom)[0],
-            pacgum=self.spritesheet.take_tiles("pacgum", self.zoom)[0]
+            super_pacgum="super_pacgum",
+            pacgum="pacgum"
         )
 
-    @staticmethod
-    def float_to_pixel(position_x: float, position_y: float, zoom: int):
-        return (int((position_x * 8 * 3 + 4.5) * zoom), int((position_y  * 8 * 3 + 4.5) * zoom))
+    def update_sprite(self, sprite_name: str, maze_x: float, maze_y: float, frame: int = -1) -> None:
+        new_x, new_y = int((maze_x * 8 * 3 + 4.5) * self.zoom), int((maze_y  * 8 * 3 + 4.5) * self.zoom)
+
+        self.spritesheet.copy_tile_into_buffer(
+            self.buffer_view,
+            sprite_name,
+            Rotation.R0,
+            new_x,
+            new_y,
+            self.zoom,
+            self.frame if frame == -1 else frame
+        )
 
     def update_pacman_render(self):
         direction = self.game_state.pacman.direction
         pos_y, pos_x = self.game_state.pacman.position
+        frame = -1
 
         if direction == Direction.NONE and self.previous_direction == Direction.NONE:
-            sprite_name = self.pacman_sprite_name[Direction.UP]
+            sprite_name = self.pacman_sprites_name.normal.sprites_for_direction[Direction.UP]
+            frame = 2
         elif direction == Direction.NONE and self.previous_direction != Direction.NONE:
-            sprite_name = self.pacman_sprite_name[self.previous_direction]
+            sprite_name = self.pacman_sprites_name.normal.sprites_for_direction[self.previous_direction]
         else:
             self.previous_direction = direction
-            sprite_name = self.pacman_sprite_name[direction]
-
-        new_position = self.float_to_pixel(pos_x, pos_y, self.zoom)
-        self.spritesheet.copy_tile_into_buffer(
-            self.buffer,
-            sprite_name,
-            Rotation.R0,
-            new_position[0],
-            new_position[1],
-            self.zoom
-        )
+            sprite_name = self.pacman_sprites_name.normal.sprites_for_direction[direction]
+        self.update_sprite(sprite_name, pos_x, pos_y, frame)
 
     def update_ghosts_render(self):
         for ghost in self.game_state.ghosts:
-            self.ghosts_sprites[ghost.name]
-
             direction = ghost.direction
             pos_y, pos_x = ghost.position
 
-            if ghost.state == GhostState.HUNTER: 
+            if ghost.state == GhostState.HUNTER:
                 if direction == Direction.NONE:
-                    sprite = self.ghosts_sprites[ghost.name].normal.sprites_for_direction[Direction.UP][self.frame % len(self.ghosts_sprites[ghost.name].normal.sprites_for_direction[Direction.UP])]
+                    sprite_name = self.ghosts_sprites_name[ghost.name].normal.sprites_for_direction[Direction.UP]
                 else:
-                    sprite = self.ghosts_sprites[ghost.name].normal.sprites_for_direction[direction][self.frame % len(self.ghosts_sprites[ghost.name].normal.sprites_for_direction[direction])]
+                    sprite_name = self.ghosts_sprites_name[ghost.name].normal.sprites_for_direction[direction]
 
             elif ghost.state == GhostState.HUNTED:
                 if self.game_state.time_hunt_ghosts <= 3.0 and self.frame % 4 <= 1:
-                    sprites = self.ghosts_sprites[ghost.name].fear_white
+                    sprite_name = self.ghosts_sprites_name[ghost.name].fear_white
                 else:
-                    sprites = self.ghosts_sprites[ghost.name].fear_blue
-
-                if direction == Direction.NONE:
-                    sprite = sprites[0]
-                else:
-                    sprite = sprites[self.frame % len(sprites)]
+                    sprite_name = self.ghosts_sprites_name[ghost.name].fear_blue
 
             elif ghost.state == GhostState.EATEN:
                 if direction == Direction.NONE:
-                    sprite = self.ghosts_sprites[ghost.name].death.sprites_for_direction[Direction.UP][self.frame % len(self.ghosts_sprites[ghost.name].death.sprites_for_direction[Direction.UP])]
+                    sprite_name = self.ghosts_sprites_name[ghost.name].death.sprites_for_direction[Direction.UP]
                 else:
-                    sprite = self.ghosts_sprites[ghost.name].death.sprites_for_direction[direction][self.frame % len(self.ghosts_sprites[ghost.name].death.sprites_for_direction[direction])]
+                    sprite_name = self.ghosts_sprites_name[ghost.name].death.sprites_for_direction[direction]
 
-            new_position = self.float_to_pixel(pos_x, pos_y, self.zoom)
-            self.spritesheet.copy_tile_into_buffer(
-                self.buffer,
-                self.buffer_pitch,
-                sprite,
-                new_position[0],
-                new_position[1],
-                self.zoom
-            )
+            self.update_sprite(sprite_name, pos_x, pos_y)
 
     def update_pacgums_render(self):
         for y in range(len(self.game_state.grid.cells)):
             for x in range(len(self.game_state.grid.cells[y])):
                 if self.game_state.grid.cells[y][x].content == CellContents.PACGUM:
-                    sprite = self.pacgums_sprites.pacgum
+                    sprite_name = self.pacgums_sprites_name.pacgum
                 elif self.game_state.grid.cells[y][x].content == CellContents.SUPER_PACGUM:
-                    sprite = self.pacgums_sprites.super_pacgum
+                    sprite_name = self.pacgums_sprites_name.super_pacgum
                 else:
                     continue
-                new_position = self.float_to_pixel(x, y, self.zoom)
-                self.spritesheet.copy_tile_into_buffer(
-                    self.buffer_view,
-                    sprite,
-                    new_position[0],
-                    new_position[1],
-                    self.zoom
-                )
+                self.update_sprite(sprite_name, x, y)
 
     def update_animation(self, dt):
         self.frame += 1
 
     def update_position(self):
         self.buffer_view.fill(0)
+
         if self.game_state.status == GameStatus.PLAYING:
-            # self.update_pacgums_render()
-            # self.update_ghosts_render()
+            self.update_pacgums_render()
+            self.update_ghosts_render()
             self.update_pacman_render()
 
 
@@ -295,7 +268,7 @@ class Render(window.Window):
 
         self.entities_renderer = EntitiesRenderer(
             self.game_state, 
-            self.entities_buffer, 
+            self.entities_buffer_view, 
             self.entities_pitch,
             self.entities_spritesheet,
             self.zoom
@@ -336,9 +309,9 @@ class Render(window.Window):
         )
 
         self.entities_renderer.update_position()
-    
+
         entities_img = image.ImageData(self.maze_width, self.maze_height, "RGBA", bytes(self.entities_buffer), pitch=-self.entities_pitch)
-    
+
         maze_img.blit(100, self.height - 50 - self.maze_height)
         entities_img.blit(100, self.height - 50 - self.maze_height)
 

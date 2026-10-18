@@ -10,10 +10,18 @@ from src.game_state.direction_ghost import direction_toward
 from enum import Enum, auto
 
 
+# Speeds are in cells per second.
 PACMAN_SPEED = 4.0
+
+GHOST_SPEED = 3.0
+# Cheat: Pac-Man speed is multiplied by this.
 SPEED_MULTIPLIER = 2.0
+# Cheat: ghost speed is multiplied by this.
 SPEED_REDUCTION = 0.5
-GHOST_SPEED = 2.0
+# Ghost speed is multiplied by this while it can be eaten (HUNTED)...
+HUNTED_SPEED_FACTOR = 0.5
+# ... and by this while it goes back to its corner (EATEN).
+EATEN_SPEED_FACTOR = 2.0
 
 
 class GameStatus(Enum):
@@ -51,6 +59,9 @@ class GameState:
         status (GameStatus): PLAYING, PAUSED, LOST or WON.
         cheats (Cheats): Which cheats are on, for example
             cheats.enabled or cheats.invincible.
+        started (bool): False until Pac-Man makes his first move in this
+            level or after a lost life; ghosts and the level timer wait
+            until then (useful to show a "Ready!" message).
 
     Positions are (y, x) = (row, column) in cells, not pixels: multiply
     by the tile size to draw, and swap to (x, y) for the screen.
@@ -63,6 +74,7 @@ class GameState:
         """
         self.config: GameConfig = config
         self.level: int = 1
+        self.started: bool = False
         self.grid: Grid = self._new_grid()
         self.lives: int = self.config.lives
         self.cheats: Cheats = Cheats()
@@ -112,8 +124,9 @@ class GameState:
         """Put every character back at its start, after a life is lost.
 
         Pac-Man goes back to the center and the ghosts to their corners as
-        HUNTER. The super-pacgum effect is stopped. Speeds are kept, so the
-        speed cheats stay on.
+        HUNTER. The super-pacgum effect is stopped, and the ghosts wait
+        again for Pac-Man's first move. Pac-Man's speed is kept, so the
+        speed cheat stays on.
         """
         y, x = self.grid.center_grid
         print("prev", self.pacman.position)
@@ -129,6 +142,7 @@ class GameState:
             ghost.state = GhostState.HUNTER
             ghost.respawn_timer = 0.0
         self.time_hunt_ghosts = 0.0
+        self.started = False
 
     def _new_grid(self) -> Grid:
         """Generate the maze of the current level.
@@ -347,12 +361,6 @@ class GameState:
         """Cheat: make the ghosts twice as slow, or back to normal speed."""
         if self.cheats.enabled:
             self.cheats.slow = not self.cheats.slow
-            if self.cheats.slow:
-                for ghost in self.ghosts:
-                    ghost.speed = GHOST_SPEED * SPEED_REDUCTION
-            else:
-                for ghost in self.ghosts:
-                    ghost.speed = GHOST_SPEED
 
     def switch_pause(self) -> None:
         """Pause the game, or resume it if it is paused.
@@ -432,6 +440,28 @@ class GameState:
                 return True
         return False
 
+    def _ghost_speed(self, ghost: Ghost) -> float:
+        """Compute the speed of a ghost from its state and the cheats.
+
+        The speed is recomputed every frame, so it always matches the
+        current state: slower while HUNTED, faster while EATEN, and
+        twice as slow for every ghost with the slow ghosts cheat.
+
+        Args:
+            ghost (Ghost): The ghost.
+
+        Returns:
+            float: Its speed, in cells per second.
+        """
+        speed = GHOST_SPEED
+        if ghost.state == GhostState.HUNTED:
+            speed *= HUNTED_SPEED_FACTOR
+        elif ghost.state == GhostState.EATEN:
+            speed *= EATEN_SPEED_FACTOR
+        if self.cheats.slow:
+            speed *= SPEED_REDUCTION
+        return speed
+
     def _move_ghosts(self, dt: float) -> None:
         """Move every ghost for one frame, unless they are frozen (cheat).
 
@@ -442,6 +472,7 @@ class GameState:
             for ghost, corner_map, corner in zip(self.ghosts, self.corner_maps,
                                                  self.grid.corners_grid):
                 wanted = self._ghost_wanted(ghost, corner_map, corner)
+                ghost.speed = self._ghost_speed(ghost)
                 advance(ghost, wanted, dt, self.grid)
 
     def update(self, dt: float) -> None:
@@ -449,13 +480,20 @@ class GameState:
 
         Moves Pac-Man and the ghosts, eats pacgums, handles collisions,
         timers, the next level and the end of the game. Does nothing when
-        the status is not PLAYING (for example during a pause).
+        the status is not PLAYING (for example during a pause). Ghosts
+        and the level timer wait until Pac-Man makes his first move.
 
         Args:
             dt (float): Seconds since the last frame (about 0.016 at 60 FPS).
         """
         if self.status != GameStatus.PLAYING:
             return
+
+        if not self.started:
+            if self.wanted_direction != Direction.NONE:
+                self.started = True
+            else:
+                return
 
         self._update_level_timer(dt)
         if self.status == GameStatus.LOST:
