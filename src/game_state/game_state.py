@@ -24,8 +24,13 @@ EATEN_SPEED_FACTOR = 2.0
 
 
 class GameStatus(Enum):
-    """State of the game, read by the screens to know what to display."""
+    """State of the game, read by the screens to know what to display.
+
+    DYING means Pac-Man has just been caught: the game waits for the
+    death animation, which ends with GameState.end_death().
+    """
     PLAYING = auto()
+    DYING = auto()
     PAUSED = auto()
     LOST = auto()
     WON = auto()
@@ -41,6 +46,9 @@ class GameState:
             game.switch_pause()          when the pause key is pressed
             game.update(dt)              dt = seconds since last frame
             then draw using the attributes below
+        when status is DYING:
+            play the death animation, then call game.end_death()
+            (the game waits until end_death() is called)
 
     Attributes you can read to draw the game (do not change them):
         grid (Grid): The current maze; grid.get_all_cells() gives every
@@ -55,7 +63,7 @@ class GameState:
         level_time_left (float): Seconds left in this level.
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
-        status (GameStatus): PLAYING, PAUSED, LOST or WON.
+        status (GameStatus): PLAYING, DYING, PAUSED, LOST or WON.
         cheats (Cheats): Which cheats are on, for example
             cheats.enabled or cheats.invincible.
         started (bool): False until Pac-Man makes his first move in this
@@ -191,8 +199,8 @@ class GameState:
     def _check_ghost_collision(self) -> None:
         """Apply what happens when Pac-Man touches a ghost.
 
-        - HUNTER: Pac-Man loses a life (not if invincible) and everybody
-          goes back to its start; the game is LOST at 0 lives.
+        - HUNTER: Pac-Man loses a life (not if invincible) and the game
+          goes to DYING; what happens next is done by end_death().
         - HUNTED: the ghost is eaten and goes back to its corner. Points
           double for each ghost eaten with the same super-pacgum
           (200, 400, 800, 1600 with the default config).
@@ -204,10 +212,7 @@ class GameState:
                     if self.cheats.invincible:
                         continue
                     self.lives -= 1
-                    if self.lives == 0:
-                        self.status = GameStatus.LOST
-                        return
-                    self._reset_position()
+                    self._start_death()
                     return
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
@@ -225,6 +230,10 @@ class GameState:
                 ghost.state = GhostState.HUNTED
                 dy, dx = ghost.direction.value
                 ghost.direction = Direction((-dy, -dx))
+
+    def _start_death(self) -> None:
+        """Put the game in DYING and wait for end_death()."""
+        self.status = GameStatus.DYING
 
     def _update_time_ghost_hunt(self, dt: float) -> None:
         """Count down the super-pacgum effect; at the end, ghosts hunt again.
@@ -256,7 +265,10 @@ class GameState:
                     ghost.state = GhostState.HUNTER
 
     def _update_level_timer(self, dt: float) -> None:
-        """Count down the level time; when it runs out, the game is LOST.
+        """Count down the level time; when it runs out, Pac-Man dies.
+
+        All lives are lost and the game goes to DYING, so the death
+        animation is played before the game is LOST.
 
         Args:
             dt (float): Seconds since the last frame.
@@ -264,7 +276,8 @@ class GameState:
         self.level_time_left -= dt
         if self.level_time_left <= 0:
             self.level_time_left = 0.0
-            self.status = GameStatus.LOST
+            self.lives = 0
+            self._start_death()
 
     def _update_pacman_map(self) -> None:
         """Recompute the distance map to Pac-Man when he reaches a new cell.
@@ -383,6 +396,22 @@ class GameState:
         """
         self.wanted_direction = direction
 
+    def end_death(self) -> None:
+        """Tell the game that the death animation is over.
+
+        Call it once, when Pac-Man's death animation has finished. If
+        lives are left, everybody goes back to the start and the game
+        goes on (it waits for the first key press); otherwise the game
+        is LOST. It does nothing if the status is not DYING.
+        """
+        if self.status != GameStatus.DYING:
+            return
+        if self.lives == 0:
+            self.status = GameStatus.LOST
+        else:
+            self._reset_position()
+            self.status = GameStatus.PLAYING
+
     def _ghost_wanted(self, ghost: Ghost, corner_map: list[list[int]],
                       corner: tuple[int, int]) -> Direction:
         """Choose where a ghost wants to go, depending on its state.
@@ -493,7 +522,7 @@ class GameState:
                 return
 
         self._update_level_timer(dt)
-        if self.status == GameStatus.LOST:
+        if self.status != GameStatus.PLAYING:
             return
 
         advance(self.pacman, self.wanted_direction, dt, self.grid)
