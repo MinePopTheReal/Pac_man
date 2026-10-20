@@ -5,7 +5,8 @@ _SUFFIX_BY_DIRECTION = {
     Direction.UP: "top",
     Direction.RIGHT: "right",
     Direction.DOWN: "bottom",
-    Direction.LEFT: "left"
+    Direction.LEFT: "left",
+    Direction.NONE: "top"
 }
 
 # pacman

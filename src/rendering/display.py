@@ -81,6 +81,9 @@ class Display(window.Window):
             self.zoom
         )
 
+        self.maze_pos_x = self.width // 2 - self.maze_width // 2
+        self.maze_pos_y =  self.height // 2 - self.maze_height // 2
+
         self.direction_input = {
             key.W: Direction.UP,
             key.D: Direction.RIGHT,
@@ -88,7 +91,7 @@ class Display(window.Window):
             key.A: Direction.LEFT
         }
 
-        clock.schedule_interval(self.entities_renderer.update_animation, 0.11)
+        clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
         clock.schedule_interval(self.game_state.update, 0.01)
 
     def _build_maze(self):
@@ -104,8 +107,8 @@ class Display(window.Window):
         self.clear()
         if self._current_level != self.game_state.level:
             self._build_maze()
-        self.wall_layer.draw(100, 100)
-        self.entities_layer.draw(100, 100)
+        self.wall_layer.draw(self.maze_pos_x, self.maze_pos_y)
+        self.entities_layer.draw(self.maze_pos_x, self.maze_pos_y)
 
         self.entities_renderer.draw_entities()
 

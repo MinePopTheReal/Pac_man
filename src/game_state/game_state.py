@@ -137,9 +137,7 @@ class GameState:
         speed cheat stays on.
         """
         y, x = self.grid.center_grid
-        print("prev", self.pacman.position)
         self.pacman.position = (float(y), float(x))
-        print("after", self.pacman.position)
         self.pacman.direction = Direction.NONE
         self.wanted_direction = Direction.NONE
 

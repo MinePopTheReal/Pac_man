@@ -13,11 +13,19 @@ from src.rendering.sprites_name import (
     GHOST_FEAR_BLUE,
     GHOST_FEAR_WHITE
 )
-from numpy import ndarray
-from pyglet import image
+
+
+# Time remaining until the end of 'Hunted' for the ghosts to start flashing
+FEAR_BLINK_TIME = 3
+# Number of frames between each flash
+FEAR_BLINK_PERIOD = 4
+
+# Number of ticks before triggering the health loss animation
+NUMBER_FREEZE_TICK = 5
 
 
 class EntitiesRenderer:
+
     def __init__(
         self,
         game_state: GameState,
@@ -37,6 +45,7 @@ class EntitiesRenderer:
 
         self.offset_px = 4.5
 
+        self.start_to_die: int = -1
         self.frame = 0
         self.previous_direction: Direction = Direction.NONE
 
@@ -61,42 +70,40 @@ class EntitiesRenderer:
         pos_y, pos_x = self.game_state.pacman.position
         frame = -1
 
-        if direction == Direction.NONE:
-            if self.previous_direction == Direction.NONE:
-                sprite_name = PACMAN_BY_DIRECTION[Direction.UP]
-                frame = 2
-            else:
-                sprite_name = PACMAN_BY_DIRECTION[self.previous_direction]
+        if self.game_state.status == GameStatus.DYING:
+            sprite_name = PACMAN_DEATH
+            frame = min(self.frame - self.start_to_die - NUMBER_FREEZE_TICK, len(self.spritesheet.sprites_bytes[sprite_name][Rotation.R0]) - 1)
+
+            if self.frame - self.start_to_die - NUMBER_FREEZE_TICK > len(self.spritesheet.sprites_bytes[sprite_name][Rotation.R0]) - 1:
+                self.game_state.end_death()
+                self.previous_direction = Direction.NONE
+                self.start_to_die = -1
+
+        elif direction == Direction.NONE and self.previous_direction == Direction.NONE:
+            sprite_name = PACMAN_BY_DIRECTION[Direction.UP]
+            frame = 2
         else:
-            self.previous_direction = direction
-            sprite_name = PACMAN_BY_DIRECTION[direction]
+            if direction != Direction.NONE:
+                self.previous_direction = direction
+            sprite_name = PACMAN_BY_DIRECTION[self.previous_direction]
+
         self._draw_sprite(sprite_name, pos_x, pos_y, frame)
 
     def _draw_ghosts(self):
         for ghost in self.game_state.ghosts:
-            direction = ghost.direction
             pos_y, pos_x = ghost.position
 
-            if ghost.state == GhostState.HUNTER:
-                if direction == Direction.NONE:
-                    sprite_name = GHOSTS_BY_DIRECTION[ghost.name][Direction.UP]
-                else:
-                    sprite_name = GHOSTS_BY_DIRECTION[ghost.name][direction]
-
-            elif ghost.state == GhostState.HUNTED:
-                if self.game_state.time_hunt_ghosts <= 3.0 and self.frame % 4 <= 1:
-                    sprite_name = GHOST_FEAR_WHITE
-                else:
-                    sprite_name = GHOST_FEAR_BLUE
-
+            if ghost.state == GhostState.HUNTED:
+                blinking = self.game_state.time_hunt_ghosts <= FEAR_BLINK_TIME and self.frame % FEAR_BLINK_PERIOD <= 1
+                sprite_name = GHOST_FEAR_WHITE if blinking else GHOST_FEAR_BLUE
             elif ghost.state == GhostState.EATEN:
-                if direction == Direction.NONE:
-                    sprite_name = EYES_BY_DIRECTION[Direction.UP]
-                else:
-                    sprite_name = EYES_BY_DIRECTION[direction]
+                sprite_name = EYES_BY_DIRECTION[ghost.direction]
+            else:
+                sprite_name = GHOSTS_BY_DIRECTION[ghost.name][ghost.direction]
 
             self._draw_sprite(sprite_name, pos_x, pos_y)
 
+    # TODO Modify this function once the pacgums are stored somewhere
     def _draw_pacgums(self):
         for y in range(len(self.game_state.grid.cells)):
             for x in range(len(self.game_state.grid.cells[y])):
@@ -112,9 +119,17 @@ class EntitiesRenderer:
         self.frame += 1
 
     def draw_entities(self):
+        if self.game_state.status == GameStatus.DYING:
+            if self.start_to_die == -1:
+                self.start_to_die = self.frame
+            if self.frame - self.start_to_die < NUMBER_FREEZE_TICK:
+                return 
         self.layer.clear()
+        if self.game_state.status == GameStatus.DYING:
+            self._draw_pacgums()
+            self._draw_pacman()
 
-        if self.game_state.status == GameStatus.PLAYING:
+        elif self.game_state.status == GameStatus.PLAYING:
             self._draw_pacgums()
             self._draw_ghosts()
             self._draw_pacman()
