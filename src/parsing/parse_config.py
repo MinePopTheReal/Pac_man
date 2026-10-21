@@ -14,10 +14,10 @@ class ConfigParser:
     T = TypeVar('T', bound=BaseModel)
 
     def __init__(self) -> None:
-        self.multi_line_comment_markers = [
+        self.comment_markers = [
             ("/*", "*/"),
-            ("#", "\n"),
-            ("//", "\n")
+            ("#", None),
+            ("//", None)
             ]
 
     @staticmethod
@@ -60,8 +60,8 @@ class ConfigParser:
             in_string = self._is_in_string(text, in_string, i)
 
             if not in_string:
-                for _, end_marker in self.multi_line_comment_markers:
-                    if end_marker != "\n" and text.startswith(end_marker, i):
+                for _, end_marker in self.comment_markers:
+                    if end_marker is not None and text.startswith(end_marker, i):
                         raise ParsingError("Missing comment marker")
             i += 1
 
@@ -84,19 +84,26 @@ class ConfigParser:
 
             if not in_string:
 
-                for start_marker, end_marker in (
-                    self.multi_line_comment_markers
-                ):
+                for start_marker, end_marker in (self.comment_markers):
                     if text.startswith(start_marker, i):
                         start = i
-
-                        while i < len(text) and (
-                            not text[i:].startswith(end_marker) or in_string
-                        ):
-                            in_string = self._is_in_string(text, in_string, i)
+                        end = -1
+                        while i <= len(text):
+                            if end_marker is None:
+                                is_end = i == len(text) or text[start:i].endswith("\n")
+                            else:
+                                is_end = (
+                                    i - start >= len(start_marker) + len(end_marker)
+                                    and text[start:i].endswith(end_marker)
+                                )
+                            if is_end:
+                                end = i
+                                break
                             i += 1
-                        text = text[:start] + text[i:]
-                        i = start
+                        if end == -1:
+                            raise ParsingError("Missing comment marker")
+                        text = text[:start] + text[end:]
+                        i = start - 1
             i += 1
 
         self._check_comment_traces(text)
