@@ -262,6 +262,7 @@ dependencies = [
     { name = "mazegenerator" },
     { name = "mypy" },
     { name = "pydantic" },
+    { name = "pyglet" },
 ]
 
 [package.metadata]
@@ -270,6 +271,7 @@ requires-dist = [
     { name = "mazegenerator", path = "mazegen/mazegenerator-2.1.0-py3-none-any.whl" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pydantic", specifier = ">=2.13.5" },
+    { name = "pyglet", specifier = ">=2.1.19" },
 ]
 
 [[package]]
@@ -368,6 +370,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6e/07/587d938ce8ffea54aa23337c4a827a72c27a3a994b4346899682704af588/pyflakes-4.0.0.tar.gz", hash = "sha256:492b27735181e3d4a6acfc08738948b666bf3e696781854ea6e0d8540d566d52", size = 66927, upload-time = "2026-09-22T22:37:01.881Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3e/f3/2664f53ab17a9249c58317a00aabf76acdd18d4b1b98b3a0a36af7763950/pyflakes-4.0.0-py2.py3-none-any.whl", hash = "sha256:0f7b7a78e8fcffd78b205200f045a70911f4179be1b42eac82c3323e0bf5c8aa", size = 65907, upload-time = "2026-09-22T22:37:00.744Z" },
+]
+
+[[package]]
+name = "pyglet"
+version = "2.1.19"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/31/2a/683a5e2421287c7eaa8dd06866b19f56f372271bf820dcd342936c59b166/pyglet-2.1.19.tar.gz", hash = "sha256:77fae024df940c60917ba604bab9b7e26306d66734186634b698c708cdd9f4be", size = 3915885, upload-time = "2026-10-11T23:34:01.248Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/f7/e5c199eb9c5cb3aae817f9102ba6c64f0c82fd4eb69a5d13dc0b1bc98ec0/pyglet-2.1.19-py3-none-any.whl", hash = "sha256:5ba6e8cb0b5ac56a284e43ab411e2bbd504191c32a765abdbd6a6c4b7f1ca317", size = 1039437, upload-time = "2026-10-11T23:33:58.548Z" },
 ]
 
 [[package]]

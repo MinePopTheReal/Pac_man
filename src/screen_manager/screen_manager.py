@@ -1,5 +1,4 @@
 from src.screen_manager.screen import Screen
-# from collections import deque
 
 
 class ScreenManager:
@@ -8,7 +7,8 @@ class ScreenManager:
         self.screens: list[Screen] = [self.main_screen]
         self.should_exit: bool = False
 
-    def current_screen(self, main_screen: Screen) -> Screen:
+    @property
+    def current_screen(self) -> Screen:
         return self.screens[-1]
 
     def push(self, screen: Screen) -> None:
@@ -18,16 +18,15 @@ class ScreenManager:
         if len(self.screens) > 1:
             self.screens.pop()
 
-    def back_to_menu(self,  main_screen: Screen) -> None:
-        for i in range(len(self.screens) - 1, -1, -1):
-            if self.screens[i] != main_screen:
-                self.screens.pop()
+    def back_to_menu(self) -> None:
+        self.screens.clear()
+        self.screens.append(self.main_screen)
 
     def quit(self) -> None:
         self.should_exit = True
 
-    def input_key(self, key) -> None:
-        ...
+    def input_key(self, key: int) -> None:
+        self.current_screen()[key]
 
     def update(self, dt: float) -> None:
         ...
