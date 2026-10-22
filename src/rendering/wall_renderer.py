@@ -4,36 +4,38 @@ from src.maze.cell import Cell
 
 from numpy import ndarray
 
+
 class WallRenderer:
     """
     Allows you to create an image composed of tiles to render the maze
     """
+
     NEIGHBORS = {
-        "TL": ("up",   "left",  "down", "right"),
-        "TR": ("up",   "right", "down", "left"),
-        "BL": ("down", "left",  "up",   "right"),
-        "BR": ("down", "right", "up",   "left")
+        "TL": ("up", "left", "down", "right"),
+        "TR": ("up", "right", "down", "left"),
+        "BL": ("down", "left", "up", "right"),
+        "BR": ("down", "right", "up", "left"),
     }
 
     ARC_INSIDE = {
         "TL": Rotation.R0,
         "TR": Rotation.R90,
         "BR": Rotation.R180,
-        "BL": Rotation.R270
+        "BL": Rotation.R270,
     }
 
     ARC_AROUND = {
         "TL": Rotation.R180,
         "TR": Rotation.R270,
         "BL": Rotation.R90,
-        "BR": Rotation.R0
+        "BR": Rotation.R0,
     }
 
     CORNER_TILES = {
         (0, 0): ("BR", 0, 0),
         (2, 0): ("BL", 1, 0),
         (0, 2): ("TR", 0, 1),
-        (2, 2): ("TL", 1, 1)
+        (2, 2): ("TL", 1, 1),
     }
 
     def __init__(self, spritesheet: SpriteSheetManager):
@@ -75,10 +77,14 @@ class WallRenderer:
             bool: True if the tile is at the edge else False
         """
         if (
-            y == 0 and sub_y == 0
-            or x == self.maze_width - 1 and sub_x == 2
-            or y == self.maze_height - 1 and sub_y == 2
-            or x == 0 and sub_x == 0
+            y == 0
+            and sub_y == 0
+            or x == self.maze_width - 1
+            and sub_x == 2
+            or y == self.maze_height - 1
+            and sub_y == 2
+            or x == 0
+            and sub_x == 0
         ):
             return True
         return False
@@ -116,7 +122,7 @@ class WallRenderer:
             "up": w(x, y - 1, Direction.LEFT),
             "left": w(x - 1, y, Direction.UP),
             "down": w(x, y, Direction.LEFT),
-            "right": w(x, y, Direction.UP)
+            "right": w(x, y, Direction.UP),
         }
 
     def choose_border_corner(
@@ -146,7 +152,7 @@ class WallRenderer:
             opposite = "down"
             possible_tiles = {
                 "BR": "line_and_corner_left",
-                "BL": "line_and_corner_right"
+                "BL": "line_and_corner_right",
             }
 
         elif bottom:
@@ -154,7 +160,7 @@ class WallRenderer:
             opposite = "up"
             possible_tiles = {
                 "TR": "line_and_corner_right",
-                "TL": "line_and_corner_left"
+                "TL": "line_and_corner_left",
             }
 
         elif left:
@@ -162,7 +168,7 @@ class WallRenderer:
             opposite = "right"
             possible_tiles = {
                 "BR": "line_and_corner_right",
-                "TR": "line_and_corner_left"
+                "TR": "line_and_corner_left",
             }
 
         else:
@@ -170,7 +176,7 @@ class WallRenderer:
             opposite = "left"
             possible_tiles = {
                 "BL": "line_and_corner_left",
-                "TL": "line_and_corner_right"
+                "TL": "line_and_corner_right",
             }
 
         if walls[opposite]:
@@ -195,17 +201,17 @@ class WallRenderer:
             vertical,
             horizontal,
             opposite_vertical,
-            opposite_horizontal
+            opposite_horizontal,
         ) = self.NEIGHBORS[position]
 
         if walls[vertical] and walls[horizontal]:
             return "corner", self.ARC_AROUND[position]
         if walls[vertical]:
-            return "line",  (
+            return "line", (
                 Rotation.R90 if position in ("TL", "BL") else Rotation.R270
             )
         if walls[horizontal]:
-            return "line",  (
+            return "line", (
                 Rotation.R180 if position in ("TL", "TR") else Rotation.R0
             )
         if walls[opposite_vertical] or walls[opposite_horizontal]:
@@ -253,11 +259,11 @@ class WallRenderer:
             (1, 0): (Direction.UP, Rotation.R0),
             (0, 1): (Direction.LEFT, Rotation.R270),
             (2, 1): (Direction.RIGHT, Rotation.R90),
-            (1, 2): (Direction.DOWN, Rotation.R180)
+            (1, 2): (Direction.DOWN, Rotation.R180),
         }
         tiles = [
             [("black_tile", Rotation.R0) for _ in range(3)] for _ in range(3)
-            ]
+        ]
         cell = self.maze[y][x]
 
         if self.is_full_cell(cell):
@@ -276,9 +282,11 @@ class WallRenderer:
             tiles[corner_y][corner_x] = tile
         return tiles
 
-    def create_maze_render(self, maze: list[list[Cell]], buffer_view: ndarray, zoom: int):
+    def create_maze_render(
+        self, maze: list[list[Cell]], buffer_view: ndarray, zoom: int
+    ) -> None:
         """
-        Create the buffer and fill it while staying within the maze walls
+        Fills the buffer with the tiles needed to recreate the maze
         """
         self.maze = maze
 
@@ -287,7 +295,9 @@ class WallRenderer:
 
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
-                tile_size = self.spritesheet.spritesheet_config.tile_size * zoom
+                tile_size = (
+                    self.spritesheet.spritesheet_config.tile_size * zoom
+                )
 
                 tiles = self._choose_tiles(maze_x, maze_y)
 
@@ -301,6 +311,5 @@ class WallRenderer:
                             sub_x * tile_size,
                             sub_y * tile_size,
                             zoom,
-                            0
+                            0,
                         )
-        

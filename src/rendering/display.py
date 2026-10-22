@@ -9,6 +9,7 @@ from pyglet import window, gl, display, clock, app
 from pyglet.window import key
 
 
+# it's just for test display is not final version
 class Display(window.Window):
     def __init__(self, game_state: GameState):
 
@@ -17,19 +18,22 @@ class Display(window.Window):
             "assets/wall_spritesheet_config.json",
             "assets/wall_spritesheet.png",
             "RGB",
-            
         )
         self.entities_spritesheet = SpriteSheetManager(
             "assets/entities_spritesheet_config.json",
             "assets/entities_spritesheet.png",
-            "RGBA"
+            "RGBA",
         )
 
         # Display config
         display_data = display.get_display()
         screen = display_data.get_default_screen()
 
-        super().__init__(width=screen.width - 100, height=screen.height - 100, caption="Pac-Man")
+        super().__init__(
+            width=screen.width - 100,
+            height=screen.height - 100,
+            caption="Pac-Man",
+        )
 
         self._current_level = -1
 
@@ -41,35 +45,48 @@ class Display(window.Window):
         self.game_state = game_state
 
         # Buffer
-        initial_maze_width = self.game_state.config.width * \
-            self.wall_spritesheet.spritesheet_config.tile_size * \
-            3
+        initial_maze_width = (
+            self.game_state.config.width
+            * self.wall_spritesheet.spritesheet_config.tile_size
+            * 3
+        )
 
-        initial_maze_height = self.game_state.config.height * \
-            self.wall_spritesheet.spritesheet_config.tile_size * \
-            3
+        initial_maze_height = (
+            self.game_state.config.height
+            * self.wall_spritesheet.spritesheet_config.tile_size
+            * 3
+        )
 
-        self.zoom = max(1, min(
+        self.zoom = max(
+            1,
+            min(
                 screen.width // initial_maze_width,
-                screen.height // initial_maze_height
-            ))
+                screen.height // initial_maze_height,
+            ),
+        )
 
         self.wall_spritesheet.preloading_sprites(
             [Rotation.R0, Rotation.R90, Rotation.R180, Rotation.R270],
-            self.zoom)
-        self.entities_spritesheet.preloading_sprites(
-            [Rotation.R0],
-            self.zoom
+            self.zoom,
         )
+        self.entities_spritesheet.preloading_sprites([Rotation.R0], self.zoom)
 
         self.maze_width = initial_maze_width * self.zoom
         self.maze_height = initial_maze_height * self.zoom
 
-        self.maze_pitch = self.maze_width * self.wall_spritesheet.bytes_number_per_pixel
-        self.entities_pitch = self.maze_width * self.entities_spritesheet.bytes_number_per_pixel
+        self.maze_pitch = (
+            self.maze_width * self.wall_spritesheet.bytes_number_per_pixel
+        )
+        self.entities_pitch = (
+            self.maze_width * self.entities_spritesheet.bytes_number_per_pixel
+        )
 
-        self.wall_layer = Layer(self.maze_width, self.maze_height, self.wall_spritesheet.format)
-        self.entities_layer = Layer(self.maze_width, self.maze_height, self.entities_spritesheet.format)
+        self.wall_layer = Layer(
+            self.maze_width, self.maze_height, self.wall_spritesheet.format
+        )
+        self.entities_layer = Layer(
+            self.maze_width, self.maze_height, self.entities_spritesheet.format
+        )
 
         self.wall_renderer = WallRenderer(self.wall_spritesheet)
         self.entities_renderer = EntitiesRenderer(
@@ -78,32 +95,34 @@ class Display(window.Window):
             self.entities_spritesheet,
             self.wall_spritesheet.spritesheet_config.tile_size,
             self.wall_spritesheet.bytes_number_per_pixel,
-            self.zoom
+            self.zoom,
         )
 
         self.maze_pos_x = self.width // 2 - self.maze_width // 2
-        self.maze_pos_y =  self.height // 2 - self.maze_height // 2
+        self.maze_pos_y = self.height // 2 - self.maze_height // 2
 
         self.direction_input = {
             key.W: Direction.UP,
             key.D: Direction.RIGHT,
             key.S: Direction.DOWN,
-            key.A: Direction.LEFT
+            key.A: Direction.LEFT,
         }
 
         clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
         clock.schedule_interval(self.game_state.update, 0.01)
 
-    def _build_maze(self):
-        self.wall_renderer.create_maze_render(self.game_state.grid.cells, self.wall_layer.buffer_view, self.zoom)
+    def _build_maze(self) -> None:
+        self.wall_renderer.create_maze_render(
+            self.game_state.grid.cells, self.wall_layer.buffer_view, self.zoom
+        )
         self.curr_level = self.game_state.level
 
-    def on_key_press(self, symbol, modifiers):
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
         direction = self.direction_input.get(symbol)
         if direction is not None:
             self.game_state.wanted_direction = direction
 
-    def on_draw(self):
+    def on_draw(self) -> None:
         self.clear()
         if self._current_level != self.game_state.level:
             self._build_maze()
