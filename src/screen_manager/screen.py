@@ -17,9 +17,8 @@ class Screen(ABC):
     def input(self, key: int) -> None:
         ...
 
-    @abstractmethod
     def update_screen(self, dt: float) -> None:
-        ...
+        pass
 
     @abstractmethod
     def draw_screen(self) -> None:

@@ -1,14 +1,21 @@
 from src.screen_manager.screen import Screen
+from src.message.errors import ScreenError
 
 
 class ScreenManager:
-    def __init__(self, main_screen: Screen) -> None:
-        self.main_screen = main_screen
-        self.screens: list[Screen] = [self.main_screen]
+    def __init__(self) -> None:
+        self.main_screen: Screen | None = None
+        self.screens: list[Screen] = []
         self.should_exit: bool = False
+
+    def first_screen(self, menu: Screen) -> None:
+        self.screens.append(menu)
+        self.main_screen = menu
 
     @property
     def current_screen(self) -> Screen:
+        if not self.screens:
+            raise ScreenError("first_screen() must be called first")
         return self.screens[-1]
 
     def push(self, screen: Screen) -> None:
@@ -19,6 +26,9 @@ class ScreenManager:
             self.screens.pop()
 
     def back_to_menu(self) -> None:
+        if self.main_screen is None:
+            raise ScreenError("first_screen() must be called "
+                              "before back_to_menu()")
         self.screens.clear()
         self.screens.append(self.main_screen)
 
@@ -36,8 +46,6 @@ class ScreenManager:
 
 
 # if __name__ == "__main__":
-#     from src.screen_manager.screen import Screen
-
 #     class Test(Screen):
 #         def __init__(self, name):
 #             self.name = name
