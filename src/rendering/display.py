@@ -4,10 +4,13 @@ from src.rendering.entities_renderer import EntitiesRenderer
 from src.rendering.wall_renderer import WallRenderer
 from src.parsing.parse_config import ConfigParser
 from src.rendering.layer import Layer
+from src.rendering.hud_renderer import HudRenderer
+
 
 from pyglet import window, gl, display, clock, app
 from pyglet.window import key
 
+HUD_ZOOM_FACTOR = 2
 
 # it's just for test display is not final version
 class Display(window.Window):
@@ -22,6 +25,11 @@ class Display(window.Window):
         self.entities_spritesheet = SpriteSheetManager(
             "assets/entities_spritesheet_config.json",
             "assets/entities_spritesheet.png",
+            "RGBA",
+        )
+        self.font_spritesheet = SpriteSheetManager(
+            "assets/font_spritesheet_config.json",
+            "assets/font_spritesheet.png",
             "RGBA",
         )
 
@@ -57,11 +65,13 @@ class Display(window.Window):
             * 3
         )
 
+        self.initial_hud_height = 4 * self.font_spritesheet.spritesheet_config.tile_size + self.font_spritesheet.spritesheet_config.tile_size
+
         self.zoom = max(
             1,
             min(
                 screen.width // initial_maze_width,
-                screen.height // initial_maze_height,
+                screen.height // (initial_maze_height + self.initial_hud_height),
             ),
         )
 
@@ -70,6 +80,7 @@ class Display(window.Window):
             self.zoom,
         )
         self.entities_spritesheet.preloading_sprites([Rotation.R0], self.zoom)
+        self.font_spritesheet.preloading_sprites([Rotation.R0], self.zoom)
 
         self.maze_width = initial_maze_width * self.zoom
         self.maze_height = initial_maze_height * self.zoom
@@ -87,7 +98,13 @@ class Display(window.Window):
         self.entities_layer = Layer(
             self.maze_width, self.maze_height, self.entities_spritesheet.format
         )
+        self.hud_height = self.initial_hud_height * self.zoom
+        self.hud_layer = Layer(
+            self.maze_width, self.hud_height, self.font_spritesheet.format
+        )
+        
 
+        self.hud_renderer = HudRenderer(self.game_state, self.font_spritesheet, self.hud_layer, self.zoom)
         self.wall_renderer = WallRenderer(self.wall_spritesheet)
         self.entities_renderer = EntitiesRenderer(
             self.game_state,
@@ -98,8 +115,14 @@ class Display(window.Window):
             self.zoom,
         )
 
+        total_height = self.maze_height + self.hud_height
+        block_y = self.height // 2 - total_height // 2
+
         self.maze_pos_x = self.width // 2 - self.maze_width // 2
-        self.maze_pos_y = self.height // 2 - self.maze_height // 2
+        self.maze_pos_y = block_y
+
+        self.hud_pos_x = self.maze_pos_x
+        self.hud_pos_y = self.maze_pos_y + self.maze_height
 
         self.direction_input = {
             key.W: Direction.UP,
@@ -109,6 +132,7 @@ class Display(window.Window):
         }
 
         clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
+        clock.schedule_interval(self.hud_renderer.update_hud, 0.2)
         clock.schedule_interval(self.game_state.update, 0.01)
 
     def _build_maze(self) -> None:
@@ -128,6 +152,7 @@ class Display(window.Window):
             self._build_maze()
         self.wall_layer.draw(self.maze_pos_x, self.maze_pos_y)
         self.entities_layer.draw(self.maze_pos_x, self.maze_pos_y)
+        self.hud_layer.draw(self.hud_pos_x, self.hud_pos_y)
 
         self.entities_renderer.draw_entities()
 

@@ -4,7 +4,7 @@ from pyglet import image
 
 class Layer:
     """
-    allows you to create and manage a layer (so you can separate
+    Allows you to create and manage a layer (so you can separate
     the maze rendering from the entities, for example)
     """
     def __init__(self, width: int, height: int, format: str):
@@ -35,7 +35,7 @@ class Layer:
         self.buffer_view.fill(0)
 
     def draw(self, x: int, y: int) -> None:
-        """allows us to display our buffer in our Pyglet window
+        """Allows us to display our buffer in our Pyglet window
 
         Args:
             x (int): Coordinates (x) of the layer in the window

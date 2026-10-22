@@ -11,7 +11,7 @@
 
     # Number of pacgums placed in each maze, super-pacgums not included
     # (min 0, default: 42). Capped to the number of free cells.
-    "pacgum": 1,
+    "pacgum": 125,
 
     # Points earned for each pacgum eaten (min 0, default: 10)
     "points_pacgum": 10,
@@ -27,13 +27,13 @@
     "seed": 42,
 
     # Time limit of each level, in seconds (min 1, default: 90)
-    "level_max_time": 180,
+    "level_max_time": 90,
 
     # Width of the maze, in cells (min 14, max 50, default: 22)
-    "width": 20,
+    "width": 15,
 
     # Height of the maze, in cells (min 10, max 50, default: 22)
-    "height": 20,
+    "height": 15,
 
     # Number of levels to complete to win the game (min 10, default: 10)
     "nb_level": 10,
