@@ -14,11 +14,11 @@ class Screen(ABC):
         self.manager = manager
 
     @abstractmethod
-    def input_key(self, key: int) -> None:
+    def input(self, key: int) -> None:
         ...
 
     @abstractmethod
-    def update(self, dt: float) -> None:
+    def update_screen(self, dt: float) -> None:
         ...
 
     @abstractmethod
