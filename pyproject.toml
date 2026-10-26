@@ -8,9 +8,12 @@ dependencies = [
     "flake8>=7.4.1",
     "mazegenerator",
     "mypy>=2.3.1",
+    "numpy>=2.5.3",
+    "pyglet>=2.1.16",
     "pydantic>=2.13.5",
-    "pyglet>=2.1.19",
+    "pillow>=13.0.0",
 ]
 
 [tool.uv.sources]
 mazegenerator = { path = "mazegen/mazegenerator-2.1.0-py3-none-any.whl" }
+
