@@ -1,3 +1,9 @@
+# TEMPORARY: This file is intended solely for testing the graphics rendering
+# (sprite sheets, layers, HUD). The input loop and the drawing loop are
+# placeholder code; we need to wait for the screen manager and the screens to
+# finalize the display and implement this section of code properly.
+
+
 from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.game_state.game_state import GameState, Direction, GameConfig
 from src.rendering.entities_renderer import EntitiesRenderer
@@ -12,11 +18,9 @@ from pyglet.window import key
 
 HUD_ZOOM_FACTOR = 2
 
-# it's just for test display is not final version
 class Display(window.Window):
     def __init__(self, game_state: GameState):
 
-        # Spritesheets
         self.wall_spritesheet = SpriteSheetManager(
             "assets/wall_spritesheet_config.json",
             "assets/wall_spritesheet.png",
@@ -33,7 +37,6 @@ class Display(window.Window):
             "RGBA",
         )
 
-        # Display config
         display_data = display.get_display()
         screen = display_data.get_default_screen()
 
@@ -48,7 +51,6 @@ class Display(window.Window):
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
-        # Config
 
         self.game_state = game_state
 
@@ -65,13 +67,13 @@ class Display(window.Window):
             * 3
         )
 
-        self.initial_hud_height = 4 * self.font_spritesheet.spritesheet_config.tile_size + self.font_spritesheet.spritesheet_config.tile_size
+        self.initial_hud_height = 2 * self.font_spritesheet.spritesheet_config.tile_size + self.font_spritesheet.spritesheet_config.tile_size
 
         self.zoom = max(
             1,
             min(
                 screen.width // initial_maze_width,
-                screen.height // (initial_maze_height + self.initial_hud_height),
+                screen.height // (initial_maze_height + self.initial_hud_height + 50),
             ),
         )
 
