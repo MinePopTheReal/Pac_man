@@ -30,7 +30,7 @@ class ScreenManager:
             raise ScreenError("first_screen() must be called "
                               "before back_to_menu()")
         self.screens.clear()
-        self.screens.append(self.main_screen)
+        self.push(self.main_screen)
 
     def quit(self) -> None:
         self.should_exit = True
