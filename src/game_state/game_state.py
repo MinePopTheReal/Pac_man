@@ -12,6 +12,7 @@ from enum import Enum, auto
 
 # Speeds are in cells per second.
 PACMAN_SPEED = 4.0
+
 GHOST_SPEED = 3.0
 # Cheat: Pac-Man speed is multiplied by this.
 SPEED_MULTIPLIER = 2.0

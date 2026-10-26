@@ -11,7 +11,7 @@
 
     # Number of pacgums placed in each maze, super-pacgums not included
     # (min 0, default: 42). Capped to the number of free cells.
-    "pacgum": 42,
+    "pacgum": 461,
 
     # Points earned for each pacgum eaten (min 0, default: 10)
     "points_pacgum": 10,

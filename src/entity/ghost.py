@@ -79,6 +79,7 @@ class Shadow(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
         """Create the ghost (see Ghost.__init__)."""
+
         super().__init__(direction, position, state, speed)
 
     def position_target(self, pac_cell: tuple[int, int],
@@ -96,6 +97,7 @@ class Speedy(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
         """Create the ghost (see Ghost.__init__)."""
+
         super().__init__(direction, position, state, speed)
 
     def position_target(self, pac_cell: tuple[int, int],
@@ -115,6 +117,7 @@ class Bashful(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
         """Create the ghost (see Ghost.__init__)."""
+
         super().__init__(direction, position, state, speed)
 
     def position_target(self, pac_cell: tuple[int, int],
@@ -141,6 +144,7 @@ class Pokey(Ghost):
     def __init__(self, direction: Direction, position: tuple[float, float],
                  state: GhostState, speed: float) -> None:
         """Create the ghost (see Ghost.__init__)."""
+
         super().__init__(direction, position, state, speed)
 
     def position_target(self, pac_cell: tuple[int, int],
