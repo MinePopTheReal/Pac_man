@@ -4,6 +4,9 @@ from src.game_state.game_state import GameState
 
 
 class HudRenderer:
+    """
+    HUD rendering and management
+    """    
     def __init__(
         self, game_state: GameState,
         spritesheet: SpriteSheetManager,
@@ -23,6 +26,18 @@ class HudRenderer:
         }
 
     def _draw_string(self, string: str, x: int, y: int) -> None:
+        """
+        It creates the output of a string, displaying
+        it character by character.
+
+        Args:
+            string (str): the string to display
+            x (int): the coordinates (x) of the beginning of the text (offset
+            equal to the size of one character)
+
+            y (int): the coordinates (y) of the beginning of the text (offset
+            equal to the size of one character)
+        """        
         for index, letter in enumerate(string.upper()):
             if letter in [' ']:
                 continue
@@ -40,27 +55,49 @@ class HudRenderer:
             )
 
     def _get_time(self) -> str:
+        """Create a string representation of the remaining time
+
+        Returns:
+            str: the remaining time as a string
+        """        
         time = int(self.game_state.level_time_left)
         string = f"{time // 60}m {time % 60}s"
         return string
 
     def _get_lives(self) -> str:
+        """Create a string representation of the remaining lives
+
+        Returns:
+            str: the remaining lives as a string
+        """        
         return (
             f"{"❤" * min(self.game_state.lives, 3)}"
             f"{"+" if self.game_state.lives > 3 else ""}"
             )
 
     def _get_level(self) -> str:
+        """Create the string that represents the current level 
+
+        Returns:
+            str: the level as a string
+        """        
         return f"{self.game_state.level}"
 
     def _get_score(self) -> str:
+        """Create the string that represents the current score 
+
+        Returns:
+            str: the score as a string
+        """        
         return f"{self.game_state.score}"
 
-    def _update_values(self) -> None:
+    def update_hud(self, dt: float) -> None:
+        """Updates all HUD values
+
+        Args:
+            dt (float): Delta time, which is not used but is required
+        """        
+        self.layer.clear()
         for key, (get_value, x, y) in self.game_values.items():
             value = get_value()
             self._draw_string(f"{key + ':':<6}{value}", x, y)
-
-    def update_hud(self, dt: float) -> None:
-        self.layer.clear()
-        self._update_values()
