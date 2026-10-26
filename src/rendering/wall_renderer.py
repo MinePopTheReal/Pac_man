@@ -50,14 +50,12 @@ class WallRenderer:
         Returns:
             bool: True if the cell have 4 walls else False
         """
-        if (
+        return (
             cell.there_is_wall(Direction.UP)
             and cell.there_is_wall(Direction.DOWN)
             and cell.there_is_wall(Direction.LEFT)
             and cell.there_is_wall(Direction.RIGHT)
-        ):
-            return True
-        return False
+        )
 
     def _is_on_the_edge(self, sub_x: int, sub_y: int, x: int, y: int) -> bool:
         """checks whether a tile is located at the edge of the maze
@@ -76,18 +74,12 @@ class WallRenderer:
         Returns:
             bool: True if the tile is at the edge else False
         """
-        if (
-            y == 0
-            and sub_y == 0
-            or x == self.maze_width - 1
-            and sub_x == 2
-            or y == self.maze_height - 1
-            and sub_y == 2
-            or x == 0
-            and sub_x == 0
-        ):
-            return True
-        return False
+        return (
+            (y == 0 and sub_y == 0)
+            or (x == self.maze_width - 1 and sub_x == 2)
+            or (y == self.maze_height - 1 and sub_y == 2)
+            or (x == 0 and sub_x == 0)
+        )
 
     def has_wall(self, x: int, y: int, direction: Direction) -> bool:
         """Checks whether a cell has a wall in a certain direction
