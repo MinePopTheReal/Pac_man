@@ -206,9 +206,10 @@ class EntitiesRenderer:
         Args:
             dt (float): time delta
         """
-        self.frame += 1
-        if self.game_state.status == GameStatus.DYING:
-            self._update_death()
+        if self.game_state.status != GameStatus.PAUSED:
+            self.frame += 1
+            if self.game_state.status == GameStatus.DYING:
+                self._update_death()
 
     def draw_entities(self) -> None:
         """

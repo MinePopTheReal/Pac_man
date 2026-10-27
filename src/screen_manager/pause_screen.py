@@ -6,6 +6,7 @@ from src.screen_manager.screen import Screen
 from enum import Enum
 from src.game_state.game_state import GameState
 from pyglet.window import key as keys
+from pyglet import text
 
 
 class PauseOption(Enum):
@@ -14,8 +15,8 @@ class PauseOption(Enum):
 
 
 class Pause(Screen):
-    def __init__(self, manager: ScreenManager, game: GameState) -> None:
-        super().__init__(manager)
+    def __init__(self, manager: ScreenManager, game: GameState, assets):
+        super().__init__(manager, assets)
         self.game = game
         self.selected: int = 0
         self.options: list[PauseOption] = list(PauseOption)
@@ -40,4 +41,30 @@ class Pause(Screen):
                 self.manager.back_to_menu()
 
     def draw_screen(self) -> None:
-        ...
+        label = text.Label(
+                f"Pause",
+                font_name="Arial",
+                font_size=32,
+                x=self.assets.window_width // 2,
+                y=(self.assets.window_height // 2) + 45,
+                anchor_x="center",
+                anchor_y="center",
+                color=(255, 0, 255, 255),
+            )
+        label.draw()
+        for i in range(len(self.options)):
+            if i == self.selected:
+                color = (255, 255, 0, 255)
+            else:
+                color = (255, 255, 255, 255)
+            label = text.Label(
+                f"{self.options[i]}",
+                font_name="Arial",
+                font_size=32,
+                x=self.assets.window_width // 2,
+                y=(self.assets.window_height // 2) - i * 45,
+                anchor_x="center",
+                anchor_y="center",
+                color=color,
+            )
+            label.draw()

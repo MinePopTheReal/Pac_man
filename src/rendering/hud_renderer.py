@@ -1,6 +1,11 @@
-from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.game_state.game_state import GameState
+from src.rendering.layer import Layer
+from src.utils.text_renderer import TextRenderer
+
+
+from numpy import ndarray
+
 
 
 class HudRenderer:
@@ -8,7 +13,8 @@ class HudRenderer:
     HUD rendering and management
     """    
     def __init__(
-        self, game_state: GameState,
+        self,
+        game_state: GameState,
         spritesheet: SpriteSheetManager,
         layer: Layer,
         zoom: int
@@ -24,35 +30,6 @@ class HudRenderer:
             "level": (self._get_level, 20, 0),
             "score": (self._get_score, 20, 1)
         }
-
-    def _draw_string(self, string: str, x: int, y: int) -> None:
-        """
-        It creates the output of a string, displaying
-        it character by character.
-
-        Args:
-            string (str): the string to display
-            x (int): the coordinates (x) of the beginning of the text (offset
-            equal to the size of one character)
-
-            y (int): the coordinates (y) of the beginning of the text (offset
-            equal to the size of one character)
-        """        
-        for index, letter in enumerate(string.upper()):
-            if letter in [' ']:
-                continue
-            new_x = (x + index) \
-                * self.spritesheet.spritesheet_config.tile_size \
-                * self.zoom
-            self.spritesheet.copy_tile_into_buffer(
-                self.layer.buffer_view,
-                letter,
-                Rotation.R0,
-                new_x,
-                y * self.spritesheet.spritesheet_config.tile_size * self.zoom,
-                self.zoom,
-                0
-            )
 
     def _get_time(self) -> str:
         """Create a string representation of the remaining time
@@ -100,4 +77,11 @@ class HudRenderer:
         self.layer.clear()
         for key, (get_value, x, y) in self.game_values.items():
             value = get_value()
-            self._draw_string(f"{key + ':':<6}{value}", x, y)
+            TextRenderer.draw_string(
+                self.layer.buffer_view,
+                f"{key + ':':<6}{value}",
+                x,
+                y,
+                self.zoom,
+                self.spritesheet
+            )

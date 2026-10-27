@@ -1,3 +1,4 @@
+from __future__ import annotations
 from src.screen_manager.screen import Screen
 from src.message.errors import ScreenError
 
