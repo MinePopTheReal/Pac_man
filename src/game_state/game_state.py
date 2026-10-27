@@ -94,7 +94,7 @@ class GameState:
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
         self.status: GameStatus = GameStatus.PLAYING
-        self.previous_status: GameStatus = GameStatus.PLAYING
+        self.previous_status: GameStatus = self.status
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
