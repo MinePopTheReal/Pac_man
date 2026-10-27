@@ -12,8 +12,8 @@ from src.utils.highscore_manager import HighscoreManager
 
 
 class Play(Screen):
-    def __init__(self, config: GameConfig, manager: ScreenManager,
-                 highscores: HighscoreManager):
+    def __init__(self, manager: ScreenManager, config: GameConfig,
+                 highscores: HighscoreManager) -> None:
         super().__init__(manager)
         self.config = config
         self.game = GameState(self.config)

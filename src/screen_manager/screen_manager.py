@@ -43,26 +43,3 @@ class ScreenManager:
 
     def draw(self) -> None:
         ...
-
-
-# if __name__ == "__main__":
-#     class Test(Screen):
-#         def __init__(self, name):
-#             self.name = name
-
-#         def input(self, key):
-#             print(self.name, 'reçoit la touche', key)
-
-#         def update_screen(self, dt):
-#             print(self.name, 'reçoit dt =', dt)
-
-#         def draw_screen(self):
-#             pass
-
-#     t = Test('menu')
-#     m = ScreenManager(t)
-#     m.input_key(5)
-#     m.update(0.1)
-#     m.push(Test('jeu'))
-#     m.input_key(7)
-#     m.update(0.2)

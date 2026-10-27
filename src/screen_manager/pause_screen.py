@@ -14,7 +14,7 @@ class PauseOption(Enum):
 
 
 class Pause(Screen):
-    def __init__(self, manager: ScreenManager, game: GameState):
+    def __init__(self, manager: ScreenManager, game: GameState) -> None:
         super().__init__(manager)
         self.game = game
         self.selected: int = 0
