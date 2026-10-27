@@ -44,6 +44,7 @@ class GridError(Error):
 
     default_type = "Grid"
 
+
 class ScreenError(Error):
     """Exception raised when the screen manager is
      used before first_screen()"""

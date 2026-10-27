@@ -8,6 +8,7 @@ from src.parsing.models import GameConfig
 from pyglet.window import key as keys
 from src.screen_manager.game_screen import Play
 from src.screen_manager.instructions_screen import Instructions
+from src.utils.highscore_manager import HighscoreManager
 
 
 class Options(Enum):
@@ -18,11 +19,13 @@ class Options(Enum):
 
 
 class MainMenu(Screen):
-    def __init__(self, config: GameConfig, manager: ScreenManager) -> None:
+    def __init__(self, config: GameConfig, manager: ScreenManager,
+                 highscores: HighscoreManager) -> None:
         super().__init__(manager)
         self.config = config
         self.options: list[Options] = list(Options)
         self.selected: int = 0
+        self.highscores = highscores
 
     def input(self, key: int) -> None:
         match key:
@@ -36,7 +39,8 @@ class MainMenu(Screen):
     def _validate(self, option: Options) -> None:
         match option:
             case Options.START:
-                self.manager.push(Play(self.config, self.manager))
+                self.manager.push(Play(self.config, self.manager,
+                                       self.highscores))
             case Options.HIGHSCORES:
                 ...
             case Options.INSTRUCTIONS:

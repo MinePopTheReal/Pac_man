@@ -7,13 +7,17 @@ from src.game_state.game_state import GameState, Direction, GameStatus
 from src.parsing.models import GameConfig
 from pyglet.window import key as keys
 from src.screen_manager.pause_screen import Pause
+from src.screen_manager.end_game import EndGame
+from src.utils.highscore_manager import HighscoreManager
 
 
 class Play(Screen):
-    def __init__(self, config: GameConfig, manager: ScreenManager):
+    def __init__(self, config: GameConfig, manager: ScreenManager,
+                 highscores: HighscoreManager):
         super().__init__(manager)
         self.config = config
         self.game = GameState(self.config)
+        self.highscores = highscores
 
     def input(self, key: int) -> None:
         match key:
@@ -49,11 +53,13 @@ class Play(Screen):
         status = self.game.status
         if status == GameStatus.WON:
             self.manager.pop()
-            # self.manager.push(...) TODO: create screen 'VICTORY'
+            self.manager.push(EndGame(self.manager, True, self.highscores,
+                                      self.game.score))
 
         elif status == GameStatus.LOST:
             self.manager.pop()
-            # self.manager.push(...) TODO: create screen 'GAME OVER'
+            self.manager.push(EndGame(self.manager, False, self.highscores,
+                                      self.game.score))
 
     def draw_screen(self) -> None:
         ...
