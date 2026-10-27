@@ -65,6 +65,8 @@ class GameState:
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
         status (GameStatus): PLAYING, DYING, PAUSED, LOST or WON.
+        previous_status (GameStatus): The status before the last pause,
+            given back when the game is resumed.
         cheats (Cheats): Which cheats are on, for example
             cheats.enabled or cheats.invincible.
         started (bool): False until Pac-Man makes his first move in this
@@ -92,6 +94,7 @@ class GameState:
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
         self.status: GameStatus = GameStatus.PLAYING
+        self.previous_status: GameStatus = GameStatus.PLAYING
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
@@ -377,13 +380,17 @@ class GameState:
         """Pause the game, or resume it if it is paused.
 
         Call it when the pause key is pressed. While paused, nothing
-        moves and the timers stop. It does nothing when the game is
-        over (LOST or WON), so a finished game cannot be resumed.
+        moves and the timers stop. Resuming gives back the status the
+        game had before the pause (PLAYING or DYING), so a pause during
+        Pac-Man's death puts the death animation on hold. It does
+        nothing when the game is over (LOST or WON), so a finished game
+        cannot be resumed.
         """
-        if self.status == GameStatus.PLAYING:
+        if self.status in (GameStatus.PLAYING, GameStatus.DYING):
+            self.previous_status = self.status
             self.status = GameStatus.PAUSED
         elif self.status == GameStatus.PAUSED:
-            self.status = GameStatus.PLAYING
+            self.status = self.previous_status
 
     def select_direction(self, direction: Direction) -> None:
         """Tell which way the player wants Pac-Man to go.
