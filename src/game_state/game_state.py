@@ -4,7 +4,8 @@ from src.maze import Grid, CellContents
 from src.parsing.models import GameConfig
 from src.game_state.collision import collides
 from src.maze.loader import generate_maze
-from src.game_state.movement import (is_on_cell, advance, direction_home)
+from src.game_state.movement import (is_on_cell, advance, direction_home,
+                                     try_turn_around)
 from src.game_state.cheats import Cheats
 from src.game_state.direction_ghost import direction_toward
 from enum import Enum, auto
@@ -533,6 +534,7 @@ class GameState:
         if self.status != GameStatus.PLAYING:
             return
 
+        try_turn_around(self.pacman, self.wanted_direction)
         advance(self.pacman, self.wanted_direction, dt, self.grid)
 
         if self._pacman_eats():
