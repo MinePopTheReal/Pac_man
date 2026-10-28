@@ -3,7 +3,9 @@
 Characters move smoothly (float positions, in cells), but walls can only
 be checked on whole cells. The rule used here: a character can only
 change direction when it stands exactly on a cell, and it always stops
-on every cell it crosses, so it can never skip a wall check.
+on every cell it crosses, so it can never skip a wall check. The only
+exception is turning back (see try_turn_around), which never crosses
+a wall.
 """
 import math
 from src.entity.characters import Direction, Character
@@ -74,6 +76,31 @@ def next_cell(coord: tuple[float, float],
     nx = math.ceil(x) if dx > 0 else math.floor(x) if dx < 0 else x
 
     return (float(ny), float(nx))
+
+
+def try_turn_around(pacman: Character, wanted: Direction) -> None:
+    """Let Pac-Man turn back at once, even between two cells.
+
+    Without it, he would only turn back on the next cell, which feels
+    slow. No wall check is needed: he goes back to the cell he just
+    left, so the way is free. On a cell, nothing is done here, because
+    advance() already chooses the direction with the walls. Only used
+    for Pac-Man: ghosts must not turn back whenever they want.
+
+    Args:
+        pacman (Character): The character to turn back; its direction
+            is updated.
+        wanted (Direction): The direction the player wants. Only the
+            opposite of the current direction makes him turn back.
+    """
+    if is_on_cell(pacman.position):
+        return
+
+    dy, dx = pacman.direction.value
+    opposite = Direction((-dy, -dx))
+
+    if wanted == opposite:
+        pacman.direction = wanted
 
 
 def advance(character: Character, wanted: Direction, dt: float,
