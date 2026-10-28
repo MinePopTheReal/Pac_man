@@ -1,5 +1,10 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager
 
+HUD_ZOOM = -1
+TITLE_ZOOM = 30
+MENU_ZOOM = -1
+
+
 class Assets:
     def __init__(self, screen_width, screen_height, window_width, window_height):
         self.wall_spritesheet = SpriteSheetManager(

@@ -104,7 +104,6 @@ class Play(Screen):
 
         clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
         clock.schedule_interval(self.hud_renderer.update_hud, 0.2)
-        clock.schedule_interval(self.game_state.update, 0.01)
 
     def input(self, symbol: int) -> None:
         match symbol:
@@ -138,15 +137,27 @@ class Play(Screen):
         self.game_state.update(dt)
 
         status = self.game_state.status
-        if status == GameStatus.WON:
-            self.manager.pop()
-            self.manager.push(EndGame(self.manager, True, self.highscores,
-                                      self.game.score))
-
-        elif status == GameStatus.LOST:
-            self.manager.pop()
-            self.manager.push(EndGame(self.manager, False, self.highscores,
-                                      self.game.score))
+        if status in [GameStatus.WON, GameStatus.LOST]:
+            clock.unschedule(self.entities_renderer.update_animation)
+            clock.unschedule(self.hud_renderer.update_hud)
+            if status == GameStatus.WON:
+                self.manager.pop()
+                self.manager.push(EndGame(
+                    self.manager,
+                    True,
+                    self.highscores,
+                    self.game_state.score,
+                    self.assets
+                ))
+            else:
+                self.manager.pop()
+                self.manager.push(EndGame(
+                    self.manager, 
+                    False, 
+                    self.highscores,
+                    self.game_state.score, 
+                    self.assets
+                ))
 
     def _build_maze(self) -> None:
         self.wall_renderer.create_maze_render(

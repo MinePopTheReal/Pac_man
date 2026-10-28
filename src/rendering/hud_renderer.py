@@ -27,8 +27,8 @@ class HudRenderer:
         self.game_values = {
             "time": (self._get_time, 0, 0),
             "lives": (self._get_lives, 0, 1),
-            "level": (self._get_level, 20, 0),
-            "score": (self._get_score, 20, 1)
+            "level": (self._get_level, 400, 0),
+            "score": (self._get_score, 400, 1)
         }
 
     def _get_time(self) -> str:

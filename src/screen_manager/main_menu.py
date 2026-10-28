@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen
+from src.screen_manager.screen import Screen, MENU_ZOOM, TITLE_ZOOM
 from enum import Enum
 from src.parsing.models import GameConfig
 from pyglet.window import key as keys
@@ -25,8 +25,6 @@ class Options(Enum):
     EXIT = 'Quit'
 
 TITLE = "PACMAN"
-TITLE_ZOOM = 30
-MENU_ZOOM = 15
 
 class MainMenu(Screen):
     def __init__(self, config: GameConfig, manager: ScreenManager, assets, highscores: HighscoreManager) -> None:
@@ -47,8 +45,6 @@ class MainMenu(Screen):
         self.title_layer = Layer(self.title_width, title_height, "RGBA")
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
 
-
-        print(self.title_layer.buffer_view.shape)
 
         TextRenderer.draw_string(
             self.title_layer.buffer_view,
@@ -77,7 +73,7 @@ class MainMenu(Screen):
             case Options.START:
                 self.manager.push(Play(self.config, self.manager, self.assets, self.highscores))
             case Options.HIGHSCORES:
-                self.manager.push(Highscore(self.manager, self.highscores))
+                self.manager.push(Highscore(self.manager, self.highscores, self.assets, self.config))
             case Options.INSTRUCTIONS:
                 self.manager.push(Instructions(self.manager, self.assets))
             case Options.EXIT:

@@ -5,6 +5,7 @@ from src.screen_manager.main_menu import MainMenu
 from src.screen_manager.game_screen import Play
 from src.rendering.display import Display
 from src.rendering.assets import Assets
+from src.utils.highscore_manager import HighscoreManager
 
 from pyglet import app
 
@@ -16,7 +17,11 @@ screen_manager = ScreenManager()
 render = Display(screen_manager)
 assets = Assets(render.screen.width, render.screen.height, render.width, render.height)
 
-main = MainMenu(config, screen_manager, assets)
+high_score_manager = HighscoreManager(config)
+
+high_score_manager.load_highscores()
+
+main = MainMenu(config, screen_manager, assets, high_score_manager)
 # play = Play(config, screen_manager, render)
 
 # screen_manager.push(play)

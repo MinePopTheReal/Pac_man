@@ -3,18 +3,34 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
 from src.screen_manager.screen import Screen
-from src.utils.highscore_manager import HighscoreManager, MAX_NAME_LENGTH
+from src.utils.highscore_manager import HighscoreManager, MAX_NAME_LENGTH, MAX_SCORES
 from pyglet.window import key as keys
 
+from src.utils.text_renderer import TextRenderer
+from src.screen_manager.screen import Screen, MENU_ZOOM, TITLE_ZOOM
+
+from src.rendering.layer import Layer
+from src.utils.sprite_sheet_manager import Rotation
 
 class EndGame(Screen):
     def __init__(self, manager: ScreenManager, won: bool,
-                 manager_highscores: HighscoreManager, score: int) -> None:
-        super().__init__(manager)
+                 manager_highscores: HighscoreManager, score: int, assets) -> None:
+        super().__init__(manager, assets)
         self.won = won
         self.manager_highscores = manager_highscores
         self.score = score
         self.name: str = ""
+        
+        
+        
+        self.menu_width = MAX_NAME_LENGTH * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_height = MAX_SCORES * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
+
+        self.assets.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
+
+        # self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
+
 
     def input(self, key: int) -> None:
         if (keys.A <= key <= keys.Z or keys._0 <= key <= keys._9
@@ -40,4 +56,14 @@ class EndGame(Screen):
         self.manager.back_to_menu()
 
     def draw_screen(self) -> None:
-        ...
+        print(self.name)
+        self.menu_layer.clear()
+        TextRenderer.draw_string(
+            self.menu_layer.buffer_view,
+            self.name,
+            0,
+            0,
+            MENU_ZOOM,
+            self.assets.font_w_spritesheet
+        )
+        self.menu_layer.draw(0, 0)

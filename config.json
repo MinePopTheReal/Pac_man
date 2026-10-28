@@ -4,10 +4,10 @@
 # default value, with a warning. Unknown keys are ignored.
 {
     # File where the top 10 highscores are saved (default: "highscores.json")
-    "highscore_filename": "highscores.json",
+    "highscore_filename": "highscores/highscore.json",
 
     # Number of lives at the start of the game (min 1, default: 3)
-    "lives": 3,
+    "lives": 1,
 
     # Number of pacgums placed in each maze, super-pacgums not included
     # (min 0, default: 42). Capped to the number of free cells.

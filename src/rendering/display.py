@@ -7,7 +7,7 @@ from __future__ import annotations
 from src.screen_manager.screen_manager import ScreenManager
 
 
-from pyglet import window, gl, display
+from pyglet import window, display, clock
 
 HUD_ZOOM_FACTOR = 2
 
@@ -16,6 +16,7 @@ class Display(window.Window):
 
         display_data = display.get_display()
         screen = display_data.get_default_screen()
+        clock.schedule_interval(self.update, 1 / 60)
 
         super().__init__(
             width=screen.width - 100,
@@ -31,3 +32,6 @@ class Display(window.Window):
     def on_draw(self) -> None:
         self.clear()
         self.screen_manager.current_screen.draw_screen()
+
+    def update(self, dt: float) -> None:
+        self.screen_manager.update(dt)
