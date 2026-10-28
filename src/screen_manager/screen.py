@@ -8,9 +8,6 @@ if TYPE_CHECKING:
 
 from src.rendering.assets import Assets
 
-TITLE_ZOOM = 30
-MENU_ZOOM = 15
-
 class Screen(ABC):
 
     def __init__(self, manager: ScreenManager, assets: Assets) -> None:

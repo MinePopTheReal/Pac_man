@@ -27,7 +27,7 @@ class TextRenderer:
             equal to the size of one character)
         """        
         for index, letter in enumerate(string.upper()):
-            if letter in [' ', '.', '(', ')']:
+            if letter in [' ']:
                 continue
             new_x = x + index \
                 * spritesheet.spritesheet_config.tile_size \

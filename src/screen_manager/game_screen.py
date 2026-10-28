@@ -2,19 +2,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen
 from src.game_state.game_state import GameState, Direction, GameStatus
-from src.parsing.models import GameConfig
+from src.rendering.entities_renderer import EntitiesRenderer
+from src.utils.highscore_manager import HighscoreManager
+from src.rendering.wall_renderer import WallRenderer
+from src.utils.sprite_sheet_manager import Rotation
+from src.rendering.hud_renderer import HudRenderer
+from src.rendering.assets import Assets, HUD_ZOOM
 from src.screen_manager.pause_screen import Pause
 from src.screen_manager.end_game import EndGame
-from src.utils.highscore_manager import HighscoreManager
-from src.rendering.display import Display
-from src.rendering.hud_renderer import HudRenderer
-from src.rendering.wall_renderer import WallRenderer
-from src.rendering.entities_renderer import EntitiesRenderer
+from src.screen_manager.screen import Screen
+from src.parsing.models import GameConfig
 from src.rendering.layer import Layer
-from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets
 
 from pyglet.window import key
 from pyglet import clock, gl
@@ -26,11 +25,8 @@ class Play(Screen):
         self.highscores = highscores
         self.game_state = GameState(config)
 
-
-        # for render
         self._current_level = -1
 
-        # Buffer
         initial_maze_width = (
             self.config.width
             * assets.wall_spritesheet.spritesheet_config.tile_size
@@ -57,7 +53,7 @@ class Play(Screen):
             self.zoom,
         )
         self.assets.entities_spritesheet.preloading_sprites([Rotation.R0], self.zoom)
-        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], self.zoom)
+        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], HUD_ZOOM * self.zoom)
 
 
         self.maze_width = initial_maze_width * self.zoom
@@ -76,11 +72,10 @@ class Play(Screen):
         self.entities_layer = Layer(
             self.maze_width, self.maze_height, assets.entities_spritesheet.format
         )
-        self.hud_height = self.initial_hud_height * self.zoom
+        self.hud_height = self.initial_hud_height * HUD_ZOOM * self.zoom
         self.hud_layer = Layer(
             self.maze_width, self.hud_height, assets.font_y_spritesheet.format
         )
-        
 
         self.hud_renderer = HudRenderer(self.game_state, assets.font_y_spritesheet, self.hud_layer, self.zoom)
         self.wall_renderer = WallRenderer(assets.wall_spritesheet)

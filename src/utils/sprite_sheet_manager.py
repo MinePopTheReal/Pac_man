@@ -33,7 +33,7 @@ class SpriteSheetManager:
         )
         self.spritesheet_bytes: ndarray = self._load_spritesheet(image_path)
 
-        self.sprites_bytes: dict[str, dict[Rotation, list[ndarray]]] = {}
+        self.sprites_bytes: dict[int, dict[str, dict[Rotation, list[ndarray]]]] = {}
 
     def _load_spritesheet_config(self, config_path: str) -> Spritesheet:
         """
@@ -78,8 +78,11 @@ class SpriteSheetManager:
             the sprites based on the user's needs
             zoom (int): zooming in on the buffer to get adapted sprites
         """
+        if zoom in self.sprites_bytes.keys():
+            return
         ts = self.spritesheet_config.tile_size
 
+        sprites_bytes = {}
         for name, coords in self.spritesheet_config.tiles.items():
             sprites = {}
             for rotation in rotation_to_load:
@@ -91,7 +94,8 @@ class SpriteSheetManager:
                     zoomed_sprite = sprite.repeat(zoom, 0).repeat(zoom, 1)
                     frames.append(self.rotate_sprites(zoomed_sprite, rotation))
                 sprites[rotation] = frames
-            self.sprites_bytes[name] = sprites
+            sprites_bytes[name] = sprites
+        self.sprites_bytes[zoom] = sprites_bytes
 
     def rotate_sprites(
         self, sprite_bytes: ndarray, rotation: Rotation
@@ -135,8 +139,8 @@ class SpriteSheetManager:
             frame (int): the frame number in the animation
         """
         ts = self.spritesheet_config.tile_size * zoom
-        sprite = self.sprites_bytes[tile_name][rotation][
-            frame % len(self.sprites_bytes[tile_name][rotation])
+        sprite = self.sprites_bytes[zoom][tile_name][rotation][
+            frame % len(self.sprites_bytes[zoom][tile_name][rotation])
         ]
         if sprite.shape[2] == 4:
             mask = sprite[:, :, 3] > 0

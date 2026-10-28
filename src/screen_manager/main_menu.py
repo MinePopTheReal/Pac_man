@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen, MENU_ZOOM, TITLE_ZOOM
+from src.screen_manager.screen import Screen
 from enum import Enum
 from src.parsing.models import GameConfig
 from pyglet.window import key as keys
@@ -17,6 +17,7 @@ from pyglet import text
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM
 
 class Options(Enum):
     START = 'Start'
@@ -34,7 +35,6 @@ class MainMenu(Screen):
         self.selected: int = 0
         self.highscores = highscores
 
-        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
 
         self.title_width = len(TITLE) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
         title_height = self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
@@ -54,8 +54,6 @@ class MainMenu(Screen):
             TITLE_ZOOM,
             self.assets.font_y_spritesheet
         )
-        self.assets.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
-        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
         
 
     def input(self, key: int) -> None:

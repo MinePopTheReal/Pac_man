@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen, MENU_ZOOM, TITLE_ZOOM
+from src.screen_manager.screen import Screen
 from src.utils.highscore_manager import HighscoreManager, MAX_SCORES, MAX_NAME_LENGTH
 from pyglet.window import key as keys
 
@@ -10,6 +10,9 @@ from src.utils.sprite_sheet_manager import Rotation
 
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM
+
+
 TITLE = "HIGHSCORE"
 
 class Highscore(Screen):
@@ -19,9 +22,6 @@ class Highscore(Screen):
         self.highscores = highscores
         self.config = config
 
-        self.highscores.load_highscores()
-
-        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
 
         self.title_width = len(TITLE) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
         title_height = self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
@@ -40,8 +40,6 @@ class Highscore(Screen):
             TITLE_ZOOM,
             self.assets.font_y_spritesheet
         )
-        self.assets.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
-        self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
 
     def input(self, key: int) -> None:
         if key in (keys.ESCAPE, keys.ENTER):
@@ -51,7 +49,7 @@ class Highscore(Screen):
         for i, (score, username) in enumerate(self.highscores.lst_scores):
             TextRenderer.draw_string(
                 self.menu_layer.buffer_view,
-                f"{i}. {username} ({score})",
+                f"{i:>3}. {username:>{MAX_NAME_LENGTH}} ({score})",
                 0,
                 i,
                 MENU_ZOOM,

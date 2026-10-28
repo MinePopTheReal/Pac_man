@@ -43,5 +43,4 @@
 
     # Time an eaten ghost waits in its corner, in seconds (min 1, default: 5.0)
     "timer_respawn_ghost": 5.0
-
 }

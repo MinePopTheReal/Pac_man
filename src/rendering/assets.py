@@ -1,8 +1,9 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager
+from src.utils.sprite_sheet_manager import Rotation
 
-HUD_ZOOM = -1
+HUD_ZOOM = 2
 TITLE_ZOOM = 30
-MENU_ZOOM = -1
+MENU_ZOOM = 15
 
 
 class Assets:
@@ -33,3 +34,8 @@ class Assets:
 
         self.window_width = window_width
         self.window_height = window_height
+
+
+        self.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
+        self.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
+        self.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)

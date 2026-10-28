@@ -1,10 +1,9 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
-from src.game_state.game_state import GameState
-from src.rendering.layer import Layer
 from src.utils.text_renderer import TextRenderer
+from src.game_state.game_state import GameState
+from src.rendering.assets import HUD_ZOOM
+from src.rendering.layer import Layer
 
-
-from numpy import ndarray
 
 
 
@@ -27,8 +26,8 @@ class HudRenderer:
         self.game_values = {
             "time": (self._get_time, 0, 0),
             "lives": (self._get_lives, 0, 1),
-            "level": (self._get_level, 400, 0),
-            "score": (self._get_score, 400, 1)
+            "level": (self._get_level, 300 * HUD_ZOOM, 0),
+            "score": (self._get_score, 300 * HUD_ZOOM, 1)
         }
 
     def _get_time(self) -> str:
@@ -82,6 +81,6 @@ class HudRenderer:
                 f"{key + ':':<6}{value}",
                 x,
                 y,
-                self.zoom,
+                HUD_ZOOM * self.zoom,
                 self.spritesheet
             )

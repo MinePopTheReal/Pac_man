@@ -111,7 +111,7 @@ class EntitiesRenderer:
             sprite_name = PACMAN_DEATH
             frame = min(
                 self._death_frame,
-                len(self.spritesheet.sprites_bytes[sprite_name][Rotation.R0])
+                len(self.spritesheet.sprites_bytes[self.zoom][sprite_name][Rotation.R0])
                 - 1,
             )
 
@@ -192,7 +192,7 @@ class EntitiesRenderer:
             self.start_to_die = self.frame
         if (
             self._death_frame
-            > len(self.spritesheet.sprites_bytes[PACMAN_DEATH][Rotation.R0])
+            > len(self.spritesheet.sprites_bytes[self.zoom][PACMAN_DEATH][Rotation.R0])
             - 1
         ):
             self.game_state.end_death()
