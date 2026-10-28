@@ -20,7 +20,6 @@ class ScreenManager:
         return self.screens[-1]
 
     def push(self, screen: Screen) -> None:
-        screen.reset()
         self.screens.append(screen)
 
     def pop(self) -> None:

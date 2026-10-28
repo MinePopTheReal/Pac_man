@@ -11,7 +11,6 @@ from src.rendering.assets import Assets
 TITLE_ZOOM = 30
 MENU_ZOOM = 15
 
-
 class Screen(ABC):
 
     def __init__(self, manager: ScreenManager, assets: Assets) -> None:
@@ -23,9 +22,6 @@ class Screen(ABC):
         ...
 
     def update_screen(self, dt: float) -> None:
-        pass
-
-    def reset(self) -> None:
         pass
 
     @abstractmethod

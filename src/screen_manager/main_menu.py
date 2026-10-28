@@ -10,7 +10,6 @@ from src.screen_manager.game_screen import Play
 from src.screen_manager.instructions_screen import Instructions
 from src.utils.highscore_manager import HighscoreManager
 from src.screen_manager.highscores_screen import Highscore
-from src.screen_manager.instructions_screen import Instructions
 
 from src.rendering.display import Display
 from pyglet import text
@@ -19,30 +18,21 @@ from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
 
-
 class Options(Enum):
     START = 'Start'
     HIGHSCORES = 'Scores'
     INSTRUCTIONS = 'Rules'
     EXIT = 'Quit'
 
-
 TITLE = "PACMAN"
 
-
 class MainMenu(Screen):
-    def __init__(self,manager: ScreenManager, config: GameConfig, assets,
-                 highscores: HighscoreManager,
-                 instructions_screen: Instructions, play_screen: Play,
-                 highscores_screen: Highscore) -> None:
+    def __init__(self, config: GameConfig, manager: ScreenManager, assets, highscores: HighscoreManager) -> None:
         super().__init__(manager, assets)
         self.config = config
         self.options: list[Options] = list(Options)
         self.selected: int = 0
         self.highscores = highscores
-        self.instructions_screen = instructions_screen
-        self.play_screen = play_screen
-        self.highscores_screen = highscores_screen
 
         self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
 
@@ -66,6 +56,7 @@ class MainMenu(Screen):
         )
         self.assets.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
         self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
+        
 
     def input(self, key: int) -> None:
         match key:
@@ -76,20 +67,17 @@ class MainMenu(Screen):
             case keys.ENTER:
                 self._validate(self.options[self.selected])
 
-    # TODO Change this so that an instance isn't created every times
+    # TODO Change this so that an instance isn't created every time 
     def _validate(self, option: Options) -> None:
         match option:
             case Options.START:
-                self.manager.push(self.play_screen)
+                self.manager.push(Play(self.config, self.manager, self.assets, self.highscores))
             case Options.HIGHSCORES:
-                self.manager.push(self.highscores_screen)
+                self.manager.push(Highscore(self.manager, self.highscores, self.assets, self.config))
             case Options.INSTRUCTIONS:
-                self.manager.push(self.instructions_screen)
+                self.manager.push(Instructions(self.manager, self.assets))
             case Options.EXIT:
                 self.manager.quit()
-
-    def reset(self) -> None:
-        self.selected = 0
 
     def draw_screen(self) -> None:
 

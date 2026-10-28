@@ -19,9 +19,8 @@ from src.rendering.assets import Assets
 from pyglet.window import key
 from pyglet import clock, gl
 
-
 class Play(Screen):
-    def __init__(self, manager: ScreenManager, config: GameConfig, assets: Assets, highscores: HighscoreManager) -> None:
+    def __init__(self, config: GameConfig, manager: ScreenManager, assets: Assets, highscores: HighscoreManager) -> None:
         super().__init__(manager, assets)
         self.config = config
         self.highscores = highscores
@@ -81,7 +80,7 @@ class Play(Screen):
         self.hud_layer = Layer(
             self.maze_width, self.hud_height, assets.font_y_spritesheet.format
         )
-
+        
 
         self.hud_renderer = HudRenderer(self.game_state, assets.font_y_spritesheet, self.hud_layer, self.zoom)
         self.wall_renderer = WallRenderer(assets.wall_spritesheet)
@@ -118,8 +117,7 @@ class Play(Screen):
                 self.game_state.select_direction(Direction.RIGHT)
             case key.ESCAPE:
                 self.game_state.switch_pause()
-                self.manager.push(Pause(self.manager, self.game_state,
-                                        self.assets))
+                self.manager.push(Pause(self.manager, self.game_state, self.assets))
             case key.T:
                 self.game_state.switch_cheat_mode()
             case key.I:
@@ -154,15 +152,12 @@ class Play(Screen):
             else:
                 self.manager.pop()
                 self.manager.push(EndGame(
-                    self.manager,
-                    False,
+                    self.manager, 
+                    False, 
                     self.highscores,
-                    self.game_state.score,
+                    self.game_state.score, 
                     self.assets
                 ))
-
-    def reset(self) -> None:
-        self.game_state = GameState(self.config)
 
     def _build_maze(self) -> None:
         self.wall_renderer.create_maze_render(

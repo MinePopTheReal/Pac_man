@@ -12,13 +12,14 @@ from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 TITLE = "HIGHSCORE"
 
-
 class Highscore(Screen):
     def __init__(self, manager: ScreenManager,
                  highscores: HighscoreManager, assets, config) -> None:
         super().__init__(manager, assets)
         self.highscores = highscores
         self.config = config
+
+        self.highscores.load_highscores()
 
         self.assets.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
 
