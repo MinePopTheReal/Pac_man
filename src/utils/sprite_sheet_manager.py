@@ -1,6 +1,6 @@
 from enum import IntEnum
 from PIL import Image
-from numpy import asarray, ndarray, rot90
+from numpy import asarray, ndarray, rot90, uint16, uint8, array
 
 from src.parsing.parse_config import ConfigParser
 from src.parsing.models import Spritesheet
@@ -34,6 +34,8 @@ class SpriteSheetManager:
         self.spritesheet_bytes: ndarray = self._load_spritesheet(image_path)
 
         self.sprites_bytes: dict[int, dict[str, dict[Rotation, list[ndarray]]]] = {}
+
+        self._tint_cache: dict[str, dict[tuple[int, int, int, int], ndarray]] = {}
 
     def _load_spritesheet_config(self, config_path: str) -> Spritesheet:
         """
@@ -114,18 +116,40 @@ class SpriteSheetManager:
 
         return rot90(sprite_bytes, self.rotation_to_numpy_rotation[rotation])
 
+    def _change_color(
+        self,
+        sprite: ndarray,
+        zoom: int, 
+        sprite_name: str,
+        rotation: Rotation,
+        frame_index: int,
+        color: tuple[int, int, int] = (255, 255, 255)
+    ) -> ndarray:
+
+        key = (zoom, sprite_name, rotation, frame_index, color)
+        cached = self._tint_cache.get(key)
+        if cached is not None:
+            return cached
+
+        out = sprite.astype(uint16)
+        out[..., :3] = out[..., :3] * array(color, dtype=uint16) // 255
+        tinted = out.astype(uint8)
+        self._tint_cache[key] = tinted
+        return tinted
+
     def copy_tile_into_buffer(
         self,
         buffer_view: ndarray,
-        tile_name: str,
+        sprite_name: str,
         rotation: Rotation,
         x: int,
         y: int,
         zoom: int,
         frame: int,
+        color: tuple[int, int, int, int] = (255, 255, 255)
     ) -> None:
         """
-        Copy the tile to the buffer in the correct location
+        Copy the sprite to the buffer in the correct location
 
         Args:
             buffer_view (ndarray): the buffer view (NumPy object) to
@@ -139,9 +163,12 @@ class SpriteSheetManager:
             frame (int): the frame number in the animation
         """
         ts = self.spritesheet_config.tile_size * zoom
-        sprite = self.sprites_bytes[zoom][tile_name][rotation][
-            frame % len(self.sprites_bytes[zoom][tile_name][rotation])
+
+        sprite = self.sprites_bytes[zoom][sprite_name][rotation][
+            frame % len(self.sprites_bytes[zoom][sprite_name][rotation])
         ]
+        sprite = self._change_color(sprite, zoom, sprite_name, rotation, frame, color)
+
         if sprite.shape[2] == 4:
             mask = sprite[:, :, 3] > 0
             buffer_view[y:y + ts, x:x + ts][mask] = sprite[mask]

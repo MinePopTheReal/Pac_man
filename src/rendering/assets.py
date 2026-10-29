@@ -1,10 +1,20 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager
 from src.utils.sprite_sheet_manager import Rotation
 
+# text zoom
 HUD_ZOOM = 2
+MENU_ZOOM = 10
 TITLE_ZOOM = 30
-MENU_ZOOM = 15
 
+# text margin
+TITLE_MARGIN = 0.6
+
+# text color
+TOP1_COLOR = (212, 175, 55)
+TOP2_COLOR = (192, 192, 192)
+TOP3_COLOR = (205, 127, 50)
+MAJOR_COLOR = (255, 255, 0)
+MINOR_COLOR = (245, 245, 220)
 
 class Assets:
     def __init__(self, screen_width, screen_height, window_width, window_height):
@@ -18,14 +28,9 @@ class Assets:
             "assets/entities_spritesheet.png",
             "RGBA",
         )
-        self.font_y_spritesheet = SpriteSheetManager(
+        self.font_spritesheet = SpriteSheetManager(
             "assets/font_spritesheet_config.json",
-            "assets/font_y_spritesheet.png",
-            "RGBA",
-        )
-        self.font_w_spritesheet = SpriteSheetManager(
-            "assets/font_spritesheet_config.json",
-            "assets/font_w_spritesheet.png",
+            "assets/font_spritesheet.png",
             "RGBA",
         )
 
@@ -36,6 +41,5 @@ class Assets:
         self.window_height = window_height
 
 
-        self.font_y_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
-        self.font_w_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
-        self.font_y_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)
+        self.font_spritesheet.preloading_sprites([Rotation.R0], TITLE_ZOOM)
+        self.font_spritesheet.preloading_sprites([Rotation.R0], MENU_ZOOM)

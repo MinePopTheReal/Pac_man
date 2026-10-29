@@ -17,7 +17,7 @@ from pyglet import text
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MAJOR_COLOR, MINOR_COLOR, TITLE_MARGIN
 
 class Options(Enum):
     START = 'Start'
@@ -36,13 +36,13 @@ class MainMenu(Screen):
         self.highscores = highscores
 
 
-        self.title_width = len(TITLE) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
-        title_height = self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
+        self.title_width = len(TITLE) * self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
+        self.title_height = self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
 
-        self.menu_width = len(max(self.options, key=lambda x: len(x.value)).value) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
-        self.menu_height = len(self.options) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_width = len(max(self.options, key=lambda x: len(x.value)).value) * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_height = len(self.options) * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
 
-        self.title_layer = Layer(self.title_width, title_height, "RGBA")
+        self.title_layer = Layer(self.title_width, self.title_height, "RGBA")
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
 
 
@@ -52,7 +52,8 @@ class MainMenu(Screen):
             0,
             0,
             TITLE_ZOOM,
-            self.assets.font_y_spritesheet
+            self.assets.font_spritesheet,
+            MAJOR_COLOR
         )
         
 
@@ -78,19 +79,15 @@ class MainMenu(Screen):
                 self.manager.quit()
 
     def draw_screen(self) -> None:
-
         for i in range(len(self.options)):
-            if i == self.selected:
-                sprite_sheet = self.assets.font_y_spritesheet
-            else:
-                sprite_sheet = self.assets.font_w_spritesheet
             TextRenderer.draw_string(
                 self.menu_layer.buffer_view,
                 self.options[i].value,
                 0,
                 i,
                 MENU_ZOOM,
-                sprite_sheet
+                self.assets.font_spritesheet,
+                MAJOR_COLOR if i == self.selected else MINOR_COLOR 
             )
-        self.title_layer.draw((self.assets.screen_width // 2) - (self.title_width // 2), (self.assets.window_height + (self.assets.screen_height // 2) - (self.menu_height // 2)) // 2)
+        self.title_layer.draw((self.assets.screen_width // 2) - (self.title_width // 2), self.assets.window_height - round(self.title_layer.height / TITLE_MARGIN))
         self.menu_layer.draw((self.assets.screen_width // 2) - (self.menu_width // 2), (self.assets.screen_height // 2) - (self.menu_height // 2))

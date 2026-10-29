@@ -1,6 +1,5 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
 
-
 from numpy import ndarray
 
 
@@ -13,6 +12,7 @@ class TextRenderer:
         y: int, 
         zoom: int,
         spritesheet: SpriteSheetManager,
+        color: tuple[int, int, int, int] = (255, 255, 255)
     ) -> None:
         """
         It creates the output of a string, displaying
@@ -29,7 +29,8 @@ class TextRenderer:
         for index, letter in enumerate(string.upper()):
             if letter in [' ']:
                 continue
-            new_x = x + index \
+            new_x = x * spritesheet.spritesheet_config.tile_size \
+                * zoom + index \
                 * spritesheet.spritesheet_config.tile_size \
                 * zoom
             spritesheet.copy_tile_into_buffer(
@@ -39,5 +40,6 @@ class TextRenderer:
                 new_x,
                 y * spritesheet.spritesheet_config.tile_size * zoom,
                 zoom,
-                0
+                0,
+                color
             )

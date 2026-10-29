@@ -12,7 +12,7 @@ from src.screen_manager.screen import Screen
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
 
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MINOR_COLOR
 
 
 class EndGame(Screen):
@@ -24,8 +24,8 @@ class EndGame(Screen):
         self.score = score
         self.name: str = ""
 
-        self.menu_width = MAX_NAME_LENGTH * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
-        self.menu_height = MAX_SCORES * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_width = MAX_NAME_LENGTH * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_height = MAX_SCORES * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
 
 
@@ -54,7 +54,6 @@ class EndGame(Screen):
         self.manager.back_to_menu()
 
     def draw_screen(self) -> None:
-        print(self.name)
         self.menu_layer.clear()
         TextRenderer.draw_string(
             self.menu_layer.buffer_view,
@@ -62,6 +61,7 @@ class EndGame(Screen):
             0,
             0,
             MENU_ZOOM,
-            self.assets.font_w_spritesheet
+            self.assets.font_spritesheet,
+            MINOR_COLOR
         )
         self.menu_layer.draw(0, 0)

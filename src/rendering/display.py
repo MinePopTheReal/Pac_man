@@ -9,7 +9,8 @@ from src.screen_manager.screen_manager import ScreenManager
 
 from pyglet import window, display, clock
 
-HUD_ZOOM_FACTOR = 2
+# HUD_ZOOM_FACTOR = 2
+SCREEN_MARGIN = 0.95
 
 class Display(window.Window):
     def __init__(self, screen_manager: ScreenManager):
@@ -19,8 +20,8 @@ class Display(window.Window):
         clock.schedule_interval(self.update, 1 / 60)
 
         super().__init__(
-            width=screen.width - 100,
-            height=screen.height - 100,
+            width=round(screen.width * SCREEN_MARGIN),
+            height=round(screen.height * SCREEN_MARGIN),
             caption="Pac-Man",
         )
 

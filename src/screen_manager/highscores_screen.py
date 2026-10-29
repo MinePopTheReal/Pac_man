@@ -10,7 +10,7 @@ from src.utils.sprite_sheet_manager import Rotation
 
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MAJOR_COLOR, MINOR_COLOR, TOP1_COLOR, TOP2_COLOR, TOP3_COLOR, TITLE_MARGIN
 
 
 TITLE = "HIGHSCORE"
@@ -23,13 +23,13 @@ class Highscore(Screen):
         self.config = config
 
 
-        self.title_width = len(TITLE) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
-        title_height = self.assets.font_w_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
+        self.title_width = len(TITLE) * self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
+        self.title_height = self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
 
-        self.menu_width = (max((len(str(score)) for _, score in self.highscores.lst_scores), default=0) + MAX_NAME_LENGTH + 5 + len(str(MAX_SCORES))) * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
-        self.menu_height = MAX_SCORES * self.assets.font_w_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_width = (max((len(str(score)) for _, score in self.highscores.lst_scores), default=0) + MAX_NAME_LENGTH + 3 + len(str(MAX_SCORES))) * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_height = MAX_SCORES * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
 
-        self.title_layer = Layer(self.title_width, title_height, "RGBA")
+        self.title_layer = Layer(self.title_width, self.title_height, "RGBA")
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
 
         TextRenderer.draw_string(
@@ -38,7 +38,8 @@ class Highscore(Screen):
             0,
             0,
             TITLE_ZOOM,
-            self.assets.font_y_spritesheet
+            self.assets.font_spritesheet,
+            MAJOR_COLOR
         )
 
     def input(self, key: int) -> None:
@@ -46,14 +47,28 @@ class Highscore(Screen):
             self.manager.pop()
 
     def draw_screen(self) -> None:
-        for i, (score, username) in enumerate(self.highscores.lst_scores):
+        for rank in range(MAX_SCORES):
+            color = MINOR_COLOR
+            username, score = '-', '-'
+            if rank < len(self.highscores.lst_scores):
+                username, score = self.highscores.lst_scores[rank]
+                match rank:
+                    case 0:
+                        color = TOP1_COLOR
+                    case 1:
+                        color = TOP2_COLOR
+                    case 2:
+                        color = TOP3_COLOR
+
             TextRenderer.draw_string(
                 self.menu_layer.buffer_view,
-                f"{i:>3}. {username:>{MAX_NAME_LENGTH}} ({score})",
+                f"{rank + 1:>3}.{username:<{MAX_NAME_LENGTH}} {score}",
                 0,
-                i,
+                rank,
                 MENU_ZOOM,
-                self.assets.font_w_spritesheet
+                self.assets.font_spritesheet,
+                color
             )
-        self.title_layer.draw((self.assets.screen_width // 2) - (self.title_width // 2), (self.assets.window_height + (self.assets.screen_height // 2) - (self.menu_height // 2)) // 2)
-        self.menu_layer.draw((self.assets.screen_width // 2) - (self.menu_width // 2), (self.assets.screen_height // 2) - (self.menu_height // 2))
+        # (self.assets.window_height + (self.assets.screen_height // 2) - (self.menu_height // 2)) // 2
+        self.title_layer.draw((self.assets.window_width // 2) - (self.title_width // 2), self.assets.window_height - round(self.title_layer.height / TITLE_MARGIN))
+        self.menu_layer.draw((self.assets.window_width // 2) - (self.menu_width // 2), (self.assets.window_height // 2) - (self.menu_height // 2))
