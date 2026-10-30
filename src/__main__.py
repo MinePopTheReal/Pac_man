@@ -3,7 +3,7 @@ from src.screen_manager.screen_manager import ScreenManager
 from src.parsing.parse_config import ConfigParser
 from src.screen_manager.main_menu import MainMenu
 from src.screen_manager.game_screen import Play
-from src.rendering.display import Display
+from src.rendering.display import Display, ACTUAL_RESOLUTION
 from src.rendering.assets import Assets
 from src.utils.highscore_manager import HighscoreManager
 
@@ -15,7 +15,7 @@ config = ConfigParser().load_config("config.json", GameConfig)
 screen_manager = ScreenManager()
 
 render = Display(screen_manager)
-assets = Assets(render.screen.width, render.screen.height, render.width, render.height)
+assets = Assets(ACTUAL_RESOLUTION[0], ACTUAL_RESOLUTION[1])
 
 high_score_manager = HighscoreManager(config)
 

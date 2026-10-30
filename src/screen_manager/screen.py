@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
+    from src.rendering.assets import Assets
 
 
-from src.rendering.assets import Assets
 
 class Screen(ABC):
 

@@ -1,6 +1,6 @@
 from enum import IntEnum
 from PIL import Image
-from numpy import asarray, ndarray, rot90, uint16, uint8, array
+from numpy import asarray, ndarray, rot90, uint16, uint8, array, arange
 
 from src.parsing.parse_config import ConfigParser
 from src.parsing.models import Spritesheet
@@ -67,8 +67,15 @@ class SpriteSheetManager:
         pixels = asarray(image)
         return pixels
 
+    @staticmethod
+    def scale(sprite: ndarray, sprite_px: int):
+        w, h = sprite.shape[:2]
+        ys = arange(sprite_px) * h // sprite_px
+        xs = arange(sprite_px) * w // sprite_px
+        return sprite[ys[:, None], xs]
+
     def preloading_sprites(
-        self, rotation_to_load: list[Rotation], zoom: int
+        self, rotation_to_load: list[Rotation], sprite_px: int
     ) -> None:
         """
         Allows you to preload all sprites while taking into account the
@@ -80,7 +87,7 @@ class SpriteSheetManager:
             the sprites based on the user's needs
             zoom (int): zooming in on the buffer to get adapted sprites
         """
-        if zoom in self.sprites_bytes.keys():
+        if sprite_px in self.sprites_bytes.keys():
             return
         ts = self.spritesheet_config.tile_size
 
@@ -93,11 +100,11 @@ class SpriteSheetManager:
                     sprite = self.spritesheet_bytes[
                         coord.y:coord.y + ts, coord.x:coord.x + ts
                     ]
-                    zoomed_sprite = sprite.repeat(zoom, 0).repeat(zoom, 1)
+                    zoomed_sprite = self.scale(sprite, sprite_px)
                     frames.append(self.rotate_sprites(zoomed_sprite, rotation))
                 sprites[rotation] = frames
             sprites_bytes[name] = sprites
-        self.sprites_bytes[zoom] = sprites_bytes
+        self.sprites_bytes[sprite_px] = sprites_bytes
 
     def rotate_sprites(
         self, sprite_bytes: ndarray, rotation: Rotation
@@ -162,7 +169,7 @@ class SpriteSheetManager:
             zoom (int): the zoom
             frame (int): the frame number in the animation
         """
-        ts = self.spritesheet_config.tile_size * zoom
+        ts = zoom
 
         sprite = self.sprites_bytes[zoom][sprite_name][rotation][
             frame % len(self.sprites_bytes[zoom][sprite_name][rotation])

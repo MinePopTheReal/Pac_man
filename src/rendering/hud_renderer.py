@@ -1,7 +1,7 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
+from src.utils.sprite_sheet_manager import SpriteSheetManager
+from src.rendering.assets import HUD_ZOOM, MAJOR_COLOR
 from src.utils.text_renderer import TextRenderer
 from src.game_state.game_state import GameState
-from src.rendering.assets import HUD_ZOOM, MAJOR_COLOR
 from src.rendering.layer import Layer
 
 
@@ -27,8 +27,8 @@ class HudRenderer:
         self.game_values = {
             "time": (self._get_time, 0, 0),
             "lives": (self._get_lives, 0, 1),
-            "level": (self._get_level, 8 * HUD_ZOOM, 0),
-            "score": (lambda: min(int(self._get_score()), (10**MAX_SCORE_LENGHT - 1)), 8 * HUD_ZOOM, 1)
+            "level": (self._get_level, 15, 0),
+            "score": (lambda: min(int(self._get_score()), (10**MAX_SCORE_LENGHT - 1)), 15, 1)
         }
     def _get_time(self) -> str:
         """Create a string representation of the remaining time
@@ -81,7 +81,7 @@ class HudRenderer:
                 f"{key + ':':<6}{value}",
                 x,
                 y,
-                HUD_ZOOM * self.zoom,
+                HUD_ZOOM,
                 self.spritesheet,
                 MAJOR_COLOR
             )

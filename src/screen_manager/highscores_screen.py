@@ -22,12 +22,11 @@ class Highscore(Screen):
         self.highscores = highscores
         self.config = config
 
+        self.title_width = len(TITLE) * TITLE_ZOOM
+        self.title_height = TITLE_ZOOM
 
-        self.title_width = len(TITLE) * self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
-        self.title_height = self.assets.font_spritesheet.spritesheet_config.tile_size * TITLE_ZOOM
-
-        self.menu_width = (max((len(str(score)) for _, score in self.highscores.lst_scores), default=0) + MAX_NAME_LENGTH + 3 + len(str(MAX_SCORES))) * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
-        self.menu_height = MAX_SCORES * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.menu_width = (max((len(str(score)) for _, score in self.highscores.lst_scores), default=0) + MAX_NAME_LENGTH + 3 + len(str(MAX_SCORES))) * MENU_ZOOM
+        self.menu_height = MAX_SCORES * MENU_ZOOM
 
         self.title_layer = Layer(self.title_width, self.title_height, "RGBA")
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
@@ -69,6 +68,5 @@ class Highscore(Screen):
                 self.assets.font_spritesheet,
                 color
             )
-        # (self.assets.window_height + (self.assets.screen_height // 2) - (self.menu_height // 2)) // 2
         self.title_layer.draw((self.assets.window_width // 2) - (self.title_width // 2), self.assets.window_height - round(self.title_layer.height / TITLE_MARGIN))
         self.menu_layer.draw((self.assets.window_width // 2) - (self.menu_width // 2), (self.assets.window_height // 2) - (self.menu_height // 2))

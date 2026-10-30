@@ -12,7 +12,7 @@ from src.screen_manager.screen import Screen
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
 
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MINOR_COLOR
+from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MINOR_COLOR, MAJOR_COLOR
 
 
 class EndGame(Screen):
@@ -22,10 +22,13 @@ class EndGame(Screen):
         self.won = won
         self.manager_highscores = manager_highscores
         self.score = score
-        self.name: str = ""
 
-        self.menu_width = MAX_NAME_LENGTH * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
-        self.menu_height = MAX_SCORES * self.assets.font_spritesheet.spritesheet_config.tile_size * MENU_ZOOM
+        self.text = "Enter your username:"
+        self.name: str = ""
+        self.empty: str = "_" * MAX_NAME_LENGTH
+
+        self.menu_width = MAX_NAME_LENGTH if len(self.text) *MENU_ZOOM < MAX_NAME_LENGTH else len(self.text) *MENU_ZOOM
+        self.menu_height = MENU_ZOOM * 3
         self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
 
 
@@ -36,9 +39,12 @@ class EndGame(Screen):
 
             if len(self.name) < MAX_NAME_LENGTH:
                 self.name += chr(key).upper()
+                self.empty = self.empty[:-1]
 
         elif key == keys.BACKSPACE:
             self.name = self.name[:-1]
+            if len(self.empty) < MAX_NAME_LENGTH:
+                self.empty += "_"
 
         elif key == keys.ENTER:
             self._validate()
@@ -57,11 +63,20 @@ class EndGame(Screen):
         self.menu_layer.clear()
         TextRenderer.draw_string(
             self.menu_layer.buffer_view,
-            self.name,
+            f"{self.text}",
             0,
             0,
             MENU_ZOOM,
             self.assets.font_spritesheet,
+            MAJOR_COLOR
+        )
+        TextRenderer.draw_string(
+            self.menu_layer.buffer_view,
+            f"{self.name+self.empty}",
+            0,
+            2,
+            MENU_ZOOM,
+            self.assets.font_spritesheet,
             MINOR_COLOR
         )
-        self.menu_layer.draw(0, 0)
+        self.menu_layer.draw(self.assets.window_width // 2 - self.menu_width // 2, 0)

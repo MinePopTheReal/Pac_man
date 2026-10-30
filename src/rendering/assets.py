@@ -1,10 +1,16 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager
 from src.utils.sprite_sheet_manager import Rotation
+from src.rendering.display import SCALE_FACTOR
 
-# text zoom
-HUD_ZOOM = 2
-MENU_ZOOM = 10
-TITLE_ZOOM = 30
+# SCALE_FACTOR
+
+# sprite size
+WALL_SIZE = int(24 * SCALE_FACTOR)
+ENTITIES_SIZE = WALL_SIZE * 2
+
+HUD_ZOOM = int(50 * SCALE_FACTOR)
+MENU_ZOOM = int(75 * SCALE_FACTOR)
+TITLE_ZOOM = int(250 * SCALE_FACTOR)
 
 # text margin
 TITLE_MARGIN = 0.6
@@ -17,7 +23,7 @@ MAJOR_COLOR = (255, 255, 0)
 MINOR_COLOR = (245, 245, 220)
 
 class Assets:
-    def __init__(self, screen_width, screen_height, window_width, window_height):
+    def __init__(self, window_width, window_height):
         self.wall_spritesheet = SpriteSheetManager(
             "assets/wall_spritesheet_config.json",
             "assets/wall_spritesheet.png",
@@ -33,9 +39,6 @@ class Assets:
             "assets/font_spritesheet.png",
             "RGBA",
         )
-
-        self.screen_width = screen_width
-        self.screen_height = screen_height
 
         self.window_width = window_width
         self.window_height = window_height

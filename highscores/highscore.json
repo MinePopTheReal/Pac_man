@@ -1,11 +1,23 @@
 [
     {
+        "name": "PABLITO",
+        "score": 6270
+    },
+    {
+        "name": "IAMSTEVE",
+        "score": 4770
+    },
+    {
         "name": "BOMBOCLAT",
         "score": 4250
     },
     {
         "name": "QQQQQQQQQQ",
         "score": 4000
+    },
+    {
+        "name": "BOB",
+        "score": 3780
     },
     {
         "name": "WHOISJSON",
@@ -24,7 +36,7 @@
         "score": 120
     },
     {
-        "name": "WHOISJSON",
-        "score": 1
+        "name": "DASDADADAD",
+        "score": 100
     }
 ]

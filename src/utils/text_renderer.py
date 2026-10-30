@@ -29,16 +29,13 @@ class TextRenderer:
         for index, letter in enumerate(string.upper()):
             if letter in [' ']:
                 continue
-            new_x = x * spritesheet.spritesheet_config.tile_size \
-                * zoom + index \
-                * spritesheet.spritesheet_config.tile_size \
-                * zoom
+            new_x = (x + index) * zoom 
             spritesheet.copy_tile_into_buffer(
                 buffer_view,
                 letter,
                 Rotation.R0,
                 new_x,
-                y * spritesheet.spritesheet_config.tile_size * zoom,
+                y * zoom,
                 zoom,
                 0,
                 color

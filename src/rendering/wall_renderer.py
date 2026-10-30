@@ -288,7 +288,7 @@ class WallRenderer:
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
                 tile_size = (
-                    self.spritesheet.spritesheet_config.tile_size * zoom
+                    zoom
                 )
 
                 tiles = self._choose_tiles(maze_x, maze_y)
