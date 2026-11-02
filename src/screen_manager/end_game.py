@@ -13,7 +13,10 @@ from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
 
 from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MINOR_COLOR, MAJOR_COLOR
+from src.utils.widget import InputField, Label
+from src.rendering.display import SCALE_FACTOR
 
+SCORE_MARGIN = MENU_ZOOM * 2
 
 class EndGame(Screen):
     def __init__(self, manager: ScreenManager, won: bool,
@@ -23,15 +26,34 @@ class EndGame(Screen):
         self.manager_highscores = manager_highscores
         self.score = score
 
-        self.text = "Enter your username:"
+        self.prompt = "Enter your username:"
         self.name: str = ""
         self.empty: str = "_" * MAX_NAME_LENGTH
+        self.title = Label(
+            "you win" if won else "you lose",
+            TITLE_ZOOM, self.assets.font_spritesheet, MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=self.assets.window_height - 200 * SCALE_FACTOR,
+            anchor_x=0.5, anchor_y=1,
+        )
 
-        self.menu_width = MAX_NAME_LENGTH if len(self.text) *MENU_ZOOM < MAX_NAME_LENGTH else len(self.text) *MENU_ZOOM
-        self.menu_height = MENU_ZOOM * 3
-        self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
+        title_bottom = self.title.y - self.title.height
+        self.score_label = Label(
+            f"your score: {self.score}",
+            MENU_ZOOM, self.assets.font_spritesheet, MINOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=title_bottom - SCORE_MARGIN,
+            anchor_x=0.5, anchor_y=1,
+        )
 
-
+        score_bottom = self.score_label.y - self.score_label.height
+        self.input_field = InputField(
+            self.prompt,
+            MENU_ZOOM, self.assets.font_spritesheet, MAJOR_COLOR, MINOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=score_bottom // 2,
+            anchor_x=0.5, anchor_y=0.5,
+        )
 
     def input(self, key: int) -> None:
         if (keys.A <= key <= keys.Z or keys._0 <= key <= keys._9
@@ -60,23 +82,6 @@ class EndGame(Screen):
         self.manager.back_to_menu()
 
     def draw_screen(self) -> None:
-        self.menu_layer.clear()
-        TextRenderer.draw_string(
-            self.menu_layer.buffer_view,
-            f"{self.text}",
-            0,
-            0,
-            MENU_ZOOM,
-            self.assets.font_spritesheet,
-            MAJOR_COLOR
-        )
-        TextRenderer.draw_string(
-            self.menu_layer.buffer_view,
-            f"{self.name+self.empty}",
-            0,
-            2,
-            MENU_ZOOM,
-            self.assets.font_spritesheet,
-            MINOR_COLOR
-        )
-        self.menu_layer.draw(self.assets.window_width // 2 - self.menu_width // 2, 0)
+        self.title.draw()
+        self.score_label.draw()
+        self.input_field.draw((' ' * ((len(self.prompt) // 2) - MAX_NAME_LENGTH // 2))+ self.name + self.empty)

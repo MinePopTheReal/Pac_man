@@ -12,7 +12,7 @@ from src.utils.highscore_manager import HighscoreManager
 from src.screen_manager.highscores_screen import Highscore
 
 from src.rendering.display import Display
-from src.utils.widget import Label
+from src.utils.widget import Label, Menu
 
 
 
@@ -22,6 +22,7 @@ from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
 from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MAJOR_COLOR, MINOR_COLOR, TITLE_MARGIN, ENTITIES_SIZE
+from src.rendering.display import SCALE_FACTOR
 
 class Options(Enum):
     START = 'Start'
@@ -39,36 +40,42 @@ class MainMenu(Screen):
         self.selected: int = 0
         self.highscores = highscores
 
-        self.title_width = len(TITLE) * TITLE_ZOOM
-        self.title_height = TITLE_ZOOM
-
-        self.menu_width = len(max(self.options, key=lambda x: len(x.value)).value) * MENU_ZOOM
-        self.menu_height = (len(self.options) * 2) * MENU_ZOOM
-
         self.title = Label(
             TITLE,
             TITLE_ZOOM,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=self.assets.window_height - 100,
+            y=self.assets.window_height - 200 * SCALE_FACTOR,
             anchor_x=0.5,
             anchor_y=1
-            )
+        )
+        self.menu = Menu(
+            [option.value for option in self.options],
+            MENU_ZOOM,
+            self.assets.font_spritesheet,
+            MINOR_COLOR,
+            MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=(self.title.y - TITLE_ZOOM) // 2,
+            anchor_x=0.5,
+            anchor_y=0.4
+        )
+        self.helper_text = Label(
+            "press enter",
+            MENU_ZOOM,
+            self.assets.font_spritesheet,
+            MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=(((self.title.y - TITLE_ZOOM) // 2) - self.menu.height) // 2,
+            anchor_x=0.5,
+            anchor_y=0,
+            blink_period=0.15
+        )
 
-        # self.title_layer = Layer(self.title_width, self.title_height, "RGBA")
-        # self.menu_layer = Layer(self.menu_width, self.menu_height, "RGBA")
-
-        # TextRenderer.draw_string(
-        #     self.title_layer.buffer_view,
-        #     TITLE,
-        #     0,
-        #     0,
-        #     TITLE_ZOOM,
-        #     self.assets.font_spritesheet,
-        #     MAJOR_COLOR
-        # )
-
+    def update_screen(self, dt: float) -> None:
+        self.helper_text.update(dt)
+        
     def input(self, key: int) -> None:
         match key:
             case keys.W | keys.UP:
@@ -91,16 +98,6 @@ class MainMenu(Screen):
                 self.manager.quit()
 
     def draw_screen(self) -> None:
-        # for i in range(len(self.options)):
-            # TextRenderer.draw_string(
-            #     self.menu_layer.buffer_view,
-            #     self.options[i].value,
-            #     0,
-            #     i * 2,
-            #     MENU_ZOOM,
-            #     self.assets.font_spritesheet,
-            #     MAJOR_COLOR if i == self.selected else MINOR_COLOR
-            # )
-        # self.title_layer.draw()
+        self.menu.draw(self.selected)
         self.title.draw()
-        # self.menu_layer.draw((self.assets.window_width // 2) - (self.menu_width // 2), (self.assets.window_height // 2) - (self.menu_height // 2))
+        self.helper_text.draw()

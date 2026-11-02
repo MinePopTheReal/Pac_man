@@ -26,16 +26,20 @@ class TextRenderer:
             y (int): the coordinates (y) of the beginning of the text (offset
             equal to the size of one character)
         """        
+        new_y = y * zoom
         for index, letter in enumerate(string.upper()):
             if letter in [' ']:
                 continue
-            new_x = (x + index) * zoom 
+            elif letter is '\n':
+                y + 1
+                new_y = y * zoom
+            new_x = (x + index) * zoom
             spritesheet.copy_tile_into_buffer(
                 buffer_view,
                 letter,
                 Rotation.R0,
                 new_x,
-                y * zoom,
+                new_y,
                 zoom,
                 0,
                 color
