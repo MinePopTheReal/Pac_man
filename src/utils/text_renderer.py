@@ -30,9 +30,6 @@ class TextRenderer:
         for index, letter in enumerate(string.upper()):
             if letter in [' ']:
                 continue
-            elif letter is '\n':
-                y + 1
-                new_y = y * zoom
             new_x = (x + index) * zoom
             spritesheet.copy_tile_into_buffer(
                 buffer_view,

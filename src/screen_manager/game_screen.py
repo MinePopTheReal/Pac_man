@@ -3,17 +3,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
 from src.game_state.game_state import GameState, Direction, GameStatus
-from src.rendering.hud_renderer import HudRenderer, MAX_SCORE_LENGHT
+# from src.rendering.hud_renderer import HudRenderer, MAX_SCORE_LENGHT
 from src.rendering.entities_renderer import EntitiesRenderer
 from src.utils.highscore_manager import HighscoreManager
 from src.rendering.wall_renderer import WallRenderer
 from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets, HUD_ZOOM, WALL_SIZE, ENTITIES_SIZE
+from src.rendering.assets import Assets, H3_PX_SIZE, WALL_SIZE, ENTITIES_SIZE, H5_PX_SIZE, H4_PX_SIZE, MAJOR_COLOR
 from src.screen_manager.pause_screen import Pause
 from src.screen_manager.end_game import EndGame
 from src.screen_manager.screen import Screen
 from src.parsing.models import GameConfig
 from src.rendering.layer import Layer
+
+from src.utils.widget import Hud
 
 from pyglet.window import key
 from pyglet import clock, gl
@@ -38,7 +40,11 @@ class Play(Screen):
             * 3
         )
 
-        self.initial_hud_height = 2 * HUD_ZOOM + HUD_ZOOM
+
+
+        # self.initial_hud_height = 2 * H3_PX_SIZE + H3_PX_SIZE
+
+        
 
         # self.zoom = max(
         #     1,
@@ -53,7 +59,7 @@ class Play(Screen):
             WALL_SIZE,
         )
         self.assets.entities_spritesheet.preloading_sprites([Rotation.R0], ENTITIES_SIZE)
-        self.assets.font_spritesheet.preloading_sprites([Rotation.R0], HUD_ZOOM)
+        self.assets.font_spritesheet.preloading_sprites([Rotation.R0], H3_PX_SIZE)
 
         self.maze_pitch = (
             self.maze_width * assets.wall_spritesheet.bytes_number_per_pixel
@@ -68,12 +74,12 @@ class Play(Screen):
         self.entities_layer = Layer(
             self.maze_width, self.maze_height, assets.entities_spritesheet.format
         )
-        self.hud_height = self.initial_hud_height
-        self.hud_layer = Layer(
-            self.maze_width, self.hud_height, assets.font_spritesheet.format
-        )
+        # self.hud_height = self.initial_hud_height
+        # self.hud_layer = Layer(
+        #     self.maze_width, self.hud_height, assets.font_spritesheet.format
+        # )
 
-        self.hud_renderer = HudRenderer(self.game_state, assets.font_spritesheet, self.hud_layer, HUD_ZOOM)
+        # self.hud_renderer = HudRenderer(self.game_state, assets.font_spritesheet, self.hud_layer, H5_PX_SIZE)
         self.wall_renderer = WallRenderer(assets.wall_spritesheet)
         self.entities_renderer = EntitiesRenderer(
             self.game_state,
@@ -83,17 +89,27 @@ class Play(Screen):
             ENTITIES_SIZE
         )
 
-        total_height = self.maze_height + self.hud_height
+        total_height = self.maze_height
         block_y = assets.window_height // 2 - total_height // 2
 
         self.maze_pos_x = assets.window_width // 2 - self.maze_width // 2
         self.maze_pos_y = block_y
 
+        self.hud = Hud(
+            H4_PX_SIZE,
+            self.assets.font_spritesheet,
+            MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=self.maze_pos_y + self.maze_height + H4_PX_SIZE,
+            anchor_x=0.5,
+            anchor_y=0
+        )
+
         self.hud_pos_x = self.maze_pos_x
         self.hud_pos_y = self.maze_pos_y + self.maze_height
 
         clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
-        clock.schedule_interval(self.hud_renderer.update_hud, 0.2)
+        # clock.schedule_interval(self.hud_renderer.update_hud, 0.2)
 
     def input(self, symbol: int) -> None:
         match symbol:
@@ -108,19 +124,19 @@ class Play(Screen):
             case key.ESCAPE:
                 self.game_state.switch_pause()
                 self.manager.push(Pause(self.manager, self.game_state, self.assets))
-            case key.T:
+            case key.C:
                 self.game_state.switch_cheat_mode()
-            case key.I:
+            case key._1:
                 self.game_state.switch_invincible()
-            case key.F:
+            case key._2:
                 self.game_state.switch_ghosts_frozen()
-            case key.N:
+            case key._3:
                 self.game_state.skip_level()
-            case key.L:
+            case key._4:
                 self.game_state.add_extra_life()
-            case key.V:
+            case key._5:
                 self.game_state.switch_speed_pacman()
-            case key.G:
+            case key._6:
                 self.game_state.switch_slow_ghosts()
 
     def update_screen(self, dt: float) -> None:
@@ -129,7 +145,7 @@ class Play(Screen):
         status = self.game_state.status
         if status in [GameStatus.WON, GameStatus.LOST]:
             clock.unschedule(self.entities_renderer.update_animation)
-            clock.unschedule(self.hud_renderer.update_hud)
+            # clock.unschedule(self.hud_renderer.update_hud)
             if status == GameStatus.WON:
                 self.manager.pop()
                 self.manager.push(EndGame(
@@ -158,10 +174,12 @@ class Play(Screen):
     def draw_screen(self) -> None:
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        
         if self._current_level != self.game_state.level:
             self._build_maze()
         self.wall_layer.draw(self.maze_pos_x, self.maze_pos_y)
         self.entities_layer.draw(self.maze_pos_x, self.maze_pos_y)
-        self.hud_layer.draw(self.hud_pos_x, self.hud_pos_y)
 
         self.entities_renderer.draw_entities()
+        self.hud.set_state(self.game_state)
+        self.hud.draw()

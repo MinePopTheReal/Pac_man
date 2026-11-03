@@ -10,7 +10,7 @@ from src.utils.sprite_sheet_manager import Rotation
 
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MAJOR_COLOR, MINOR_COLOR, TOP1_COLOR, TOP2_COLOR, TOP3_COLOR, TITLE_MARGIN
+from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MAJOR_COLOR, MINOR_COLOR, TOP1_COLOR, TOP2_COLOR, TOP3_COLOR, TITLE_MARGIN
 from src.utils.widget import Label, HighscoresLabel
 from src.rendering.display import SCALE_FACTOR
 
@@ -25,7 +25,7 @@ class Highscore(Screen):
 
         self.title = Label(
             TITLE,
-            TITLE_ZOOM,
+            H1_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
@@ -33,17 +33,19 @@ class Highscore(Screen):
             anchor_x=0.5,
             anchor_y=1
         )
+
+        title_bottom = self.title.y - self.title.height
         self.highscores_label = HighscoresLabel(
-            MENU_ZOOM,
+            H3_PX_SIZE,
             self.assets.font_spritesheet,
             TOP1_COLOR,
             TOP2_COLOR,
             TOP3_COLOR,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=(self.title.y - TITLE_ZOOM) // 2,
+            y=title_bottom - 200 * SCALE_FACTOR,
             anchor_x=0.5,
-            anchor_y=0.4
+            anchor_y=1
         )
 
     def input(self, key: int) -> None:

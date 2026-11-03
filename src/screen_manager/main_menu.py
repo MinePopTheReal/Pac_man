@@ -21,7 +21,7 @@ from pyglet import text
 from src.utils.text_renderer import TextRenderer
 from src.rendering.layer import Layer
 from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets, MENU_ZOOM, TITLE_ZOOM, MAJOR_COLOR, MINOR_COLOR, TITLE_MARGIN, ENTITIES_SIZE
+from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MAJOR_COLOR, MINOR_COLOR, TITLE_MARGIN, ENTITIES_SIZE
 from src.rendering.display import SCALE_FACTOR
 
 class Options(Enum):
@@ -42,7 +42,7 @@ class MainMenu(Screen):
 
         self.title = Label(
             TITLE,
-            TITLE_ZOOM,
+            H1_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
@@ -50,44 +50,48 @@ class MainMenu(Screen):
             anchor_x=0.5,
             anchor_y=1
         )
+
+        title_bottom = self.title.y - self.title.height
         self.menu = Menu(
             [option.value for option in self.options],
-            MENU_ZOOM,
+            H3_PX_SIZE,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=(self.title.y - TITLE_ZOOM) // 2,
+            y=title_bottom - 800 * SCALE_FACTOR,
             anchor_x=0.5,
-            anchor_y=0.4
+            anchor_y=0
         )
+
+        menu_bottom = self.menu.y - self.menu.height
         self.helper_text = Label(
             "press enter",
-            MENU_ZOOM,
+            H3_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=(((self.title.y - TITLE_ZOOM) // 2) - self.menu.height) // 2,
+            y=menu_bottom + 200 * SCALE_FACTOR,
             anchor_x=0.5,
-            anchor_y=0,
-            blink_period=0.15
+            anchor_y=1,
+            blink_period=0.2
         )
 
     def update_screen(self, dt: float) -> None:
         self.helper_text.update(dt)
-        
+
     def input(self, key: int) -> None:
         match key:
             case keys.W | keys.UP:
-                self.selected = (self.selected - 1) % len(self.options)
+                self.menu.move(-1)
             case keys.S | keys.DOWN:
-                self.selected = (self.selected + 1) % len(self.options)
+                self.menu.move(1)
             case keys.ENTER:
-                self._validate(self.options[self.selected])
+                self._validate(self.menu.selected)
 
-    # TODO Change this so that an instance isn't created every time 
-    def _validate(self, option: Options) -> None:
-        match option:
+    # TODO Change this so that an instance isn't created every time
+    def _validate(self, selected: int) -> None:
+        match self.options[selected]:
             case Options.START:
                 self.manager.push(Play(self.config, self.manager, self.assets, self.highscores))
             case Options.HIGHSCORES:
@@ -98,6 +102,6 @@ class MainMenu(Screen):
                 self.manager.quit()
 
     def draw_screen(self) -> None:
-        self.menu.draw(self.selected)
+        self.menu.draw()
         self.title.draw()
         self.helper_text.draw()
