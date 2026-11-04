@@ -2,27 +2,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen
-from enum import Enum
-from src.parsing.models import GameConfig
-from pyglet.window import key as keys
-from src.screen_manager.game_screen import Play
+from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MAJOR_COLOR, MINOR_COLOR
 from src.screen_manager.instructions_screen import Instructions
-from src.utils.highscore_manager import HighscoreManager
 from src.screen_manager.highscores_screen import Highscore
-
-from src.rendering.display import Display
-from src.utils.widget import Label, Menu
-
-
-
-from pyglet import text
-
-from src.utils.text_renderer import TextRenderer
-from src.rendering.layer import Layer
-from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MAJOR_COLOR, MINOR_COLOR, TITLE_MARGIN, ENTITIES_SIZE
+from src.utils.highscore_manager import HighscoreManager
+from src.screen_manager.game_screen import Play
 from src.rendering.display import SCALE_FACTOR
+from src.screen_manager.screen import Screen
+from src.parsing.models import GameConfig
+from src.utils.widget.label import Label
+from src.utils.widget.menu import Menu
+
+
+from pyglet.window import key as keys
+from enum import Enum
 
 class Options(Enum):
     START = 'Start'
@@ -30,10 +23,11 @@ class Options(Enum):
     INSTRUCTIONS = 'Rules'
     EXIT = 'Quit'
 
-TITLE = "PAC-MAN"
 
 class MainMenu(Screen):
-    def __init__(self, config: GameConfig, manager: ScreenManager, assets, highscores: HighscoreManager) -> None:
+    TITLE = "PAC-MAN"
+
+    def __init__(self, config: GameConfig, manager: ScreenManager, assets: Assets, highscores: HighscoreManager) -> None:
         super().__init__(manager, assets)
         self.config = config
         self.options: list[Options] = list(Options)
@@ -41,7 +35,7 @@ class MainMenu(Screen):
         self.highscores = highscores
 
         self.title = Label(
-            TITLE,
+            self.TITLE,
             H1_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
@@ -88,6 +82,8 @@ class MainMenu(Screen):
                 self.menu.move(1)
             case keys.ENTER:
                 self._validate(self.menu.selected)
+            case keys.ESCAPE:
+                self.manager.quit()
 
     # TODO Change this so that an instance isn't created every time
     def _validate(self, selected: int) -> None:

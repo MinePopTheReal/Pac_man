@@ -2,11 +2,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen
-from enum import Enum
+from src.rendering.assets import H1_PX_SIZE, H3_PX_SIZE, MAJOR_COLOR, MINOR_COLOR, SCALE_FACTOR
 from src.game_state.game_state import GameState
+from src.screen_manager.screen import Screen
+from src.utils.widget.label import Label
+from src.utils.widget.menu import Menu
+
 from pyglet.window import key as keys
-from pyglet import text
+from enum import Enum
 
 
 class PauseOption(Enum):
@@ -15,25 +18,51 @@ class PauseOption(Enum):
 
 
 class Pause(Screen):
+    TITLE = "pause"
+
     def __init__(self, manager: ScreenManager, game: GameState, assets):
         super().__init__(manager, assets)
         self.game = game
         self.selected: int = 0
         self.options: list[PauseOption] = list(PauseOption)
 
+        self.title = Label(
+            self.TITLE,
+            H1_PX_SIZE,
+            self.assets.font_spritesheet,
+            MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=self.assets.window_height - 200 * SCALE_FACTOR,
+            anchor_x=0.5,
+            anchor_y=1
+        )
+
+        title_bottom = self.title.y - self.title.height
+        self.menu = Menu(
+            [option.value for option in self.options],
+            H3_PX_SIZE,
+            self.assets.font_spritesheet,
+            MINOR_COLOR,
+            MAJOR_COLOR,
+            x=self.assets.window_width // 2,
+            y=title_bottom - 800 * SCALE_FACTOR,
+            anchor_x=0.5,
+            anchor_y=0
+        )
+
     def input(self, key: int) -> None:
         match key:
             case keys.W | keys.UP:
-                self.selected = (self.selected - 1) % len(self.options)
+                self.menu.move(1)
             case keys.S | keys.DOWN:
-                self.selected = (self.selected + 1) % len(self.options)
+                self.menu.move(-1)
             case keys.ENTER:
-                self._validate(self.options[self.selected])
+                self._validate(self.menu.selected)
             case keys.ESCAPE:
-                self._validate(PauseOption.RESUME)
+                self._validate(0)
 
-    def _validate(self, option: PauseOption) -> None:
-        match option:
+    def _validate(self, selected: int = 0) -> None:
+        match self.options[selected]:
             case PauseOption.RESUME:
                 self.game.switch_pause()
                 self.manager.pop()
@@ -41,30 +70,5 @@ class Pause(Screen):
                 self.manager.back_to_menu()
 
     def draw_screen(self) -> None:
-        label = text.Label(
-                f"Pause",
-                font_name="Arial",
-                font_size=32,
-                x=self.assets.window_width // 2,
-                y=(self.assets.window_height // 2) + 45,
-                anchor_x="center",
-                anchor_y="center",
-                color=(255, 0, 255, 255),
-            )
-        label.draw()
-        for i in range(len(self.options)):
-            if i == self.selected:
-                color = (255, 255, 0, 255)
-            else:
-                color = (255, 255, 255, 255)
-            label = text.Label(
-                f"{self.options[i]}",
-                font_name="Arial",
-                font_size=32,
-                x=self.assets.window_width // 2,
-                y=(self.assets.window_height // 2) - i * 45,
-                anchor_x="center",
-                anchor_y="center",
-                color=color,
-            )
-            label.draw()
+        self.title.draw()
+        self.menu.draw()

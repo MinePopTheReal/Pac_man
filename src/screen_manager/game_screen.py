@@ -3,25 +3,37 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
 from src.game_state.game_state import GameState, Direction, GameStatus
-# from src.rendering.hud_renderer import HudRenderer, MAX_SCORE_LENGHT
 from src.rendering.entities_renderer import EntitiesRenderer
 from src.utils.highscore_manager import HighscoreManager
 from src.rendering.wall_renderer import WallRenderer
 from src.utils.sprite_sheet_manager import Rotation
-from src.rendering.assets import Assets, H3_PX_SIZE, WALL_SIZE, ENTITIES_SIZE, H5_PX_SIZE, H4_PX_SIZE, MAJOR_COLOR
 from src.screen_manager.pause_screen import Pause
 from src.screen_manager.end_game import EndGame
 from src.screen_manager.screen import Screen
 from src.parsing.models import GameConfig
 from src.rendering.layer import Layer
-
-from src.utils.widget import Hud
+from src.utils.widget.hud import Hud
+from src.rendering.assets import (
+        Assets, 
+        H3_PX_SIZE, 
+        WALL_SIZE, 
+        ENTITIES_SIZE, 
+        H4_PX_SIZE, 
+        MAJOR_COLOR
+    )
 
 from pyglet.window import key
 from pyglet import clock, gl
 
+
 class Play(Screen):
-    def __init__(self, config: GameConfig, manager: ScreenManager, assets: Assets, highscores: HighscoreManager) -> None:
+    def __init__(
+        self, 
+        config: GameConfig, 
+        manager: ScreenManager, 
+        assets: Assets, 
+        highscores: HighscoreManager
+    ) -> None:
         super().__init__(manager, assets)
         self.config = config
         self.highscores = highscores
@@ -39,20 +51,6 @@ class Play(Screen):
             * WALL_SIZE
             * 3
         )
-
-
-
-        # self.initial_hud_height = 2 * H3_PX_SIZE + H3_PX_SIZE
-
-        
-
-        # self.zoom = max(
-        #     1,
-        #     min(
-        #         assets.screen_width // initial_maze_width,
-        #         assets.screen_height // (initial_maze_height + self.initial_hud_height + 50),
-        #     ),
-        # )
 
         self.assets.wall_spritesheet.preloading_sprites(
             [Rotation.R0, Rotation.R90, Rotation.R180, Rotation.R270],
@@ -74,12 +72,7 @@ class Play(Screen):
         self.entities_layer = Layer(
             self.maze_width, self.maze_height, assets.entities_spritesheet.format
         )
-        # self.hud_height = self.initial_hud_height
-        # self.hud_layer = Layer(
-        #     self.maze_width, self.hud_height, assets.font_spritesheet.format
-        # )
 
-        # self.hud_renderer = HudRenderer(self.game_state, assets.font_spritesheet, self.hud_layer, H5_PX_SIZE)
         self.wall_renderer = WallRenderer(assets.wall_spritesheet)
         self.entities_renderer = EntitiesRenderer(
             self.game_state,
@@ -109,7 +102,6 @@ class Play(Screen):
         self.hud_pos_y = self.maze_pos_y + self.maze_height
 
         clock.schedule_interval(self.entities_renderer.update_animation, 0.115)
-        # clock.schedule_interval(self.hud_renderer.update_hud, 0.2)
 
     def input(self, symbol: int) -> None:
         match symbol:
@@ -145,7 +137,6 @@ class Play(Screen):
         status = self.game_state.status
         if status in [GameStatus.WON, GameStatus.LOST]:
             clock.unschedule(self.entities_renderer.update_animation)
-            # clock.unschedule(self.hud_renderer.update_hud)
             if status == GameStatus.WON:
                 self.manager.pop()
                 self.manager.push(EndGame(
@@ -170,6 +161,7 @@ class Play(Screen):
             self.game_state.grid.cells, self.wall_layer.buffer_view, WALL_SIZE
         )
         self._current_level = self.game_state.level
+        self.wall_layer.is_dirty()
 
     def draw_screen(self) -> None:
         gl.glEnable(gl.GL_BLEND)
@@ -179,7 +171,6 @@ class Play(Screen):
             self._build_maze()
         self.wall_layer.draw(self.maze_pos_x, self.maze_pos_y)
         self.entities_layer.draw(self.maze_pos_x, self.maze_pos_y)
-
         self.entities_renderer.draw_entities()
         self.hud.set_state(self.game_state)
         self.hud.draw()

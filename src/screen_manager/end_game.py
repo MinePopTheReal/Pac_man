@@ -2,23 +2,31 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
+from src.utils.widget.input_field import InputField, MAX_NAME_LENGTH
+from src.utils.highscore_manager import HighscoreManager
 from src.screen_manager.screen import Screen
-from src.utils.highscore_manager import HighscoreManager, MAX_NAME_LENGTH, MAX_SCORES
+from src.utils.widget.label import Label
+from src.rendering.assets import (
+    Assets, 
+    H3_PX_SIZE, 
+    H1_PX_SIZE, 
+    MINOR_COLOR, 
+    MAJOR_COLOR, 
+    SCALE_FACTOR
+)
+
 from pyglet.window import key as keys
 
-from src.utils.text_renderer import TextRenderer
-from src.screen_manager.screen import Screen
-
-from src.rendering.layer import Layer
-from src.utils.sprite_sheet_manager import Rotation
-
-from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MINOR_COLOR, MAJOR_COLOR
-from src.utils.widget import InputField, Label
-from src.rendering.display import SCALE_FACTOR
 
 class EndGame(Screen):
-    def __init__(self, manager: ScreenManager, won: bool,
-                 manager_highscores: HighscoreManager, score: int, assets) -> None:
+    def __init__(
+        self,
+        manager: ScreenManager,
+        won: bool,
+        manager_highscores: HighscoreManager,
+        score: int,
+        assets: Assets
+    ) -> None:
         super().__init__(manager, assets)
         self.won = won
         self.manager_highscores = manager_highscores

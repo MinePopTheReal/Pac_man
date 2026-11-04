@@ -2,29 +2,42 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.screen_manager.screen_manager import ScreenManager
+from src.utils.widget.highscores_label import HighscoresLabel
+from src.utils.highscore_manager import HighscoreManager
+from src.rendering.display import SCALE_FACTOR
 from src.screen_manager.screen import Screen
-from src.utils.highscore_manager import HighscoreManager, MAX_SCORES, MAX_NAME_LENGTH
+from src.parsing.models import GameConfig
+from src.utils.widget.label import Label
+from src.rendering.assets import Assets
+from src.rendering.assets import (
+    H1_PX_SIZE, 
+    H3_PX_SIZE, 
+    MAJOR_COLOR, 
+    MINOR_COLOR, 
+    TOP1_COLOR, 
+    TOP2_COLOR, 
+    TOP3_COLOR
+)
+
 from pyglet.window import key as keys
 
-from src.utils.sprite_sheet_manager import Rotation
-
-from src.utils.text_renderer import TextRenderer
-from src.rendering.layer import Layer
-from src.rendering.assets import Assets, H3_PX_SIZE, H1_PX_SIZE, MAJOR_COLOR, MINOR_COLOR, TOP1_COLOR, TOP2_COLOR, TOP3_COLOR, TITLE_MARGIN
-from src.utils.widget import Label, HighscoresLabel
-from src.rendering.display import SCALE_FACTOR
-
-TITLE = "HIGHSCORE"
 
 class Highscore(Screen):
-    def __init__(self, manager: ScreenManager,
-                 highscores: HighscoreManager, assets, config) -> None:
+    TITLE = "HIGHSCORE"
+
+    def __init__(
+        self,
+        manager: ScreenManager,
+        highscores: HighscoreManager,
+        assets: Assets,
+        config: GameConfig
+    ) -> None:
         super().__init__(manager, assets)
         self.highscores = highscores
         self.config = config
 
         self.title = Label(
-            TITLE,
+            self.TITLE,
             H1_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,

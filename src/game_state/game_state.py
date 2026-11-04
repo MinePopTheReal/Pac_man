@@ -22,6 +22,9 @@ SPEED_REDUCTION = 0.5
 HUNTED_SPEED_FACTOR = 0.5
 # ... and by this while it goes back to its corner (EATEN).
 EATEN_SPEED_FACTOR = 2.0
+# score limit
+MAX_SCORE_DIGITS = 7
+MAX_SCORE = 10**MAX_SCORE_DIGITS - 1
 
 
 class GameStatus(Enum):
@@ -99,6 +102,9 @@ class GameState:
         self.pacman_map: list[list[int]] = []
         self._update_pacman_map()
 
+    def _update_score(self, addition: int) -> None:
+        self.score = min(self.score + addition, MAX_SCORE)
+
     def _spawn_pacman(self) -> Pacman:
         """Create Pac-Man in the middle of the maze.
 
@@ -123,8 +129,11 @@ class GameState:
 
         for classe, corner in zip(classes, self.grid.corners_grid):
             y, x = corner
-            ghost = classe(Direction.NONE, (float(y), float(x)),
-                           GhostState.HUNTER, GHOST_SPEED)
+            ghost = classe(
+                Direction.NONE,
+                (float(y), float(x)),
+                GhostState.HUNTER, GHOST_SPEED
+            )
             lst_ghosts.append(ghost)
         return lst_ghosts
 
@@ -159,8 +168,12 @@ class GameState:
             Grid: The new maze.
         """
         seed = self.config.seed if self.level == 1 else 0
-        return generate_maze(self.config.height, self.config.width, seed,
-                             self.config.pacgum)
+        return generate_maze(
+            self.config.height,
+            self.config.width,
+            seed,
+            self.config.pacgum
+        )
 
     def _build_level(self) -> None:
         """Prepare the current level: new maze, characters back in place.
@@ -218,7 +231,8 @@ class GameState:
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
                     points_ghost = self.config.points_ghost
-                    self.score += points_ghost * (2**self.eaten_ghosts)
+                    self._update_score(points_ghost * (2**self.eaten_ghosts))
+                    # self.score += points_ghost * (2**self.eaten_ghosts)
                     self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
                     ghost.respawn_timer = self.config.timer_respawn_ghost
@@ -292,9 +306,12 @@ class GameState:
             self.pacman_map = self.grid.distances_from_cell(y, x)
             self.pacman_map_cell = (y, x)
 
-    def _chase_map(self, ghost: Ghost,
-                   corner_map: list[list[int]],
-                   corner: tuple[int, int]) -> list[list[int]]:
+    def _chase_map(
+        self,
+        ghost: Ghost,
+        corner_map: list[list[int]],
+        corner: tuple[int, int]
+    ) -> list[list[int]]:
         """Give the distance map a hunting ghost should follow.
 
         The map leads to the ghost's own target (see position_target). If
@@ -310,10 +327,12 @@ class GameState:
             list[list[int]]: The distance map to follow.
         """
         shad_y, shad_x = self.ghosts[0].position
-        target = ghost.position_target(self.pacman_map_cell,
-                                       self.pacman.direction,
-                                       (round(shad_y), round(shad_x)),
-                                       corner)
+        target = ghost.position_target(
+            self.pacman_map_cell,
+            self.pacman.direction,
+            (round(shad_y), round(shad_x)),
+            corner
+        )
         ty, tx = target
         ty = min(max(ty, 0), self.grid.height - 1)
         tx = min(max(tx, 0), self.grid.width - 1)
@@ -413,8 +432,12 @@ class GameState:
             self._reset_position()
             self.status = GameStatus.PLAYING
 
-    def _ghost_wanted(self, ghost: Ghost, corner_map: list[list[int]],
-                      corner: tuple[int, int]) -> Direction:
+    def _ghost_wanted(
+        self,
+        ghost: Ghost,
+        corner_map: list[list[int]],
+        corner: tuple[int, int]
+    ) -> Direction:
         """Choose where a ghost wants to go, depending on its state.
 
         EATEN ghosts go back to their corner, HUNTED ghosts run away from
@@ -456,13 +479,17 @@ class GameState:
             cell = self.grid.get_cell(int(y), int(x))
             eaten = cell.update_cell_content()
             if eaten == CellContents.PACGUM:
-                self.score += self.config.points_pacgum
+                self._update_score(self.config.points_pacgum)
+                # self.score += self.config.points_pacgum
             elif eaten == CellContents.SUPER_PACGUM:
-                self.score += self.config.points_super_pacgum
+                self._update_score(self.config.points_super_pacgum)
+                # self.score += self.config.points_super_pacgum
                 self.eaten_ghosts = 0
                 self._start_ghosts_hunt()
-            if (eaten != CellContents.EMPTY
-               and self.grid.remaining_pacgums() == 0):
+            if (
+                eaten != CellContents.EMPTY
+                and self.grid.remaining_pacgums() == 0
+            ):
                 self._next_level()
                 return True
         return False
@@ -496,8 +523,11 @@ class GameState:
             dt (float): Seconds since the last frame.
         """
         if not self.cheats.ghosts_frozen:
-            for ghost, corner_map, corner in zip(self.ghosts, self.corner_maps,
-                                                 self.grid.corners_grid):
+            for ghost, corner_map, corner in zip(
+                self.ghosts,
+                self.corner_maps,
+                self.grid.corners_grid
+            ):
                 wanted = self._ghost_wanted(ghost, corner_map, corner)
                 ghost.speed = self._ghost_speed(ghost)
                 advance(ghost, wanted, dt, self.grid)

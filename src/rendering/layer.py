@@ -13,8 +13,13 @@ class Layer:
         self.format = format
         self.bytes_per_pixel = len(self.format)
         self.pitch = width * self.bytes_per_pixel
+        self._dirty = True
+        self._image: image.ImageData | None = None
 
         self._create_layer()
+
+    def is_dirty(self):
+        self._dirty = True
 
     def _create_layer(self) -> None:
         """
@@ -32,6 +37,7 @@ class Layer:
         Clears the buffer completely
         (for example, all pixels are set to R:0, G:0, B:0, A:0)
         """
+        self._dirty = True
         self.buffer_view.fill(0)
 
     def draw(self, x: int, y: int) -> None:
@@ -41,11 +47,13 @@ class Layer:
             x (int): Coordinates (x) of the layer in the window
             y (int): Coordinates (y) of the layer in the window
         """
-        img = image.ImageData(
-            self.width,
-            self.height,
-            self.format,
-            bytes(self.buffer),
-            pitch=self.pitch,
-        )
-        img.blit(x, y)
+        if self._dirty:
+            self._image = image.ImageData(
+                self.width,
+                self.height,
+                self.format,
+                bytes(self.buffer),
+                pitch=self.pitch,
+            )
+            self._dirty = False
+        self._image.blit(x, y)
