@@ -59,7 +59,7 @@ class Pause(Screen):
             case keys.ENTER:
                 self._validate(self.menu.selected)
             case keys.ESCAPE:
-                self._validate(0)
+                self._validate(1)
 
     def _validate(self, selected: int = 0) -> None:
         match self.options[selected]:
