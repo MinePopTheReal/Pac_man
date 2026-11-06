@@ -1,9 +1,12 @@
-from enum import Enum, auto
 from src.entity.characters import Direction
+
+
+from enum import Enum, auto
 
 
 class CellContents(Enum):
     """What a cell of the maze can contain."""
+
     EMPTY = auto()
     PACGUM = auto()
     SUPER_PACGUM = auto()
@@ -15,6 +18,7 @@ class Cell:
     The cell does not store its own coordinates: its position is given
     by its place in the maze grid (cells[y][x]).
     """
+
     def __init__(self, walls: set[Direction], content: CellContents) -> None:
         """Create a cell.
 

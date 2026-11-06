@@ -16,6 +16,7 @@ class Cheats:
         fast (bool): Pac-Man moves twice as fast.
         slow (bool): Ghosts move twice as slow.
     """
+
     enabled: bool = False
     invincible: bool = False
     ghosts_frozen: bool = False

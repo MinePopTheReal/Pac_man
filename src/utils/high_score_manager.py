@@ -11,46 +11,52 @@ import json
 MAX_HIGHSCORE = 10
 
 
-class HighscoreManager:
+class HighScoreManager:
     def __init__(self, config: GameConfig) -> None:
-        self.path_file = config.highscore_filename
+        self.path_file = config.high_score_filename
         self.lst_scores: list[tuple[str, int]] = []
 
-    def load_highscores(self) -> None:
+    def load_high_score(self) -> None:
         try:
             content = FileManager.read(self.path_file)
         except Error:
-            print(WarningMessage(
-                "No highscore file, "
-                "starting with an empty list"
-            ))
+            print(
+                WarningMessage(
+                    "No high score file, " "starting with an empty list"
+                )
+            )
             return
 
         try:
             lst_content = json.loads(content)
         except json.JSONDecodeError:
-            print(WarningMessage(
-                "Highscore file is not valid JSON, "
-                "starting with an empty list"
-            ))
+            print(
+                WarningMessage(
+                    "High score file is not valid JSON, "
+                    "starting with an empty list"
+                )
+            )
             return
 
         if not isinstance(lst_content, list):
-            print(WarningMessage(
-                "Highscore file must contain a list,"
-                "starting with an empty list"
-            ))
+            print(
+                WarningMessage(
+                    "High score file must contain a list,"
+                    "starting with an empty list"
+                )
+            )
             return
 
         for element in lst_content:
             if not isinstance(element, dict):
-                print(WarningMessage("Invalid highscore entry ignored"))
+                print(WarningMessage("Invalid high score entry ignored"))
                 continue
-            name = element.get('name')
-            score = element.get('score')
+            name = element.get("name")
+            score = element.get("score")
 
             if (
-                not isinstance(name, str) or not isinstance(score, int)
+                not isinstance(name, str)
+                or not isinstance(score, int)
                 or isinstance(score, bool)
             ):
                 continue
@@ -66,13 +72,14 @@ class HighscoreManager:
             self.lst_scores, key=lambda x: x[1], reverse=True
         )[:MAX_HIGHSCORE]
 
-    def save_highscores(self) -> None:
+    def save_high_score(self) -> None:
         lst_dict: list[dict[str, int | str]] = [
-            {'name': name, 'score': score} for name, score in self.lst_scores]
+            {"name": name, "score": score} for name, score in self.lst_scores
+        ]
         try:
             FileManager.write(lst_dict, self.path_file)
         except Error:
-            print(WarningMessage("Could not save the highscores"))
+            print(WarningMessage("Could not save the high_score"))
 
     @staticmethod
     def is_valid_name(name: str) -> bool:

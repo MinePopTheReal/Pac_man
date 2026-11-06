@@ -1,12 +1,22 @@
-from src.entity import (Speedy, Shadow, Bashful, Pokey,
-                        Pacman, Direction, Ghost, GhostState)
-from src.maze import Grid, CellContents
-from src.parsing.models import GameConfig
-from src.game_state.collision import collides
-from src.maze.loader import generate_maze
-from src.game_state.movement import (is_on_cell, advance, direction_home)
-from src.game_state.cheats import Cheats
+from src.game_state.movement import is_on_cell, advance, direction_home
 from src.game_state.direction_ghost import direction_toward
+from src.game_state.collision import collides
+from src.parsing.models import GameConfig
+from src.maze.loader import generate_maze
+from src.game_state.cheats import Cheats
+from src.maze import Grid, CellContents
+from src.entity import (
+    Speedy,
+    Shadow,
+    Bashful,
+    Pokey,
+    Pacman,
+    Direction,
+    Ghost,
+    GhostState,
+)
+
+
 from enum import Enum, auto
 
 
@@ -24,7 +34,7 @@ HUNTED_SPEED_FACTOR = 0.5
 EATEN_SPEED_FACTOR = 2.0
 # score limit
 MAX_SCORE_DIGITS = 7
-MAX_SCORE = 10**MAX_SCORE_DIGITS - 1
+MAX_SCORE = 10 ** MAX_SCORE_DIGITS - 1
 
 
 class GameStatus(Enum):
@@ -33,6 +43,7 @@ class GameStatus(Enum):
     DYING means Pac-Man has just been caught: the game waits for the
     death animation, which ends with GameState.end_death().
     """
+
     PLAYING = auto()
     DYING = auto()
     PAUSED = auto()
@@ -77,6 +88,7 @@ class GameState:
     Positions are (y, x) = (row, column) in cells, not pixels: multiply
     by the tile size to draw, and swap to (x, y) for the screen.
     """
+
     def __init__(self, config: GameConfig) -> None:
         """Start a new game at level 1.
 
@@ -132,7 +144,8 @@ class GameState:
             ghost = classe(
                 Direction.NONE,
                 (float(y), float(x)),
-                GhostState.HUNTER, GHOST_SPEED
+                GhostState.HUNTER,
+                GHOST_SPEED,
             )
             lst_ghosts.append(ghost)
         return lst_ghosts
@@ -169,10 +182,7 @@ class GameState:
         """
         seed = self.config.seed if self.level == 1 else 0
         return generate_maze(
-            self.config.height,
-            self.config.width,
-            seed,
-            self.config.pacgum
+            self.config.height, self.config.width, seed, self.config.pacgum
         )
 
     def _build_level(self) -> None:
@@ -231,7 +241,7 @@ class GameState:
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
                     points_ghost = self.config.points_ghost
-                    self._update_score(points_ghost * (2**self.eaten_ghosts))
+                    self._update_score(points_ghost * (2 ** self.eaten_ghosts))
                     # self.score += points_ghost * (2**self.eaten_ghosts)
                     self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
@@ -310,7 +320,7 @@ class GameState:
         self,
         ghost: Ghost,
         corner_map: list[list[int]],
-        corner: tuple[int, int]
+        corner: tuple[int, int],
     ) -> list[list[int]]:
         """Give the distance map a hunting ghost should follow.
 
@@ -331,7 +341,7 @@ class GameState:
             self.pacman_map_cell,
             self.pacman.direction,
             (round(shad_y), round(shad_x)),
-            corner
+            corner,
         )
         ty, tx = target
         ty = min(max(ty, 0), self.grid.height - 1)
@@ -436,7 +446,7 @@ class GameState:
         self,
         ghost: Ghost,
         corner_map: list[list[int]],
-        corner: tuple[int, int]
+        corner: tuple[int, int],
     ) -> Direction:
         """Choose where a ghost wants to go, depending on its state.
 
@@ -459,11 +469,18 @@ class GameState:
         if ghost.state == GhostState.EATEN:
             return direction_home(int(y), int(x), corner_map, self.grid)
         if ghost.state == GhostState.HUNTED:
-            return direction_toward(self.grid, int(y), int(x), ghost.direction,
-                                    self.pacman_map, True)
+            return direction_toward(
+                self.grid,
+                int(y),
+                int(x),
+                ghost.direction,
+                self.pacman_map,
+                True,
+            )
         chase_map = self._chase_map(ghost, corner_map, corner)
-        return direction_toward(self.grid, int(y), int(x), ghost.direction,
-                                chase_map, False)
+        return direction_toward(
+            self.grid, int(y), int(x), ghost.direction, chase_map, False
+        )
 
     def _pacman_eats(self) -> bool:
         """Eat what is on Pac-Man's cell and add the points.
@@ -524,9 +541,7 @@ class GameState:
         """
         if not self.cheats.ghosts_frozen:
             for ghost, corner_map, corner in zip(
-                self.ghosts,
-                self.corner_maps,
-                self.grid.corners_grid
+                self.ghosts, self.corner_maps, self.grid.corners_grid
             ):
                 wanted = self._ghost_wanted(ghost, corner_map, corner)
                 ghost.speed = self._ghost_speed(ghost)

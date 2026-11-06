@@ -33,9 +33,13 @@ class SpriteSheetManager:
         )
         self.spritesheet_bytes: ndarray = self._load_spritesheet(image_path)
 
-        self.sprites_bytes: dict[int, dict[str, dict[Rotation, list[ndarray]]]] = {}
+        self.sprites_bytes: dict[
+            int, dict[str, dict[Rotation, list[ndarray]]]
+        ] = {}
 
-        self._tint_cache: dict[str, dict[tuple[int, int, int, int], ndarray]] = {}
+        self._tint_cache: dict[
+            tuple[int, str, Rotation, int, tuple[int, int, int]], ndarray
+        ] = {}
 
     def _load_spritesheet_config(self, config_path: str) -> Spritesheet:
         """
@@ -68,11 +72,12 @@ class SpriteSheetManager:
         return pixels
 
     @staticmethod
-    def scale(sprite: ndarray, sprite_px: int):
-        w, h = sprite.shape[:2]
+    def scale(sprite: ndarray, sprite_px: int) -> ndarray:
+        h, w = sprite.shape[:2]
         ys = arange(sprite_px) * h // sprite_px
         xs = arange(sprite_px) * w // sprite_px
-        return sprite[ys[:, None], xs]
+        scaled: ndarray = sprite[ys[:, None], xs]
+        return scaled
 
     def preloading_sprites(
         self, rotation_to_load: list[Rotation], sprite_px: int
@@ -98,7 +103,7 @@ class SpriteSheetManager:
                 frames = []
                 for coord in coords:
                     sprite = self.spritesheet_bytes[
-                        coord.y:coord.y + ts, coord.x:coord.x + ts
+                        coord.y: coord.y + ts, coord.x: coord.x + ts
                     ]
                     zoomed_sprite = self.scale(sprite, sprite_px)
                     frames.append(self.rotate_sprites(zoomed_sprite, rotation))
@@ -126,11 +131,11 @@ class SpriteSheetManager:
     def _change_color(
         self,
         sprite: ndarray,
-        zoom: int, 
+        zoom: int,
         sprite_name: str,
         rotation: Rotation,
         frame_index: int,
-        color: tuple[int, int, int] = (255, 255, 255)
+        color: tuple[int, int, int] = (255, 255, 255),
     ) -> ndarray:
 
         key = (zoom, sprite_name, rotation, frame_index, color)
@@ -153,7 +158,7 @@ class SpriteSheetManager:
         y: int,
         zoom: int,
         frame: int,
-        color: tuple[int, int, int, int] = (255, 255, 255)
+        color: tuple[int, int, int] = (255, 255, 255),
     ) -> None:
         """
         Copy the sprite to the buffer in the correct location
@@ -174,10 +179,12 @@ class SpriteSheetManager:
         sprite = self.sprites_bytes[zoom][sprite_name][rotation][
             frame % len(self.sprites_bytes[zoom][sprite_name][rotation])
         ]
-        sprite = self._change_color(sprite, zoom, sprite_name, rotation, frame, color)
+        sprite = self._change_color(
+            sprite, zoom, sprite_name, rotation, frame, color
+        )
 
         if sprite.shape[2] == 4:
             mask = sprite[:, :, 3] > 0
-            buffer_view[y:y + ts, x:x + ts][mask] = sprite[mask]
+            buffer_view[y: y + ts, x: x + ts][mask] = sprite[mask]
         else:
-            buffer_view[y:y + ts, x:x + ts] = sprite
+            buffer_view[y: y + ts, x: x + ts] = sprite

@@ -7,11 +7,9 @@ class WarningMessage:
 
     Adds warning formatting when converted to a string.
     """
+
     def __init__(self, message: str):
         self.message = message
 
     def __str__(self) -> str:
-        return (
-            f"{TC.BOLD}{TC.MAGENTA}[Warning]{TC.END}: "
-            f"{self.message}"
-        )
+        return f"{TC.BOLD}{TC.MAGENTA}[Warning]{TC.END}: " f"{self.message}"

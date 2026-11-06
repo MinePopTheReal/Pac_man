@@ -1,10 +1,18 @@
-import math
 from src.maze.grid import Grid, LST_DIRECTION
 from src.entity.characters import Direction
 
 
-def direction_toward(grid: Grid, y: int, x: int, current: Direction,
-                     dist_map: list[list[int]], run_away: bool) -> Direction:
+import math
+
+
+def direction_toward(
+    grid: Grid,
+    y: int,
+    x: int,
+    current: Direction,
+    dist_map: list[list[int]],
+    run_away: bool,
+) -> Direction:
     """Choose the direction that gets a ghost closer to its target.
 
     The ghost looks at its open neighbour cells and picks the one with
@@ -39,7 +47,7 @@ def direction_toward(grid: Grid, y: int, x: int, current: Direction,
             if distance == -1:
                 continue
             if run_away:
-                distance = - distance
+                distance = -distance
             if distance < best_distance:
                 best_direction = direction
                 best_distance = distance

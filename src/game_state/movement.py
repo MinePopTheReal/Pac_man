@@ -5,9 +5,11 @@ be checked on whole cells. The rule used here: a character can only
 change direction when it stands exactly on a cell, and it always stops
 on every cell it crosses, so it can never skip a wall check.
 """
-import math
 from src.entity.characters import Direction, Character
 from src.maze.grid import Grid, LST_DIRECTION
+
+
+from math import floor, ceil
 
 
 def is_on_cell(coord: tuple[float, float]) -> bool:
@@ -23,8 +25,9 @@ def is_on_cell(coord: tuple[float, float]) -> bool:
     return y.is_integer() and x.is_integer()
 
 
-def choose_direction(y: int, x: int, wanted: Direction, current: Direction,
-                     grid: Grid) -> Direction:
+def choose_direction(
+    y: int, x: int, wanted: Direction, current: Direction, grid: Grid
+) -> Direction:
     """Choose where a character standing on a cell goes next.
 
     It tries, in this order: the wanted direction (key pressed or ghost
@@ -49,8 +52,9 @@ def choose_direction(y: int, x: int, wanted: Direction, current: Direction,
     return Direction.NONE
 
 
-def next_cell(coord: tuple[float, float],
-              direction: Direction) -> tuple[float, float]:
+def next_cell(
+    coord: tuple[float, float], direction: Direction
+) -> tuple[float, float]:
     """Return the next cell on the way, in the given direction.
 
     On a cell, it is the neighbour cell. Between two cells, it is the
@@ -70,14 +74,15 @@ def next_cell(coord: tuple[float, float],
     if is_on_cell(coord):
         return (float(y + dy), float(x + dx))
 
-    ny = math.ceil(y) if dy > 0 else math.floor(y) if dy < 0 else y
-    nx = math.ceil(x) if dx > 0 else math.floor(x) if dx < 0 else x
+    ny = ceil(y) if dy > 0 else floor(y) if dy < 0 else y
+    nx = ceil(x) if dx > 0 else floor(x) if dx < 0 else x
 
     return (float(ny), float(nx))
 
 
-def advance(character: Character, wanted: Direction, dt: float,
-            grid: Grid) -> None:
+def advance(
+    character: Character, wanted: Direction, dt: float, grid: Grid
+) -> None:
     """Move a character for one frame, without going through walls.
 
     1. If it stands on a cell, it chooses its direction (and stops if
@@ -98,7 +103,8 @@ def advance(character: Character, wanted: Direction, dt: float,
     if is_on_cell(character.position):
         py, px = character.position
         character.direction = choose_direction(
-            int(py), int(px), wanted, character.direction, grid)
+            int(py), int(px), wanted, character.direction, grid
+        )
         if character.direction == Direction.NONE:
             return
 
@@ -113,8 +119,9 @@ def advance(character: Character, wanted: Direction, dt: float,
         character.move(dt)
 
 
-def direction_home(y: int, x: int, maze: list[list[int]],
-                   grid: Grid) -> Direction:
+def direction_home(
+    y: int, x: int, maze: list[list[int]], grid: Grid
+) -> Direction:
     """Give the direction that brings an eaten ghost closer to its corner.
 
     It looks for the neighbour cell that is one step closer to the

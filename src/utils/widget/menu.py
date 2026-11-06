@@ -1,4 +1,5 @@
 from src.utils.widget.widget import Widget, make_text_layer, Align
+from src.utils.sprite_sheet_manager import SpriteSheetManager
 
 
 class MenuItem:
@@ -6,13 +7,15 @@ class MenuItem:
         self,
         text: str,
         zoom: int,
-        font,
-        normal_color,
-        selected_color,
+        font: SpriteSheetManager,
+        normal_color: tuple[int, int, int],
+        selected_color: tuple[int, int, int],
         align: Align = "center",
     ) -> None:
         self.normal = make_text_layer(text, zoom, font, normal_color, align)
-        self.selected = make_text_layer(text, zoom, font, selected_color, align)
+        self.selected = make_text_layer(
+            text, zoom, font, selected_color, align
+        )
         self.width = self.normal.width
 
     def draw(self, x: int, y: int, is_selected: bool) -> None:
@@ -24,9 +27,9 @@ class Menu(Widget):
         self,
         texts: list[str],
         zoom: int,
-        font,
-        normal_color,
-        selected_color,
+        font: SpriteSheetManager,
+        normal_color: tuple[int, int, int],
+        selected_color: tuple[int, int, int],
         *,
         x: int,
         y: int,

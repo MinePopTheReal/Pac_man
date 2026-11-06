@@ -9,7 +9,7 @@ from pydantic import (
     ValidationInfo,
     StrictFloat,
     ValidatorFunctionWrapHandler,
-    model_validator
+    model_validator,
 )
 
 
@@ -20,6 +20,7 @@ class Coord(BaseModel):
     """
     Check if coord are valid
     """
+
     model_config = ConfigDict(extra="forbid")
     x: StrictInt = Field(ge=0)
     y: StrictInt = Field(ge=0)
@@ -29,6 +30,7 @@ class Spritesheet(BaseModel):
     """
     Check spritesheet config
     """
+
     model_config = ConfigDict(extra="forbid")
     tiles: dict[str, list[Coord]]
     tile_size: int = Field(ge=1)
@@ -41,11 +43,11 @@ class Spritesheet(BaseModel):
         return {
             key: [Coord(**coord) for coord in value]
             for key, value in values.items()
-            }
+        }
 
 
 class GameConfig(BaseModel):
-    highscore_filename: str = Field(default="highscores.json")
+    high_score_filename: str = Field(default="high_score.json")
     lives: StrictInt = Field(default=3, ge=1)
     pacgum: StrictInt = Field(default=202, ge=0)
     points_pacgum: StrictInt = Field(default=10, ge=0)
@@ -65,7 +67,7 @@ class GameConfig(BaseModel):
         cls,
         value: Any,
         handler: ValidatorFunctionWrapHandler,
-        info: ValidationInfo
+        info: ValidationInfo,
     ) -> Any:
         try:
             return handler(value)
@@ -73,19 +75,23 @@ class GameConfig(BaseModel):
             if info.field_name is None:
                 raise
             default = cls.model_fields[info.field_name].default
-            print(WarningMessage(
-                f"Invalid value for '{info.field_name}' "
-                f"({value!r}), using default "
-                f"{default} instead."
-            ))
+            print(
+                WarningMessage(
+                    f"Invalid value for '{info.field_name}' "
+                    f"({value!r}), using default "
+                    f"{default} instead."
+                )
+            )
             return default
 
     @model_validator(mode="after")
-    def report_missing_key(self) -> 'GameConfig':
+    def report_missing_key(self) -> "GameConfig":
         for name, field in type(self).model_fields.items():
             if name not in self.model_fields_set:
-                print(WarningMessage(
-                    f"key '{name}' is missing, "
-                    f"using default value {field.default}"
-                ))
+                print(
+                    WarningMessage(
+                        f"key '{name}' is missing, "
+                        f"using default value {field.default}"
+                    )
+                )
         return self

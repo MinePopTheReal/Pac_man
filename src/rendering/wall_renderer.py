@@ -2,6 +2,7 @@ from src.utils.sprite_sheet_manager import Rotation, SpriteSheetManager
 from src.maze.grid import Direction
 from src.maze.cell import Cell
 
+
 from numpy import ndarray
 
 
@@ -287,10 +288,6 @@ class WallRenderer:
 
         for maze_y in range(self.maze_height):
             for maze_x in range(self.maze_width):
-                tile_size = (
-                    zoom
-                )
-
                 tiles = self._choose_tiles(maze_x, maze_y)
 
                 for sub_y in [maze_y * 3, maze_y * 3 + 1, maze_y * 3 + 2]:
@@ -300,8 +297,8 @@ class WallRenderer:
                             buffer_view,
                             tile_name,
                             rotation,
-                            sub_x * tile_size,
-                            sub_y * tile_size,
+                            sub_x * zoom,
+                            sub_y * zoom,
                             zoom,
                             0,
                         )

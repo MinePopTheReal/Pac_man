@@ -5,6 +5,7 @@ class Error(Exception):
     """
     The entire logic behind the creation of custom errors.
     """
+
     default_type = "Not defined"
 
     def __init__(
@@ -46,10 +47,10 @@ class GridError(Error):
 
 
 class ScreenError(Error):
-    """Exception raised when the screen manager is
-     used before first_screen()"""
+    """
+    Exception raised when the screen manager is used before first_screen()
+    """
 
     default_type = "Screen"
-
 
 # add your own error

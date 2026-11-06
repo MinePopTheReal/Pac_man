@@ -1,5 +1,7 @@
-from src.rendering.layer import Layer
+from src.utils.sprite_sheet_manager import SpriteSheetManager
 from src.utils.text_renderer import TextRenderer
+from src.rendering.layer import Layer
+
 
 from typing import Literal
 
@@ -9,11 +11,15 @@ _ALIGN_FACTOR: dict[Align, float] = {
     "left": 0.0,
     "center": 0.5,
     "right": 1.0
-    }
+}
 
 
 def make_text_layer(
-    text: str, zoom: int, font, color, align: Align = "center"
+    text: str,
+    zoom: int,
+    font: SpriteSheetManager,
+    color: tuple[int, int, int],
+    align: Align = "center"
 ) -> Layer:
     lines = text.splitlines() or [""]
     columns = max(len(line) for line in lines)

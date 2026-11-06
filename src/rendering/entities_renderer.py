@@ -1,5 +1,6 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.game_state.game_state import GameState, Direction, GameStatus
+from src.rendering.assets import WALL_SIZE, ENTITIES_SIZE
 from src.entity.ghost import GhostState
 from src.maze.grid import CellContents
 from src.rendering.layer import Layer
@@ -13,7 +14,6 @@ from src.rendering.sprites_name import (
     GHOST_FEAR_BLUE,
     GHOST_FEAR_WHITE,
 )
-from src.rendering.assets import WALL_SIZE, ENTITIES_SIZE
 
 # Time remaining until the end of 'Hunted' for the ghosts to start flashing
 FEAR_BLINK_TIME = 3
@@ -28,6 +28,7 @@ class EntitiesRenderer:
     This class is used to place each entity in the buffer and
     to update the animations and positions with each frame.
     """
+
     def __init__(
         self,
         game_state: GameState,
@@ -61,7 +62,10 @@ class EntitiesRenderer:
             the animation). Defaults to -1.
         """
         cell_px = WALL_SIZE * self.number_of_tiles_per_cell
-        offset = (cell_px - ENTITIES_SIZE) / 2 + ENTITIES_SIZE / self.spritesheet.spritesheet_config.tile_size
+        offset = (
+            (cell_px - ENTITIES_SIZE) / 2
+            + ENTITIES_SIZE / self.spritesheet.spritesheet_config.tile_size
+        )
 
         new_x = int(maze_x * cell_px + offset)
         new_y = int(maze_y * cell_px + offset)
@@ -73,7 +77,7 @@ class EntitiesRenderer:
             new_x,
             new_y,
             ENTITIES_SIZE,
-            self.frame if frame == -1 else frame
+            self.frame if frame == -1 else frame,
         )
 
     def _draw_pacman(self) -> None:
@@ -92,7 +96,11 @@ class EntitiesRenderer:
             sprite_name = PACMAN_DEATH
             frame = min(
                 self._death_frame,
-                len(self.spritesheet.sprites_bytes[ENTITIES_SIZE][sprite_name][Rotation.R0])
+                len(
+                    self.spritesheet.sprites_bytes[ENTITIES_SIZE][sprite_name][
+                        Rotation.R0
+                    ]
+                )
                 - 1,
             )
 
@@ -173,7 +181,11 @@ class EntitiesRenderer:
             self.start_to_die = self.frame
         if (
             self._death_frame
-            > len(self.spritesheet.sprites_bytes[ENTITIES_SIZE][PACMAN_DEATH][Rotation.R0])
+            > len(
+                self.spritesheet.sprites_bytes[ENTITIES_SIZE][PACMAN_DEATH][
+                    Rotation.R0
+                ]
+            )
             - 1
         ):
             self.game_state.end_death()

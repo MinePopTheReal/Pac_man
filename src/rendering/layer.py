@@ -7,6 +7,7 @@ class Layer:
     Allows you to create and manage a layer (so you can separate
     the maze rendering from the entities, for example)
     """
+
     def __init__(self, width: int, height: int, format: str):
         self.width = width
         self.height = height
@@ -18,7 +19,7 @@ class Layer:
 
         self._create_layer()
 
-    def is_dirty(self):
+    def is_dirty(self) -> None:
         self._dirty = True
 
     def _create_layer(self) -> None:
@@ -56,4 +57,5 @@ class Layer:
                 pitch=self.pitch,
             )
             self._dirty = False
-        self._image.blit(x, y)
+        if self._image:
+            self._image.blit(x, y)

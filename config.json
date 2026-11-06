@@ -3,8 +3,8 @@
 # are also supported. Missing or invalid values are replaced by their
 # default value, with a warning. Unknown keys are ignored.
 {
-    # File where the top 10 highscores are saved (default: "highscores.json")
-    "highscore_filename": "highscores/highscore.json",
+    # File where the top 10 high_score are saved (default: "high_score.json")
+    "high_score_filename": "high_score/high_score.json",
 
     # Number of lives at the start of the game (min 1, default: 3)
     "lives": 3,

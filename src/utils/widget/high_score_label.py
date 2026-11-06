@@ -1,19 +1,21 @@
-from src.game_state.game_state import MAX_SCORE_DIGITS
+from src.utils.sprite_sheet_manager import SpriteSheetManager
 from src.utils.widget.input_field import MAX_NAME_LENGTH
-from src.utils.highscore_manager import MAX_HIGHSCORE
+from src.game_state.game_state import MAX_SCORE_DIGITS
+from src.utils.high_score_manager import MAX_HIGHSCORE
 from src.utils.text_renderer import TextRenderer
 from src.utils.widget.widget import Widget
 from src.rendering.layer import Layer
 
-class HighscoresLabel(Widget):
+
+class HighScoresLabel(Widget):
     def __init__(
         self,
         zoom: int,
-        font,
-        top1_color,
-        top2_color,
-        top3_color,
-        normal_color,
+        font: SpriteSheetManager,
+        top1_color: tuple[int, int, int],
+        top2_color: tuple[int, int, int],
+        top3_color: tuple[int, int, int],
+        normal_color: tuple[int, int, int],
         *,
         x: int = 0,
         y: int = 0,
@@ -38,7 +40,11 @@ class HighscoresLabel(Widget):
         self.layer = Layer(self.width, self.height, "RGBA")
         self._drawn: list[tuple[str, int]] | None = None
 
-    def _color_for(self, rank: int, has_score: bool):
+    def _color_for(
+        self,
+        rank: int,
+        has_score: bool
+    ) -> tuple[int, int, int]:
         if has_score and rank < len(self.rank_colors):
             return self.rank_colors[rank]
         return self.normal_color
@@ -50,7 +56,7 @@ class HighscoresLabel(Widget):
         self.layer.clear()
         for rank in range(MAX_HIGHSCORE):
             has_score = rank < len(scores)
-            username, score = scores[rank] if has_score else ('-', '-')
+            username, score = scores[rank] if has_score else ("-", "-")
             TextRenderer.draw_string(
                 self.layer.buffer_view,
                 f"{rank + 1:>3}.{username:<{MAX_NAME_LENGTH}} {score}",

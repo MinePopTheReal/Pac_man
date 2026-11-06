@@ -1,13 +1,15 @@
-from src.game_state.game_state import GameState
+from src.rendering.assets import Assets, WALL_SIZE, ENTITIES_SIZE
 from src.rendering.entities_renderer import EntitiesRenderer
 from src.rendering.wall_renderer import WallRenderer
 from src.utils.sprite_sheet_manager import Rotation
+from src.game_state.game_state import GameState
 from src.utils.widget.widget import Widget
 from src.parsing.models import GameConfig
 from src.rendering.layer import Layer
-from src.rendering.assets import Assets, WALL_SIZE, ENTITIES_SIZE
+
 
 from pyglet import clock, gl
+
 
 TILES_PER_CELL = 3
 ANIMATION_INTERVAL_S = 0.115
@@ -19,8 +21,8 @@ class MazeView(Widget):
         game_state: GameState,
         assets: Assets,
         config: GameConfig,
-        x: float,
-        y: float,
+        x: int,
+        y: int,
     ) -> None:
         width = config.width * TILES_PER_CELL * WALL_SIZE
         height = config.height * TILES_PER_CELL * WALL_SIZE
@@ -32,15 +34,9 @@ class MazeView(Widget):
 
         self._preload_sprites()
 
-        self.wall_layer = Layer(
-            width,
-            height,
-            assets.wall_spritesheet.format
-        )
+        self.wall_layer = Layer(width, height, assets.wall_spritesheet.format)
         self.entities_layer = Layer(
-            width,
-            height,
-            assets.entities_spritesheet.format
+            width, height, assets.entities_spritesheet.format
         )
 
         self.wall_renderer = WallRenderer(assets.wall_spritesheet)

@@ -8,13 +8,13 @@ PDB := pdb
 SRC_DIR := src
 
 run: install
-		$(UV) run python3 -m src
+		$(UV) run python3 -m $(SRC_DIR)
 
 install:
 		$(UV) sync
 
 debug:
-		$(UV) run python3 -m pdb $(SRC_DIR)/__main__.py
+		$(UV) run python3 -m pdb -m $(SRC_DIR)
 
 clean:
 		rm -rf $(TEMP_FILE)

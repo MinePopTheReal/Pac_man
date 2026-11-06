@@ -1,17 +1,15 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from src.screen_manager.screen_manager import ScreenManager
-from src.screen_manager.screen import Screen
+from src.screen_manager.screen import Screen, Navigator
 from src.utils.widget.label import Label
 from src.rendering.assets import (
+    Assets,
     H1_PX_SIZE,
     H4_PX_SIZE,
     H5_PX_SIZE,
     SCALE_FACTOR,
     MINOR_COLOR,
-    MAJOR_COLOR
+    MAJOR_COLOR,
 )
+
 
 from pyglet.window import key as keys
 
@@ -19,8 +17,12 @@ from pyglet.window import key as keys
 class Instructions(Screen):
     TITLE = "instructions"
 
-    def __init__(self, manager: ScreenManager, assets) -> None:
-        super().__init__(manager, assets)
+    def __init__(
+        self,
+        navigator: Navigator,
+        assets: Assets
+    ) -> None:
+        super().__init__(navigator, assets)
         self.rules: str = (
             "EAT ALL THE PACGUMS TO\n"
             "CLEAR THE LEVEL.\n\n"
@@ -34,7 +36,7 @@ class Instructions(Screen):
             "GAME OVER\n\n"
             "GET THE BEST SCORE.\n"
         )
-        
+
         self.controls: str = (
             "GAME:\n"
             "MOVE: WASD OR ARROWS\n"
@@ -53,16 +55,23 @@ class Instructions(Screen):
             "5: FAST PACMAN\n"
             "6: SLOW GHOSTS\n"
         )
-        
+
+        self.set_screens()
+
+    def input(self, key: int) -> None:
+        if key in (keys.ESCAPE, keys.ENTER):
+            self.navigator.pop()
+
+    def set_screens(self) -> None:
         self.title = Label(
             self.TITLE,
             H1_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=self.assets.window_height - 200 * SCALE_FACTOR,
+            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
             anchor_x=0.5,
-            anchor_y=1
+            anchor_y=1,
         )
 
         title_bottom = self.title.y - self.title.height
@@ -72,21 +81,23 @@ class Instructions(Screen):
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=title_bottom - 150 * SCALE_FACTOR,
+            y=int(title_bottom - 150 * SCALE_FACTOR),
             anchor_x=0.5,
-            anchor_y=1
+            anchor_y=1,
         )
 
-        sub_title_rules_bottom = self.sub_title_rules.y - self.sub_title_rules.height
+        sub_title_rules_bottom = (
+            self.sub_title_rules.y - self.sub_title_rules.height
+        )
         self.rules_label = Label(
             self.rules,
             H5_PX_SIZE,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=sub_title_rules_bottom - 20 * SCALE_FACTOR,
+            y=int(sub_title_rules_bottom - 20 * SCALE_FACTOR),
             anchor_x=0.5,
-            anchor_y=1
+            anchor_y=1,
         )
 
         rules_bottom = self.rules_label.y - self.rules_label.height
@@ -96,27 +107,25 @@ class Instructions(Screen):
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=rules_bottom - 50 * SCALE_FACTOR,
+            y=int(rules_bottom - 50 * SCALE_FACTOR),
             anchor_x=0.5,
-            anchor_y=1
+            anchor_y=1,
         )
 
-        sub_title_controls_bottom = self.sub_title_controls.y - self.sub_title_controls.height
+        sub_title_controls_bottom = (
+            self.sub_title_controls.y - self.sub_title_controls.height
+        )
         self.controls_label = Label(
             self.controls,
             H5_PX_SIZE,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=sub_title_controls_bottom - 20 * SCALE_FACTOR,
+            y=int(sub_title_controls_bottom - 20 * SCALE_FACTOR),
             anchor_x=0.5,
             anchor_y=1,
-            align="left"
+            align="left",
         )
-
-    def input(self, key: int) -> None:
-        if key in (keys.ESCAPE, keys.ENTER):
-            self.manager.pop()
 
     def draw_screen(self) -> None:
         self.title.draw()

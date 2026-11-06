@@ -1,5 +1,5 @@
-from abc import ABC
 from enum import Enum
+from abc import ABC
 
 
 class Direction(Enum):
@@ -11,15 +11,16 @@ class Direction(Enum):
 
 
 class Character(ABC):
-    def __init__(self, direction: Direction,
-                 position: tuple[float, float], speed: float) -> None:
+    def __init__(
+        self, direction: Direction, position: tuple[float, float], speed: float
+    ) -> None:
         """initialization class character.
-                Args:
-                    position (tuple[float, float]): Cell: (y, x) row, column
-                    state (str): Character's state.
-                    direction (str): character direction(UP, DOWN, LEFT, RIGHT)
-                    speed (float): character speed
-                """
+        Args:
+            position (tuple[float, float]): Cell: (y, x) row, column
+            state (str): Character's state.
+            direction (str): character direction(UP, DOWN, LEFT, RIGHT)
+            speed (float): character speed
+        """
         self.position = position
         self.direction = direction
         self.speed = speed

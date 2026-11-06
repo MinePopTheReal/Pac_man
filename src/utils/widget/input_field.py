@@ -1,6 +1,6 @@
-# from src.utils.highscore_manager import MAX_NAME_LENGTH
+from src.utils.sprite_sheet_manager import SpriteSheetManager
 from src.utils.text_renderer import TextRenderer
-from src.utils.widget.widget import Widget 
+from src.utils.widget.widget import Widget
 from src.rendering.layer import Layer
 
 
@@ -12,9 +12,9 @@ class InputField(Widget):
         self,
         prompt: str,
         zoom: int,
-        font,
-        color_prompt,
-        color_text,
+        font: SpriteSheetManager,
+        color_prompt: tuple[int, int, int],
+        color_text: tuple[int, int, int],
         *,
         x: int = 0,
         y: int = 0,

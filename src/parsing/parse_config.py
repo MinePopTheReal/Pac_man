@@ -1,9 +1,10 @@
+from src.utils.file_manager import FileManager
+from src.message.errors import ParsingError
+
+
 from json import loads, JSONDecodeError
 from pydantic import BaseModel
 from typing import TypeVar
-
-from src.utils.file_manager import FileManager
-from src.message.errors import ParsingError
 
 
 class ConfigParser:
@@ -11,14 +12,10 @@ class ConfigParser:
     Parser for json config
     """
 
-    T = TypeVar('T', bound=BaseModel)
+    T = TypeVar("T", bound=BaseModel)
 
     def __init__(self) -> None:
-        self.comment_markers = [
-            ("/*", "*/"),
-            ("#", None),
-            ("//", None)
-            ]
+        self.comment_markers = [("/*", "*/"), ("#", None), ("//", None)]
 
     @staticmethod
     def _is_in_string(text: str, curr_state: bool, i: int) -> bool:
@@ -61,7 +58,9 @@ class ConfigParser:
 
             if not in_string:
                 for _, end_marker in self.comment_markers:
-                    if end_marker is not None and text.startswith(end_marker, i):
+                    if end_marker is not None and text.startswith(
+                        end_marker, i
+                    ):
                         raise ParsingError("Missing comment marker")
             i += 1
 
@@ -79,23 +78,24 @@ class ConfigParser:
         text = file_content
         in_string = False
 
-        while (i < len(text)):
+        while i < len(text):
             in_string = self._is_in_string(text, in_string, i)
 
             if not in_string:
 
-                for start_marker, end_marker in (self.comment_markers):
+                for start_marker, end_marker in self.comment_markers:
                     if text.startswith(start_marker, i):
                         start = i
                         end = -1
                         while i <= len(text):
                             if end_marker is None:
-                                is_end = i == len(text) or text[start:i].endswith("\n")
+                                is_end = i == len(text) or text[
+                                    start:i
+                                ].endswith("\n")
                             else:
-                                is_end = (
-                                    i - start >= len(start_marker) + len(end_marker)
-                                    and text[start:i].endswith(end_marker)
-                                )
+                                is_end = i - start >= len(start_marker) + len(
+                                    end_marker
+                                ) and text[start:i].endswith(end_marker)
                             if is_end:
                                 end = i
                                 break

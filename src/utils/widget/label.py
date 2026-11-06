@@ -1,4 +1,5 @@
 from src.utils.widget.widget import Widget, make_text_layer, Align
+from src.utils.sprite_sheet_manager import SpriteSheetManager
 
 
 class Label(Widget):
@@ -6,8 +7,8 @@ class Label(Widget):
         self,
         text: str,
         zoom: int,
-        font,
-        color,
+        font: SpriteSheetManager,
+        color: tuple[int, int, int],
         *,
         x: int = 0,
         y: int = 0,
@@ -29,4 +30,3 @@ class Label(Widget):
 
     def _render(self) -> None:
         self.layer.draw(self.left, self.bottom)
-

@@ -1,18 +1,42 @@
-from __future__ import annotations
+from src.rendering.assets import Assets
+
+
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import Protocol
+from enum import StrEnum
 
-if TYPE_CHECKING:
-    from src.screen_manager.screen_manager import ScreenManager
-    from src.rendering.assets import Assets
 
+class ScreenName(StrEnum):
+    MAIN = "main"
+    PLAY = "play"
+    INSTRUCTION = "instruction"
+    HIGHSCORE = "high_score"
+    PAUSE = "pause"
+    ENDGAME = "endgame"
+
+
+class Navigator(Protocol):
+    def push(self, screen_name: ScreenName) -> None:
+        ...
+
+    def pop(self) -> None:
+        ...
+
+    def quit(self) -> None:
+        ...
+
+    def back_to_menu(self) -> None:
+        ...
 
 
 class Screen(ABC):
-
-    def __init__(self, manager: ScreenManager, assets: Assets) -> None:
-        self.manager = manager
+    def __init__(self, navigator: Navigator, assets: Assets) -> None:
+        self.navigator = navigator
         self.assets = assets
+
+    @abstractmethod
+    def set_screens(self) -> None:
+        ...
 
     @abstractmethod
     def input(self, key: int) -> None:
