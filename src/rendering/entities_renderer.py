@@ -2,7 +2,7 @@ from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.game_state.game_state import GameState, Direction, GameStatus
 from src.rendering.assets import WALL_SIZE, ENTITIES_SIZE
 from src.entity.ghost import GhostState
-from src.maze.grid import CellContents
+from src.maze.grid import PacgumsType
 from src.rendering.layer import Layer
 from src.rendering.sprites_name import (
     EYES_BY_DIRECTION,
@@ -138,27 +138,21 @@ class EntitiesRenderer:
 
             self._draw_sprite(sprite_name, pos_x, pos_y)
 
-    # TODO Modify this function once the pacgums are stored somewhere
     def _draw_pacgums(self) -> None:
         """
         Manages the sprites and animations for Pacgums
         """
-        for y in range(len(self.game_state.grid.cells)):
-            for x in range(len(self.game_state.grid.cells[y])):
-                if (
-                    self.game_state.grid.cells[y][x].content
-                    == CellContents.PACGUM
-                ):
-                    sprite_name = PACGUM
-                elif (
-                    self.game_state.grid.cells[y][x].content
-                    == CellContents.SUPER_PACGUM
-                    and self.frame % 2 == 0
-                ):
-                    sprite_name = SUPER_PACGUM
-                else:
-                    continue
-                self._draw_sprite(sprite_name, x, y)
+        for (x, y), pacgum_type in self.game_state.grid.pacgums.items():
+            if (pacgum_type == PacgumsType.PACGUM):
+                sprite_name = PACGUM
+            elif (
+                pacgum_type == PacgumsType.SUPER_PACGUM
+                and self.frame % 2 == 0
+            ):
+                sprite_name = SUPER_PACGUM
+            else:
+                continue
+            self._draw_sprite(sprite_name, x, y)
 
     @property
     def _death_frame(self) -> int:

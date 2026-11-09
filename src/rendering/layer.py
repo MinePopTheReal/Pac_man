@@ -19,7 +19,7 @@ class Layer:
 
         self._create_layer()
 
-    def is_dirty(self) -> None:
+    def mark_dirty(self) -> None:
         self._dirty = True
 
     def _create_layer(self) -> None:

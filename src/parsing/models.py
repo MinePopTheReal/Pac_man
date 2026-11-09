@@ -47,6 +47,9 @@ class Spritesheet(BaseModel):
 
 
 class GameConfig(BaseModel):
+    """
+    Check validity of config file
+    """
     high_score_filename: str = Field(default="high_score.json")
     lives: StrictInt = Field(default=3, ge=1)
     pacgum: StrictInt = Field(default=202, ge=0)

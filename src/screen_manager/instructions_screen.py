@@ -22,6 +22,11 @@ class Instructions(Screen):
         navigator: Navigator,
         assets: Assets
     ) -> None:
+        """Screen that explains the rules and the controls of the game.
+
+        The texts are fixed. The player leaves the screen with Escape or
+        Enter.
+        """
         super().__init__(navigator, assets)
         self.rules: str = (
             "EAT ALL THE PACGUMS TO\n"
@@ -56,13 +61,24 @@ class Instructions(Screen):
             "6: SLOW GHOSTS\n"
         )
 
-        self.set_screens()
-
     def input(self, key: int) -> None:
+        """Go back to the previous screen when Escape or Enter is pressed.
+
+        Other keys are ignored.
+
+        Args:
+            key (int): The code of the key (see pyglet.window.key).
+        """
         if key in (keys.ESCAPE, keys.ENTER):
             self.navigator.pop()
 
     def set_screens(self) -> None:
+        """Build the labels of the screen.
+
+        Called when the screen is created and each time it is shown.
+        The title, the rules and the controls are stacked from top to
+        bottom, each one placed under the previous one.
+        """
         self.title = Label(
             self.TITLE,
             H1_PX_SIZE,
@@ -128,6 +144,7 @@ class Instructions(Screen):
         )
 
     def draw_screen(self) -> None:
+        """Draw the title, the rules and the controls."""
         self.title.draw()
         self.sub_title_rules.draw()
         self.sub_title_controls.draw()

@@ -1,6 +1,6 @@
 class TerminalColors:
     """
-    colors use for display message (Error, Succes or Warning)
+    colors use for display message (Error, Success or Warning)
     """
 
     END: str = "\033[0m"

@@ -29,7 +29,7 @@ class Error(Exception):
 
 
 class RenderError(Error):
-    """Exception raised by the command line interface."""
+    """Exception raised by the render."""
 
     default_type = "Render"
 
@@ -52,5 +52,3 @@ class ScreenError(Error):
     """
 
     default_type = "Screen"
-
-# add your own error

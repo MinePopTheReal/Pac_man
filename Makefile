@@ -7,14 +7,16 @@ PDB := pdb
 
 SRC_DIR := src
 
+CONFIG_PATH ?= config.json
+
 run: install
-		$(UV) run python3 -m $(SRC_DIR)
+	$(UV) run python3 -m $(SRC_DIR) "$(CONFIG_PATH)"
 
 install:
 		$(UV) sync
 
 debug:
-		$(UV) run python3 -m pdb -m $(SRC_DIR)
+	$(UV) run python3 -m pdb -m $(SRC_DIR) "$(CONFIG_PATH)"
 
 clean:
 		rm -rf $(TEMP_FILE)
@@ -23,3 +25,5 @@ clean:
 lint:
 		@$(UV) run flake8 src/
 		@$(UV) run mypy src/ $(MYPY_FLAG)
+
+.PHONY: run install debug clean lint

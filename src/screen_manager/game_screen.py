@@ -26,30 +26,30 @@ DIRECTION_KEYS = {
 
 
 class Play(Screen):
+    """Screen where the game is played.
+
+    It shows the maze and the HUD, sends the keys pressed to the game,
+    makes the game move forward each frame, and goes to the end screen
+    when the game is won or lost.
+    """
     def __init__(
         self,
-        session: Session,
         navigator: Navigator,
-        assets: Assets,
         high_score: HighScoreManager,
+        session: Session,
+        assets: Assets,
     ) -> None:
         super().__init__(navigator, assets)
         self.high_score = high_score
         self.session = session
 
-        self._cheat_actions = {
-            key.C: self.session.game_state.switch_cheat_mode,
-            key._1: self.session.game_state.switch_invincible,
-            key._2: self.session.game_state.switch_ghosts_frozen,
-            key._3: self.session.game_state.skip_level,
-            key._4: self.session.game_state.add_extra_life,
-            key._5: self.session.game_state.switch_speed_pacman,
-            key._6: self.session.game_state.switch_slow_ghosts,
-        }
-
-        self.set_screens()
-
     def set_screens(self) -> None:
+        """Build the maze view and the HUD for the current game.
+
+        Called each time the screen is shown, so the widgets always match
+        the game of the session. The maze is centered in the window and
+        the HUD is placed just above it.
+        """
         center_x = self.assets.window_width // 2
         center_y = self.assets.window_height // 2
 
@@ -72,29 +72,70 @@ class Play(Screen):
             anchor_y=0,
         )
 
-        self.maze_view.start_animation()
+    def _cheat_action(self, symbol: int) -> None:
+        """Run the cheat linked to a key, if there is one.
+
+        C turns the cheat mode on or off, and 1 to 6 switch the other
+        cheats (they do nothing while the cheat mode is off). The game
+        is read again at each key press, so the cheats also work after
+        a new game was started. Other keys are ignored.
+
+        Args:
+            symbol (int): The code of the key (see pyglet.window.key).
+        """
+        gs = self.session.game_state
+        actions = {
+            key.C: gs.switch_cheat_mode,
+            key._1: gs.switch_invincible,
+            key._2: gs.switch_ghosts_frozen,
+            key._3: gs.skip_level,
+            key._4: gs.add_extra_life,
+            key._5: gs.switch_speed_pacman,
+            key._6: gs.switch_slow_ghosts
+        }
+
+        if symbol in actions:
+            actions[symbol]()
 
     def input(self, symbol: int) -> None:
+        """Handle a key pressed during the game.
+
+        WASD and the arrow keys choose the direction of Pac-Man, Escape
+        pauses the game and opens the pause screen, and any other key is
+        tried as a cheat key.
+
+        Args:
+            symbol (int): The code of the key (see pyglet.window.key).
+        """
         if symbol in DIRECTION_KEYS:
             self.session.game_state.select_direction(DIRECTION_KEYS[symbol])
         elif symbol == key.ESCAPE:
             self.session.game_state.switch_pause()
             self.navigator.push(ScreenName.PAUSE)
-        elif symbol in self._cheat_actions:
-            self._cheat_actions[symbol]()
+        else:
+            self._cheat_action(symbol)
 
     def update_screen(self, dt: float) -> None:
+        """Move the maze animation and the game forward by one frame.
+
+        When the game is won or lost, this screen is replaced by the end
+        screen.
+
+        Args:
+            dt (float): Seconds since the last frame.
+        """
+        self.maze_view.update(dt)
         self.session.game_state.update(dt)
 
         status = self.session.game_state.status
         if status not in (GameStatus.WON, GameStatus.LOST):
             return
 
-        self.maze_view.stop_animation()
         self.navigator.pop()
         self.navigator.push(ScreenName.ENDGAME)
 
     def draw_screen(self) -> None:
+        """Draw the maze, then the HUD with the current state of the game."""
         self.maze_view.draw()
         self.hud.set_state(self.session.game_state)
         self.hud.draw()

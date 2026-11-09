@@ -1,8 +1,8 @@
 from src.message.warning import WarningMessage
-from src.maze.cell import Cell, CellContents
+from src.maze.grid import Grid, PacgumsType
 from src.entity.characters import Direction
 from src.message.errors import GridError
-from src.maze.grid import Grid
+from src.maze.cell import Cell
 
 
 from mazegenerator import MazeGenerator
@@ -65,16 +65,14 @@ def transform_maze_to_grid(
         row: list[Cell] = []
         for x, number in enumerate(number_row):
             walls = convert_number_to_walls(number)
-            content = CellContents.EMPTY
-            row.append(Cell(walls, content))
+            row.append(Cell(walls))
             if number != CLOSED_CELL:
                 free_cell.append((y, x))
         cells.append(row)
 
     grid = Grid(cells)
     for y, x in grid.corners_grid:
-        cell = grid.get_cell(y, x)
-        cell.content = CellContents.SUPER_PACGUM
+        grid.pacgums[(x, y)] = PacgumsType.SUPER_PACGUM
         free_cell.remove((y, x))
     y, x = grid.center_grid
     free_cell.remove((y, x))
@@ -93,8 +91,7 @@ def transform_maze_to_grid(
     lst_cell_pac = rng.sample(free_cell, nb_pacgums)
 
     for y, x in lst_cell_pac:
-        cell = grid.get_cell(y, x)
-        cell.content = CellContents.PACGUM
+        grid.pacgums[(x, y)] = PacgumsType.PACGUM
 
     return grid
 

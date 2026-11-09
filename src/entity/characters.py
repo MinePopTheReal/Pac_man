@@ -3,6 +3,9 @@ from abc import ABC
 
 
 class Direction(Enum):
+    """
+    Simple Enum for Directions
+    """
     NONE = (0, 0)
     UP = (-1, 0)
     DOWN = (1, 0)
@@ -17,8 +20,7 @@ class Character(ABC):
         """initialization class character.
         Args:
             position (tuple[float, float]): Cell: (y, x) row, column
-            state (str): Character's state.
-            direction (str): character direction(UP, DOWN, LEFT, RIGHT)
+            direction (Direction): character direction(UP, DOWN, LEFT, RIGHT)
             speed (float): character speed
         """
         self.position = position
@@ -26,6 +28,12 @@ class Character(ABC):
         self.speed = speed
 
     def move(self, dt: float) -> None:
+        """The logic for frame-by-frame movement allows the
+        character's new position to be calculated
+
+        Args:
+            dt (float): new position
+        """
         y, x = self.position
         dir_y, dir_x = self.direction.value
         distance = self.speed * dt

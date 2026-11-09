@@ -3,6 +3,12 @@ from src.utils.sprite_sheet_manager import SpriteSheetManager
 
 
 class MenuItem:
+    """One entry of a menu, drawn in two colors.
+
+    The text is drawn twice when the item is created: once in the normal
+    color and once in the selected color. Showing the item as selected or
+    not then only means choosing which of the two images to draw.
+    """
     def __init__(
         self,
         text: str,
@@ -19,10 +25,26 @@ class MenuItem:
         self.width = self.normal.width
 
     def draw(self, x: int, y: int, is_selected: bool) -> None:
+        """Draw the item in the window.
+
+        Args:
+            x (int): Horizontal position of the left of the item.
+            y (int): Vertical position of the bottom of the item.
+            is_selected (bool): True to draw it in the selected color,
+                False for the normal color.
+        """
         (self.selected if is_selected else self.normal).draw(x, y)
 
 
 class Menu(Widget):
+    """Widget that shows a vertical list of entries, one of them selected.
+
+    The entries are stacked from top to bottom, centered horizontally,
+    with a gap of one character between them. The selected entry is
+    drawn in another color. The widget only displays the menu and keeps
+    the position of the selection: the key presses are handled by the
+    screen, which calls move().
+    """
     def __init__(
         self,
         texts: list[str],
@@ -56,9 +78,19 @@ class Menu(Widget):
         )
 
     def move(self, delta: int) -> None:
+        """Move the selection up or down.
+
+        After the last entry the selection goes back to the first one,
+        and the other way round.
+
+        Args:
+            delta (int): The number of entries to move: -1 selects the
+                previous entry (up), 1 selects the next one (down).
+        """
         self.selected = (self.selected + delta) % len(self.items)
 
     def _render(self) -> None:
+        """Draw the entries one under the other, each one centered."""
         top = self.bottom + self.height
         for i, item in enumerate(self.items):
             item_x = self.left + (self.width - item.width) // 2

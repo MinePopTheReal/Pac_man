@@ -340,6 +340,9 @@ requires-dist = [
     { name = "pyglet", specifier = ">=2.1.16" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "pathspec"
 version = "1.1.1"

@@ -1,9 +1,9 @@
-from src.maze.cell import Cell, CellContents
-from src.message.errors import GridError
 from src.entity.characters import Direction
-
+from src.message.errors import GridError
+from src.maze.cell import Cell
 
 from collections import deque
+from enum import Enum, auto
 
 
 LST_DIRECTION = [
@@ -12,6 +12,13 @@ LST_DIRECTION = [
     Direction.LEFT,
     Direction.RIGHT
 ]
+
+
+class PacgumsType(Enum):
+    """What a cell of the maze can contain."""
+
+    PACGUM = auto()
+    SUPER_PACGUM = auto()
 
 
 class Grid:
@@ -31,6 +38,8 @@ class Grid:
         self.cells = cells
         self.height = len(self.cells)
         self.width = len(self.cells[0])
+
+        self.pacgums: dict[tuple[int, int], PacgumsType] = {}
 
     def in_grid(self, y: int, x: int) -> bool:
         """Check if a position is inside the grid.
@@ -157,12 +166,7 @@ class Grid:
         Returns:
             int: The number of pacgums and super-pacgums left.
         """
-        count_pacgums = 0
-        for row in self.cells:
-            for cell in row:
-                if cell.content != CellContents.EMPTY:
-                    count_pacgums += 1
-        return count_pacgums
+        return len(self.pacgums)
 
     def distances_from_cell(self, y0: int, x0: int) -> list[list[int]]:
         dist = [[-1 for _ in range(self.width)] for _ in range(self.height)]

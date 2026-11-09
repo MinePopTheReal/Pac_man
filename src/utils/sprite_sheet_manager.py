@@ -1,12 +1,17 @@
-from enum import IntEnum
-from PIL import Image
-from numpy import asarray, ndarray, rot90, uint16, uint8, array, arange
-
 from src.parsing.parse_config import ConfigParser
 from src.parsing.models import Spritesheet
+from src.message.errors import RenderError
+from src.utils.file_manager import FileManager
+
+from numpy import asarray, ndarray, rot90, uint16, uint8, array, arange
+from enum import IntEnum
 
 
 class Rotation(IntEnum):
+    """Angles, in degrees, a sprite can be rotated by.
+
+    The rotation is clockwise. R0 means the sprite is not rotated.
+    """
     R0 = 0
     R90 = 90
     R180 = 180
@@ -66,13 +71,29 @@ class SpriteSheetManager:
             ndarray: Return an array containing all the pixels in the
             sprite sheet
         """
-        image = Image.open(image_path).convert(self.format)
+        image = FileManager.read_image(image_path, self.format)
 
         pixels = asarray(image)
         return pixels
 
     @staticmethod
     def scale(sprite: ndarray, sprite_px: int) -> ndarray:
+        """Resize a sprite to a square of sprite_px pixels.
+
+        Each pixel of the result is copied from the nearest pixel of the
+        original (nearest neighbor), so no new color is created and the
+        pixel art stays sharp. The original is not changed.
+
+        Args:
+            sprite (ndarray): The pixels of the sprite, with the shape
+                (height, width, channels).
+            sprite_px (int): The width and the height of the result, in
+                pixels.
+
+        Returns:
+            ndarray: The pixels of the resized sprite, with the shape
+                (sprite_px, sprite_px, channels).
+        """
         h, w = sprite.shape[:2]
         ys = arange(sprite_px) * h // sprite_px
         xs = arange(sprite_px) * w // sprite_px
@@ -83,14 +104,14 @@ class SpriteSheetManager:
         self, rotation_to_load: list[Rotation], sprite_px: int
     ) -> None:
         """
-        Allows you to preload all sprites while taking into account the
-        zoom level and user-specified rotation, so you don't have to rework
-        or transform the tiles later, thereby improving performance.
+        Allows you to preload all the sprites in the user-defined rotation,
+        which saves you from having to rework or transform the tiles later
+        on, thereby improving performance.
 
         Args:
             rotation_to_load (list[Rotation]): rotation list, to rotate
             the sprites based on the user's needs
-            zoom (int): zooming in on the buffer to get adapted sprites
+            sprite_px: sprite size in px
         """
         if sprite_px in self.sprites_bytes.keys():
             return
@@ -137,6 +158,30 @@ class SpriteSheetManager:
         frame_index: int,
         color: tuple[int, int, int] = (255, 255, 255),
     ) -> ndarray:
+        """Tint a sprite with a color.
+
+        Each red, green and blue value is multiplied by the matching
+        value of the color, divided by 255. White leaves the sprite as
+        it is, and the transparency (alpha) is never changed. The result
+        is stored in a cache, so the same sprite tinted with the same
+        color is computed only once.
+
+        Args:
+            sprite (ndarray): The pixels of the sprite to tint.
+            zoom (int): The size of the sprite in pixels. It is only used
+                to build the cache key.
+            sprite_name (str): The name of the sprite, for the cache key.
+            rotation (Rotation): The rotation of the sprite, for the
+                cache key.
+            frame_index (int): The frame of the animation, for the cache
+                key.
+            color (tuple[int, int, int]): The RGB color to tint with.
+                The default is white.
+
+        Returns:
+            ndarray: The pixels of the tinted sprite, without changing
+                the sprite given.
+        """
 
         key = (zoom, sprite_name, rotation, frame_index, color)
         cached = self._tint_cache.get(key)
@@ -176,6 +221,8 @@ class SpriteSheetManager:
         """
         ts = zoom
 
+        if not self.sprites_bytes[zoom].get(sprite_name):
+            raise RenderError("The requested sprite does not exist")
         sprite = self.sprites_bytes[zoom][sprite_name][rotation][
             frame % len(self.sprites_bytes[zoom][sprite_name][rotation])
         ]

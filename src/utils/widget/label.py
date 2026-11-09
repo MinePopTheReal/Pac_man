@@ -3,6 +3,12 @@ from src.utils.sprite_sheet_manager import SpriteSheetManager
 
 
 class Label(Widget):
+    """Widget that shows a fixed text, which can have several lines.
+
+    The text is drawn once, when the label is created, into its own
+    layer. The size of the label is the size of that layer, so it fits
+    the text exactly. To show another text, create a new label.
+    """
     def __init__(
         self,
         text: str,
@@ -29,4 +35,5 @@ class Label(Widget):
         )
 
     def _render(self) -> None:
+        """Put the layer of the label in the window."""
         self.layer.draw(self.left, self.bottom)

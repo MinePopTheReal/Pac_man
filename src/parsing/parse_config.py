@@ -114,7 +114,7 @@ class ConfigParser:
         load, clean and create obj
 
         Args:
-            path (str): path to the onfig file
+            path (str): path to the config file
             return_type (type[T]): pydantic model for the return
 
         Returns:
@@ -129,6 +129,12 @@ class ConfigParser:
             raise ParsingError(
                 "An error occurred while loading the file"
             ) from e
+
+        if not isinstance(file_datas, dict):
+            raise ParsingError(
+                "Invalid configuration file format. Key-value "
+                "pairs are expected in the following format: key:value"
+            )
 
         obj = return_type(**file_datas)
         return obj

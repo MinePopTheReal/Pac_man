@@ -4,7 +4,7 @@ from src.game_state.collision import collides
 from src.parsing.models import GameConfig
 from src.maze.loader import generate_maze
 from src.game_state.cheats import Cheats
-from src.maze import Grid, CellContents
+from src.maze import Grid, PacgumsType
 from src.entity import (
     Speedy,
     Shadow,
@@ -112,6 +112,7 @@ class GameState:
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
         self.pacman_map_cell: tuple[int, int] = (-1, -1)
         self.pacman_map: list[list[int]] = []
+
         self._update_pacman_map()
 
     def _update_score(self, addition: int) -> None:
@@ -137,11 +138,11 @@ class GameState:
             list[Ghost]: The 4 ghosts, all HUNTER.
         """
         lst_ghosts: list[Ghost] = []
-        classes: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
+        classes_name: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
 
-        for classe, corner in zip(classes, self.grid.corners_grid):
+        for class_name, corner in zip(classes_name, self.grid.corners_grid):
             y, x = corner
-            ghost = classe(
+            ghost = class_name(
                 Direction.NONE,
                 (float(y), float(x)),
                 GhostState.HUNTER,
@@ -242,7 +243,6 @@ class GameState:
                 if collides(self.pacman.position, ghost.position):
                     points_ghost = self.config.points_ghost
                     self._update_score(points_ghost * (2 ** self.eaten_ghosts))
-                    # self.score += points_ghost * (2**self.eaten_ghosts)
                     self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
                     ghost.respawn_timer = self.config.timer_respawn_ghost
@@ -493,22 +493,19 @@ class GameState:
         """
         if is_on_cell(self.pacman.position):
             y, x = self.pacman.position
-            cell = self.grid.get_cell(int(y), int(x))
-            eaten = cell.update_cell_content()
-            if eaten == CellContents.PACGUM:
+            y, x = int(y), int(x)
+            eaten = self.grid.pacgums.get((x, y))
+            if eaten == PacgumsType.PACGUM:
                 self._update_score(self.config.points_pacgum)
-                # self.score += self.config.points_pacgum
-            elif eaten == CellContents.SUPER_PACGUM:
+            elif eaten == PacgumsType.SUPER_PACGUM:
                 self._update_score(self.config.points_super_pacgum)
-                # self.score += self.config.points_super_pacgum
                 self.eaten_ghosts = 0
                 self._start_ghosts_hunt()
-            if (
-                eaten != CellContents.EMPTY
-                and self.grid.remaining_pacgums() == 0
-            ):
-                self._next_level()
-                return True
+            if eaten is not None:
+                self.grid.pacgums.pop((x, y))
+                if self.grid.remaining_pacgums() == 0:
+                    self._next_level()
+                    return True
         return False
 
     def _ghost_speed(self, ghost: Ghost) -> float:

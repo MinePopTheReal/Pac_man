@@ -1,6 +1,7 @@
 from src.message.errors import Error
 
 
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path
 from typing import Any
 from json import dump
@@ -73,3 +74,43 @@ class FileManager:
 
         except OSError as e:
             raise Error(f"Unable to write file: {file_path}") from e
+
+    @staticmethod
+    def read_image(image_path: str, format: str) -> Image.Image:
+        """Open an image file and convert it to a pixel format.
+
+        Every error that can happen while reading the image (missing
+        file, no permission, not an image, corrupted data) is turned
+        into an Error with a clear message.
+
+        Args:
+            image_path (str): The path to the image file.
+            format (str): The Pillow mode to convert the image to, for
+                example "RGB" or "RGBA".
+
+        Returns:
+            Image.Image: The image, converted and fully loaded in memory.
+        """
+        try:
+            image = Image.open(image_path).convert(format)
+
+            return image
+        except FileNotFoundError as e:
+            raise Error(f"Spritesheet not found: {image_path}") from e
+
+        except PermissionError as e:
+            raise Error(f"Permission denied: {image_path}") from e
+
+        except IsADirectoryError as e:
+            raise Error(f"Not a file: {image_path}") from e
+
+        except UnidentifiedImageError as e:
+            raise Error(f"Not a valid image: {image_path}") from e
+
+        except (
+            OSError,
+            SyntaxError,
+            ValueError,
+            Image.DecompressionBombError
+        ) as e:
+            raise Error(f"Corrupted or unsupported image: {image_path}") from e

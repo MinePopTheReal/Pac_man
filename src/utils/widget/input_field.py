@@ -1,5 +1,5 @@
 from src.utils.sprite_sheet_manager import SpriteSheetManager
-from src.utils.text_renderer import TextRenderer
+from src.utils.text_renderer import draw_string
 from src.utils.widget.widget import Widget
 from src.rendering.layer import Layer
 
@@ -8,6 +8,14 @@ MAX_NAME_LENGTH = 10
 
 
 class InputField(Widget):
+    """Widget that shows a prompt and, under it, the text typed by the player.
+
+    The prompt is on the first line, aligned to the left. The text is on
+    the second line, centered. The widget only displays the text: the key
+    presses are handled by the screen, which gives the text to set_text().
+    The content is drawn into its own layer, which is redrawn only when
+    the text changes.
+    """
     def __init__(
         self,
         prompt: str,
@@ -41,11 +49,21 @@ class InputField(Widget):
         self.set_text("")
 
     def set_text(self, text: str) -> None:
+        """Show a new text under the prompt.
+
+        Does nothing if the text is the same as the last time, so it can
+        be called every frame at no cost. The text is not limited here:
+        it must fit in the width of the widget, so the caller has to
+        limit its length (to MAX_NAME_LENGTH for a name).
+
+        Args:
+            text (str): The text to show, centered on the second line.
+        """
         if text == self._text:
             return
         self._text = text
         self.layer.clear()
-        TextRenderer.draw_string(
+        draw_string(
             self.layer.buffer_view,
             self.prompt,
             0,
@@ -54,7 +72,7 @@ class InputField(Widget):
             self.font,
             self.color_prompt,
         )
-        TextRenderer.draw_string(
+        draw_string(
             self.layer.buffer_view,
             text,
             ((self.layer.width // self.zoom) // 2) - (len(text) // 2),
@@ -65,4 +83,5 @@ class InputField(Widget):
         )
 
     def _render(self) -> None:
+        """Put the layer of the field in the window."""
         self.layer.draw(self.left, self.bottom)

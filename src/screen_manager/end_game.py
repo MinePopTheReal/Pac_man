@@ -18,20 +18,30 @@ from pyglet.window import key as keys
 
 
 class EndGame(Screen):
+    """Screen shown at the end of a game, after a victory or a defeat.
+
+    It displays the final score and the best score, and lets the player
+    type a name to save the score in the high score list.
+    """
     def __init__(
         self,
-        session: Session,
         navigator: Navigator,
         high_score_manager: HighScoreManager,
+        session: Session,
         assets: Assets,
     ) -> None:
         super().__init__(navigator, assets)
         self.high_score_manager = high_score_manager
         self.session = session
 
-        self.set_screens()
+        # self.set_screens()
 
     def set_screens(self) -> None:
+        """Build the widgets and clear the name typed by the player.
+
+        Called each time the screen is shown. The title depends on the
+        result of the game (victory or game over).
+        """
         self.prompt = "Enter your username:"
         self.name: str = ""
         self.empty: str = "_" * MAX_NAME_LENGTH
@@ -97,6 +107,15 @@ class EndGame(Screen):
         self._refresh_input()
 
     def input(self, key: int) -> None:
+        """Handle a key pressed while the player types a name.
+
+        Letters, digits and space add a character (up to the maximum
+        length), Backspace removes the last one, Enter saves the score,
+        and Escape leaves without saving it.
+
+        Args:
+            key (int): The code of the key (see pyglet.window.key).
+        """
         if (
             keys.A <= key <= keys.Z
             or keys._0 <= key <= keys._9
@@ -123,9 +142,15 @@ class EndGame(Screen):
             self.navigator.back_to_menu()
 
     def _refresh_input(self) -> None:
+        """Redraw the input field with the name and the empty slots."""
         self.input_field.set_text(self.name + self.empty)
 
     def _validate(self) -> None:
+        """Save the score under the typed name and go back to the menu.
+
+        Does nothing if the name is not valid (empty, too long or with
+        forbidden characters), so the player can correct it.
+        """
         if not self.high_score_manager.is_valid_name(self.name):
             return
         self.high_score_manager.add_name_score(
@@ -135,6 +160,7 @@ class EndGame(Screen):
         self.navigator.back_to_menu()
 
     def draw_screen(self) -> None:
+        """Draw the title, the scores and the input field."""
         self.title.draw()
         self.your_score_label.draw()
         self.best_score_label.draw()

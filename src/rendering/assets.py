@@ -5,6 +5,10 @@ from src.utils.sprite_sheet_manager import Rotation
 from pyglet import display
 
 
+# Consistency in size, colors, magnification
+# factor, etc., to ensure a consistent display
+
+
 # screen
 SCREEN_MARGIN = 0.95
 
@@ -46,6 +50,9 @@ MINOR_COLOR = (245, 245, 220)
 
 
 class Assets:
+    """
+    Pre-loaded sprites and all kinds of useful information for rendering
+    """
     def __init__(self, window_width: int, window_height: int) -> None:
         self.wall_spritesheet = SpriteSheetManager(
             "assets/wall_spritesheet_config.json",
