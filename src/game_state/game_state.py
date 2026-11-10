@@ -84,7 +84,7 @@ class GameState:
         level_time_left (float): Seconds left in this level.
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
-        status (GameStatus): PLAYING, DYING, PAUSED, LOST or WON.
+        status (GameStatus): GAME_SCREENING, DYING, PAUSED, LOST or WON.
         previous_status (GameStatus): The status before the last pause,
             given back when the game is resumed.
         cheats (Cheats): Which cheats are on, for example
@@ -114,7 +114,7 @@ class GameState:
         self.eaten_ghosts: int = 0
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
-        self.status: GameStatus = GameStatus.PLAYING
+        self.status: GameStatus = GameStatus.GAME_SCREENING
         self.previous_status: GameStatus = self.status
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
@@ -416,12 +416,12 @@ class GameState:
 
         Call it when the pause key is pressed. While paused, nothing
         moves and the timers stop. Resuming gives back the status the
-        game had before the pause (PLAYING or DYING), so a pause during
+        game had before the pause (GAME_SCREENING or DYING), so a pause during
         Pac-Man's death puts the death animation on hold. It does
         nothing when the game is over (LOST or WON), so a finished game
         cannot be resumed.
         """
-        if self.status in (GameStatus.PLAYING, GameStatus.DYING):
+        if self.status in (GameStatus.GAME_SCREENING, GameStatus.DYING):
             self.previous_status = self.status
             self.status = GameStatus.PAUSED
         elif self.status == GameStatus.PAUSED:

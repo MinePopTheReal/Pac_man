@@ -10,7 +10,7 @@ class Character(ABC):
     ) -> None:
         """initialization class character.
         Args:
-            position (tuple[float, float]): Cell: (y, x) row, column
+            position (tuple[float, float]): Cell: (x, y) row, column
             direction (Direction): character direction(UP, DOWN, LEFT, RIGHT)
             speed (float): character speed
         """

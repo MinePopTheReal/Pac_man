@@ -51,7 +51,7 @@ class Ghost(Character):
 
         Args:
             direction (Direction): Starting direction.
-            position (tuple[float, float]): Starting (y, x) position, in cells.
+            position (tuple[float, float]): Starting (x, y) position, in cells.
             state (GhostState): Starting state.
             speed (float): Speed in cells per second.
         """

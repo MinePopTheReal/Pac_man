@@ -136,5 +136,5 @@ class ConfigParser:
                 "pairs are expected in the following format: key:value"
             )
 
-        obj = return_type(**file_datas)
+        obj = return_type.model_validate(file_datas)
         return obj
