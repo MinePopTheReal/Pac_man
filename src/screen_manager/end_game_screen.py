@@ -1,9 +1,9 @@
-from src.utils.widget.input_field import InputField, MAX_NAME_LENGTH
+from src.rendering.widget.input_field import InputField, MAX_NAME_LENGTH
 from src.utils.high_score_manager import HighScoreManager
 from src.screen_manager.screen import Screen, Navigator
 from src.game_state.game_state import GameStatus
+from src.rendering.widget.label import Label
 from src.game_state.session import Session
-from src.utils.widget.label import Label
 from src.rendering.assets import (
     Assets,
     H3_PX_SIZE,
@@ -17,7 +17,7 @@ from src.rendering.assets import (
 from pyglet.window import key as keys
 
 
-class EndGame(Screen):
+class EndGameScreen(Screen):
     """Screen shown at the end of a game, after a victory or a defeat.
 
     It displays the final score and the best score, and lets the player
@@ -34,9 +34,7 @@ class EndGame(Screen):
         self.high_score_manager = high_score_manager
         self.session = session
 
-        # self.set_screens()
-
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the widgets and clear the name typed by the player.
 
         Called each time the screen is shown. The title depends on the

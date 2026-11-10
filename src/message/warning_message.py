@@ -1,4 +1,4 @@
-from src.message.colors import TerminalColors as TC
+from src.message.terminal_colors import TerminalColors as TC
 
 
 class WarningMessage:

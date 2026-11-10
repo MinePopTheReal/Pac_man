@@ -1,4 +1,4 @@
-from src.entity.characters import Character, Direction
+from src.entity.character import Character, Direction
 
 
 class Pacman(Character):

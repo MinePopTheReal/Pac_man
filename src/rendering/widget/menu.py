@@ -1,5 +1,5 @@
-from src.utils.widget.widget import Widget, make_text_layer, Align
-from src.utils.sprite_sheet_manager import SpriteSheetManager
+from src.rendering.widget.widget import Widget, make_text_layer, Align
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
 
 
 class MenuItem:

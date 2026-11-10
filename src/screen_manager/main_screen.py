@@ -1,7 +1,7 @@
 from src.screen_manager.screen_manager import ScreenName
 from src.screen_manager.screen import Screen, Navigator
-from src.utils.widget.label import Label
-from src.utils.widget.menu import Menu
+from src.rendering.widget.label import Label
+from src.rendering.widget.menu import Menu
 from src.rendering.assets import (
     Assets,
     H3_PX_SIZE,
@@ -16,7 +16,7 @@ from pyglet.window import key as keys
 from enum import Enum
 
 
-class Options(Enum):
+class MainOptions(Enum):
     """Entries of the main menu.
 
     The value of each entry is the text shown in the menu. The order of
@@ -28,7 +28,7 @@ class Options(Enum):
     EXIT = 'Quit'
 
 
-class MainMenu(Screen):
+class MainScreen(Screen):
     """First screen of the game, where the player chooses what to do.
 
     It shows the title and a menu to start a game, see the high scores,
@@ -47,9 +47,7 @@ class MainMenu(Screen):
         assets: Assets
     ) -> None:
         super().__init__(navigator, assets)
-        self.options: list[Options] = list(Options)
-
-        self.set_screens()
+        self.options: list[MainOptions] = list(MainOptions)
 
     def update_screen(self, dt: float) -> None:
         """Make the "press enter" text blink.
@@ -79,7 +77,7 @@ class MainMenu(Screen):
             case keys.ESCAPE:
                 self.navigator.quit()
 
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the title, the menu and the "press enter" text.
 
         Called when the screen is created and each time it is shown.
@@ -132,13 +130,13 @@ class MainMenu(Screen):
             selected (int): The position of the chosen entry in the menu.
         """
         match self.options[selected]:
-            case Options.START:
-                self.navigator.push(ScreenName.PLAY)
-            case Options.HIGH_SCORES:
+            case MainOptions.START:
+                self.navigator.push(ScreenName.GAME_SCREEN)
+            case MainOptions.HIGH_SCORES:
                 self.navigator.push(ScreenName.HIGH_SCORE)
-            case Options.INSTRUCTIONS:
-                self.navigator.push(ScreenName.INSTRUCTION)
-            case Options.EXIT:
+            case MainOptions.INSTRUCTIONS:
+                self.navigator.push(ScreenName.INSTRUCTIONS)
+            case MainOptions.EXIT:
                 self.navigator.quit()
 
     def draw_screen(self) -> None:

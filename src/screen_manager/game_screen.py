@@ -3,9 +3,9 @@ from src.game_state.game_state import Direction, GameStatus
 from src.screen_manager.screen_manager import ScreenName
 from src.utils.high_score_manager import HighScoreManager
 from src.screen_manager.screen import Screen, Navigator
-from src.utils.widget.maze_view import MazeView
+from src.rendering.widget.maze_view import MazeView
 from src.game_state.session import Session
-from src.utils.widget.hud import Hud
+from src.rendering.widget.hud import Hud
 
 
 from pyglet.window import key
@@ -25,7 +25,7 @@ DIRECTION_KEYS = {
 }
 
 
-class Play(Screen):
+class GameScreen(Screen):
     """Screen where the game is played.
 
     It shows the maze and the HUD, sends the keys pressed to the game,
@@ -43,7 +43,7 @@ class Play(Screen):
         self.high_score = high_score
         self.session = session
 
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the maze view and the HUD for the current game.
 
         Called each time the screen is shown, so the widgets always match

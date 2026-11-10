@@ -1,5 +1,5 @@
 from src.maze.grid import Grid, LST_DIRECTION
-from src.entity.characters import Direction
+from src.entity.character import Direction
 
 
 import math
@@ -7,8 +7,8 @@ import math
 
 def direction_toward(
     grid: Grid,
-    y: int,
     x: int,
+    y: int,
     current: Direction,
     dist_map: list[list[int]],
     run_away: bool,
@@ -31,16 +31,16 @@ def direction_toward(
     Returns:
         Direction: The direction to take, or Direction.NONE if blocked.
     """
-    dir_y, dir_x = current.value
-    opposite = Direction((-dir_y, -dir_x))
+    dir_x, dir_y = current.value
+    opposite = Direction((-dir_x, -dir_y))
     best_direction: Direction = Direction.NONE
     best_distance: float = math.inf
 
     for direction in LST_DIRECTION:
         if direction == opposite:
             continue
-        if grid.can_move(y, x, direction):
-            dy, dx = direction.value
+        if grid.can_move(x, y, direction):
+            dx, dy = direction.value
             ny = y + dy
             nx = x + dx
             distance = dist_map[ny][nx]
@@ -52,6 +52,6 @@ def direction_toward(
                 best_direction = direction
                 best_distance = distance
 
-    if best_direction == Direction.NONE and grid.can_move(y, x, opposite):
+    if best_direction == Direction.NONE and grid.can_move(x, y, opposite):
         return opposite
     return best_direction

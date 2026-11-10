@@ -1,4 +1,4 @@
-from src.message.warning import WarningMessage
+from src.message.warning_message import WarningMessage
 from pydantic import (
     BaseModel,
     StrictInt,
@@ -26,7 +26,7 @@ class Coord(BaseModel):
     y: StrictInt = Field(ge=0)
 
 
-class Spritesheet(BaseModel):
+class SpriteSheet(BaseModel):
     """
     Check spritesheet config
     """

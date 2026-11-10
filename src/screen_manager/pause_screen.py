@@ -8,8 +8,8 @@ from src.rendering.assets import (
 )
 from src.screen_manager.screen import Screen, Navigator
 from src.game_state.session import Session
-from src.utils.widget.label import Label
-from src.utils.widget.menu import Menu
+from src.rendering.widget.label import Label
+from src.rendering.widget.menu import Menu
 
 
 from pyglet.window import key as keys
@@ -26,7 +26,7 @@ class PauseOption(Enum):
     MENU = 'Back to menu'
 
 
-class Pause(Screen):
+class PauseScreen(Screen):
     """Screen shown on top of the game when the player pauses it.
 
     It shows a menu to resume the game or to give it up and go back to
@@ -43,8 +43,6 @@ class Pause(Screen):
         self.session = session
 
         self.options: list[PauseOption] = list(PauseOption)
-
-        self.set_screens()
 
     def input(self, key: int) -> None:
         """Handle a key pressed in the pause menu.
@@ -66,7 +64,7 @@ class Pause(Screen):
             case keys.ESCAPE:
                 self._validate(0)
 
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the title and the menu.
 
         Called when the screen is created and each time it is shown.

@@ -54,7 +54,7 @@ class ScreenManager:
     def push(self, screen_name: ScreenName) -> None:
         """Show a screen on top of the current one.
 
-        The screen builds its widgets (set_screens) just before being
+        The screen builds its widgets (build_widget) just before being
         shown. The current screen stays in the stack, so pop() can show
         it again.
 
@@ -69,7 +69,7 @@ class ScreenManager:
             raise ScreenError(
                 "The screen you want to push isn't registered."
             )
-        screen.set_screens()
+        screen.build_widget()
         self.screens_stack.append(screen)
 
     def pop(self) -> None:

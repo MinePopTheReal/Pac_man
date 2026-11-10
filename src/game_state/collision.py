@@ -15,9 +15,9 @@ def collides(
     ghost) is done by GameState.
 
     Args:
-        character_a (tuple[float, float]): The (y, x) position of the
+        character_a (tuple[float, float]): The (x, y) position of the
             first character, in cells.
-        character_b (tuple[float, float]): The (y, x) position of the
+        character_b (tuple[float, float]): The (x, y) position of the
             second character, in cells.
 
     Returns:

@@ -13,8 +13,8 @@ class ScreenName(StrEnum):
     it to show a screen.
     """
     MAIN = "main"
-    PLAY = "play"
-    INSTRUCTION = "instruction"
+    GAME_SCREEN = "play"
+    INSTRUCTIONS = "instruction"
     HIGH_SCORE = "high_score"
     PAUSE = "pause"
     ENDGAME = "endgame"
@@ -59,7 +59,7 @@ class Screen(ABC):
         self.assets = assets
 
     @abstractmethod
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the widgets of the screen.
 
         Called by the screen manager each time the screen is shown, so

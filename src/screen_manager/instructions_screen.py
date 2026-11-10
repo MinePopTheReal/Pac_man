@@ -1,5 +1,5 @@
 from src.screen_manager.screen import Screen, Navigator
-from src.utils.widget.label import Label
+from src.rendering.widget.label import Label
 from src.rendering.assets import (
     Assets,
     H1_PX_SIZE,
@@ -14,7 +14,7 @@ from src.rendering.assets import (
 from pyglet.window import key as keys
 
 
-class Instructions(Screen):
+class InstructionsScreen(Screen):
     TITLE = "instructions"
 
     def __init__(
@@ -72,7 +72,7 @@ class Instructions(Screen):
         if key in (keys.ESCAPE, keys.ENTER):
             self.navigator.pop()
 
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the labels of the screen.
 
         Called when the screen is created and each time it is shown.

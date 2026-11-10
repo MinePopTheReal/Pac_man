@@ -1,13 +1,13 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager
-from src.utils.widget.input_field import MAX_NAME_LENGTH
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
+from src.rendering.widget.input_field import MAX_NAME_LENGTH
 from src.game_state.game_state import MAX_SCORE_DIGITS
 from src.utils.high_score_manager import MAX_HIGH_SCORE
-from src.utils.text_renderer import draw_string
-from src.utils.widget.widget import Widget
+from src.rendering.text_drawing import draw_string
+from src.rendering.widget.widget import Widget
 from src.rendering.layer import Layer
 
 
-class HighScoresLabel(Widget):
+class HighScoreLabel(Widget):
     """Widget that draws the list of the best scores.
 
     Each line shows the rank, the name and the score. The list always has

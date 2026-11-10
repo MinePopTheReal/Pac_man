@@ -1,9 +1,9 @@
 from src.rendering.assets import Assets, WALL_SIZE, ENTITIES_SIZE
 from src.rendering.entities_renderer import EntitiesRenderer
 from src.rendering.wall_renderer import WallRenderer
-from src.utils.sprite_sheet_manager import Rotation
+from src.rendering.sprite_sheet_manager import Rotation
 from src.game_state.game_state import GameState
-from src.utils.widget.widget import Widget
+from src.rendering.widget.widget import Widget
 from src.parsing.models import GameConfig
 from src.rendering.layer import Layer
 

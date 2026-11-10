@@ -1,7 +1,7 @@
-from src.utils.widget.high_score_label import HighScoresLabel
+from src.rendering.widget.high_score_label import HighScoreLabel
 from src.utils.high_score_manager import HighScoreManager
 from src.screen_manager.screen import Screen, Navigator
-from src.utils.widget.label import Label
+from src.rendering.widget.label import Label
 from src.rendering.assets import Assets
 from src.rendering.assets import (
     H1_PX_SIZE,
@@ -18,7 +18,7 @@ from src.rendering.assets import (
 from pyglet.window import key as keys
 
 
-class HighScore(Screen):
+class HighScoreScreen(Screen):
     """Screen that shows the list of the best scores.
 
     The scores come from the high score manager. The first three are
@@ -36,8 +36,6 @@ class HighScore(Screen):
         super().__init__(navigator, assets)
         self.high_score = high_score
 
-        self.set_screens()
-
     def input(self, key: int) -> None:
         """Go back to the previous screen when Escape or Enter is pressed.
 
@@ -49,7 +47,7 @@ class HighScore(Screen):
         if key in (keys.ESCAPE, keys.ENTER):
             self.navigator.pop()
 
-    def set_screens(self) -> None:
+    def build_widget(self) -> None:
         """Build the title and the score list widgets.
 
         Called when the screen is created and each time it is shown.
@@ -68,7 +66,7 @@ class HighScore(Screen):
         )
 
         title_bottom = self.title.y - self.title.height
-        self.high_score_label = HighScoresLabel(
+        self.high_score_label = HighScoreLabel(
             H3_PX_SIZE,
             self.assets.font_spritesheet,
             TOP1_COLOR,

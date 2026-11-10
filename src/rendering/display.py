@@ -1,6 +1,6 @@
 from src.rendering.assets import ACTUAL_RESOLUTION, MINIMAL_RESOLUTION
 from src.screen_manager.screen_manager import ScreenManager
-from src.message.warning import WarningMessage
+from src.message.warning_message import WarningMessage
 from src.message.errors import RenderError
 
 

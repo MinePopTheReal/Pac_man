@@ -1,4 +1,4 @@
-from src.entity.characters import Character, Direction
+from src.entity.character import Character, Direction
 
 from abc import abstractmethod
 from enum import Enum, auto
@@ -38,7 +38,7 @@ class Ghost(Character):
             again, once it is back in its corner.
     """
 
-    name: str = "ghost"
+    name: str = ""
 
     def __init__(
         self,
@@ -72,13 +72,13 @@ class Ghost(Character):
         The cell may be a wall or outside the maze: GameState checks it.
 
         Args:
-            pac_cell (tuple[int, int]): Pac-Man's (y, x) cell.
+            pac_cell (tuple[int, int]): Pac-Man's (x, y) cell.
             pac_direction (Direction): The direction Pac-Man is moving in.
-            shadow_cell (tuple[int, int]): Shadow's (y, x) cell.
+            shadow_cell (tuple[int, int]): Shadow's (x, y) cell.
             corner (tuple[int, int]): This ghost's own corner.
 
         Returns:
-            tuple[int, int]: The (y, x) cell to aim at.
+            tuple[int, int]: The (x, y) cell to aim at.
         """
         pass
 
@@ -134,9 +134,9 @@ class Speedy(Ghost):
         corner: tuple[int, int],
     ) -> tuple[int, int]:
         """Aim SPEEDY_AHEAD cells in front of Pac-Man."""
-        y, x = pac_cell
-        dy, dx = pac_direction.value
-        return (y + dy * SPEEDY_AHEAD, x + dx * SPEEDY_AHEAD)
+        x, y = pac_cell
+        dx, dy = pac_direction.value
+        return (x + dx * SPEEDY_AHEAD, y + dy * SPEEDY_AHEAD)
 
 
 class Bashful(Ghost):
@@ -167,12 +167,12 @@ class Bashful(Ghost):
         The target is Shadow's position mirrored through the cell
         BASHFUL_AHEAD cells in front of Pac-Man.
         """
-        y, x = pac_cell
-        dy, dx = pac_direction.value
-        piv_y = y + dy * BASHFUL_AHEAD
+        x, y = pac_cell
+        dx, dy = pac_direction.value
         piv_x = x + dx * BASHFUL_AHEAD
-        shad_y, shad_x = shadow_cell
-        return (2 * piv_y - shad_y, 2 * piv_x - shad_x)
+        piv_y = y + dy * BASHFUL_AHEAD
+        shad_x, shad_y = shadow_cell
+        return (2 * piv_x - shad_x, 2 * piv_y - shad_y)
 
 
 class Pokey(Ghost):

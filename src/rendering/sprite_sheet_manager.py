@@ -1,5 +1,5 @@
-from src.parsing.parse_config import ConfigParser
-from src.parsing.models import Spritesheet
+from src.parsing.config_parser import ConfigParser
+from src.parsing.models import SpriteSheet
 from src.message.errors import RenderError
 from src.utils.file_manager import FileManager
 
@@ -33,7 +33,7 @@ class SpriteSheetManager:
             Rotation.R270: 1,
         }
 
-        self.spritesheet_config: Spritesheet = self._load_spritesheet_config(
+        self.spritesheet_config: SpriteSheet = self._load_spritesheet_config(
             config_path
         )
         self.spritesheet_bytes: ndarray = self._load_spritesheet(image_path)
@@ -46,7 +46,7 @@ class SpriteSheetManager:
             tuple[int, str, Rotation, int, tuple[int, int, int]], ndarray
         ] = {}
 
-    def _load_spritesheet_config(self, config_path: str) -> Spritesheet:
+    def _load_spritesheet_config(self, config_path: str) -> SpriteSheet:
         """
         Load the configuration associated with the sprite sheet
 
@@ -58,7 +58,7 @@ class SpriteSheetManager:
             sprite configuration
         """
         parser = ConfigParser()
-        spritesheet = parser.load_config(config_path, Spritesheet)
+        spritesheet = parser.load_config(config_path, SpriteSheet)
         return spritesheet
 
     def _load_spritesheet(self, image_path: str) -> ndarray:

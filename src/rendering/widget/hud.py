@@ -1,8 +1,8 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager
-from src.utils.text_renderer import draw_string
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
+from src.rendering.text_drawing import draw_string
 from src.game_state.game_state import MAX_SCORE
 from src.game_state.game_state import GameState
-from src.utils.widget.widget import Widget
+from src.rendering.widget.widget import Widget
 from src.rendering.layer import Layer
 
 

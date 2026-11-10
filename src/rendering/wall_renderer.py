@@ -1,4 +1,4 @@
-from src.utils.sprite_sheet_manager import Rotation, SpriteSheetManager
+from src.rendering.sprite_sheet_manager import Rotation, SpriteSheetManager
 from src.maze.grid import Direction
 from src.maze.cell import Cell
 

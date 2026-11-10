@@ -5,7 +5,7 @@ be checked on whole cells. The rule used here: a character can only
 change direction when it stands exactly on a cell, and it always stops
 on every cell it crosses, so it can never skip a wall check.
 """
-from src.entity.characters import Direction, Character
+from src.entity.character import Direction, Character
 from src.maze.grid import Grid, LST_DIRECTION
 
 
@@ -16,17 +16,17 @@ def is_on_cell(coord: tuple[float, float]) -> bool:
     """Check if a position is exactly on a cell (both values are whole).
 
     Args:
-        coord (tuple[float, float]): A (y, x) position, in cells.
+        coord (tuple[float, float]): A (x, y) position, in cells.
 
     Returns:
         bool: True for (5.0, 3.0), False for (5.0, 3.4).
     """
-    y, x = coord
-    return y.is_integer() and x.is_integer()
+    x, y = coord
+    return x.is_integer() and y.is_integer()
 
 
 def choose_direction(
-    y: int, x: int, wanted: Direction, current: Direction, grid: Grid
+    x: int, y: int, wanted: Direction, current: Direction, grid: Grid
 ) -> Direction:
     """Choose where a character standing on a cell goes next.
 
@@ -35,8 +35,8 @@ def choose_direction(
     stops.
 
     Args:
-        y (int): The row of the cell.
         x (int): The column of the cell.
+        y (int): The row of the cell.
         wanted (Direction): The direction the character would like to take.
         current (Direction): The direction it is moving in.
         grid (Grid): The maze.
@@ -45,9 +45,9 @@ def choose_direction(
         Direction: The direction to take, or Direction.NONE if both are
             blocked by walls.
     """
-    if grid.can_move(y, x, wanted):
+    if grid.can_move(x, y, wanted):
         return wanted
-    if grid.can_move(y, x, current):
+    if grid.can_move(x, y, current):
         return current
     return Direction.NONE
 
@@ -62,22 +62,22 @@ def next_cell(
     (5.0, 3.0) -> (5.0, 4.0) and (5.0, 3.4) -> (5.0, 4.0).
 
     Args:
-        coord (tuple[float, float]): The current (y, x) position.
+        coord (tuple[float, float]): The current (x, y) position.
         direction (Direction): The direction of the move.
 
     Returns:
-        tuple[float, float]: The (y, x) position of the next cell.
+        tuple[float, float]: The (x, y) position of the next cell.
     """
-    y, x = coord
-    dy, dx = direction.value
+    x, y = coord
+    dx, dy = direction.value
 
     if is_on_cell(coord):
-        return (float(y + dy), float(x + dx))
+        return (float(x + dx), float(y + dy))
 
-    ny = ceil(y) if dy > 0 else floor(y) if dy < 0 else y
     nx = ceil(x) if dx > 0 else floor(x) if dx < 0 else x
+    ny = ceil(y) if dy > 0 else floor(y) if dy < 0 else y
 
-    return (float(ny), float(nx))
+    return (float(nx), float(ny))
 
 
 def advance(
@@ -101,26 +101,26 @@ def advance(
         grid (Grid): The maze.
     """
     if is_on_cell(character.position):
-        py, px = character.position
+        px, py = character.position
         character.direction = choose_direction(
-            int(py), int(px), wanted, character.direction, grid
+            int(px), int(py), wanted, character.direction, grid
         )
         if character.direction == Direction.NONE:
             return
 
-    ty, tx = next_cell(character.position, character.direction)
-    y, x = character.position
-    remains = abs(ty - y) + abs(tx - x)
+    tx, ty = next_cell(character.position, character.direction)
+    x, y = character.position
+    remains = abs(tx - x) + abs(ty - y)
 
     distance = character.speed * dt
     if distance >= remains:
-        character.position = (ty, tx)
+        character.position = (tx, ty)
     else:
         character.move(dt)
 
 
 def direction_home(
-    y: int, x: int, maze: list[list[int]], grid: Grid
+    x: int, y: int, maze: list[list[int]], grid: Grid
 ) -> Direction:
     """Give the direction that brings an eaten ghost closer to its corner.
 
@@ -142,8 +142,8 @@ def direction_home(
     if step <= 0:
         return Direction.NONE
     for direction in LST_DIRECTION:
-        if grid.can_move(y, x, direction):
-            dy, dx = direction.value
+        if grid.can_move(x, y, direction):
+            dx, dy = direction.value
             ny = y + dy
             nx = x + dx
             if maze[ny][nx] == step - 1:

@@ -1,5 +1,4 @@
-from src.utils.widget.input_field import MAX_NAME_LENGTH
-from src.message.warning import WarningMessage
+from src.message.warning_message import WarningMessage
 from src.utils.file_manager import FileManager
 from src.parsing.models import GameConfig
 from src.message.errors import Error
@@ -9,6 +8,7 @@ from json import loads, JSONDecodeError
 
 
 MAX_HIGH_SCORE = 10
+MAX_NAME_LENGTH = 10
 
 
 class HighScoreManager:

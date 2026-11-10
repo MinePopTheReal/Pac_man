@@ -1,4 +1,4 @@
-from src.entity.characters import Direction
+from src.entity.character import Direction
 
 
 class Cell:

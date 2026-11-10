@@ -1,10 +1,8 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager
-from src.utils.text_renderer import draw_string
-from src.utils.widget.widget import Widget
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
+from src.utils.high_score_manager import MAX_NAME_LENGTH
+from src.rendering.text_drawing import draw_string
+from src.rendering.widget.widget import Widget
 from src.rendering.layer import Layer
-
-
-MAX_NAME_LENGTH = 10
 
 
 class InputField(Widget):

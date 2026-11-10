@@ -1,10 +1,10 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
+from src.rendering.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.game_state.game_state import GameState, Direction, GameStatus
 from src.rendering.assets import WALL_SIZE, ENTITIES_SIZE
+from src.maze.pacgum_type import PacgumType
 from src.entity.ghost import GhostState
-from src.maze.grid import PacgumsType
 from src.rendering.layer import Layer
-from src.rendering.sprites_name import (
+from src.rendering.sprites_names import (
     EYES_BY_DIRECTION,
     GHOSTS_BY_DIRECTION,
     PACGUM,
@@ -86,7 +86,7 @@ class EntitiesRenderer:
         Pac-Man's state and adds it to the buffer.
         """
         direction = self.game_state.pacman.direction
-        pos_y, pos_x = self.game_state.pacman.position
+        pos_x, pos_y = self.game_state.pacman.position
         frame = -1
 
         if (
@@ -123,7 +123,7 @@ class EntitiesRenderer:
         on their state and adds them to the buffer.
         """
         for ghost in self.game_state.ghosts:
-            pos_y, pos_x = ghost.position
+            pos_x, pos_y = ghost.position
 
             if ghost.state == GhostState.HUNTED:
                 blinking = (
@@ -143,10 +143,10 @@ class EntitiesRenderer:
         Manages the sprites and animations for Pacgums
         """
         for (x, y), pacgum_type in self.game_state.grid.pacgums.items():
-            if (pacgum_type == PacgumsType.PACGUM):
+            if (pacgum_type == PacgumType.PACGUM):
                 sprite_name = PACGUM
             elif (
-                pacgum_type == PacgumsType.SUPER_PACGUM
+                pacgum_type == PacgumType.SUPER_PACGUM
                 and self.frame % 2 == 0
             ):
                 sprite_name = SUPER_PACGUM
@@ -207,7 +207,7 @@ class EntitiesRenderer:
             self._draw_pacgums()
             self._draw_pacman()
 
-        elif self.game_state.status == GameStatus.PLAYING:
+        elif self.game_state.status == GameStatus.GAME_SCREENING:
             self._draw_pacgums()
             self._draw_ghosts()
             self._draw_pacman()

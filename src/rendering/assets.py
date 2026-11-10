@@ -1,5 +1,5 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager
-from src.utils.sprite_sheet_manager import Rotation
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
+from src.rendering.sprite_sheet_manager import Rotation
 
 
 from pyglet import display

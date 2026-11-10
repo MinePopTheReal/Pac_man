@@ -1,16 +1,7 @@
-from enum import Enum
+from src.entity.direction import Direction
+
+
 from abc import ABC
-
-
-class Direction(Enum):
-    """
-    Simple Enum for Directions
-    """
-    NONE = (0, 0)
-    UP = (-1, 0)
-    DOWN = (1, 0)
-    LEFT = (0, -1)
-    RIGHT = (0, 1)
 
 
 class Character(ABC):
@@ -34,9 +25,9 @@ class Character(ABC):
         Args:
             dt (float): new position
         """
-        y, x = self.position
-        dir_y, dir_x = self.direction.value
+        x, y = self.position
+        dir_x, dir_y = self.direction.value
         distance = self.speed * dt
         new_pos_y = y + dir_y * distance
         new_pos_x = x + dir_x * distance
-        self.position = (new_pos_y, new_pos_x)
+        self.position = (new_pos_x, new_pos_y)

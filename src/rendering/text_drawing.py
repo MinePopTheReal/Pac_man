@@ -1,4 +1,4 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
+from src.rendering.sprite_sheet_manager import SpriteSheetManager, Rotation
 from src.message.errors import RenderError
 
 from numpy import ndarray

@@ -1,26 +1,25 @@
-from src.screen_manager.instructions_screen import Instructions
+from src.screen_manager.instructions_screen import InstructionsScreen
+from src.screen_manager.high_score_screen import HighScoreScreen
+from src.screen_manager.end_game_screen import EndGameScreen
 from src.screen_manager.screen_manager import ScreenManager
 from src.rendering.assets import Assets, ACTUAL_RESOLUTION
-from src.screen_manager.high_score_screen import HighScore
 from src.utils.high_score_manager import HighScoreManager
-from src.screen_manager.pause_screen import Pause
-from src.parsing.parse_config import ConfigParser
-from src.screen_manager.main_menu import MainMenu
+from src.screen_manager.pause_screen import PauseScreen
+from src.screen_manager.game_screen import GameScreen
+from src.screen_manager.main_screen import MainScreen
+from src.parsing.config_parser import ConfigParser
 from src.screen_manager.screen import ScreenName
 from src.game_state.game_state import GameConfig
-from src.screen_manager.game_screen import Play
-from src.screen_manager.end_game import EndGame
 from src.game_state.session import Session
 from src.rendering.display import Display
 from src.message.errors import Error
+
 
 from argparse import ArgumentParser
 from pyglet import app
 
 
 def main() -> None:
-    # TODO docstring
-    # TODO norm
     """Build the game from a config file and run it.
 
     The path of the JSON config file is read from the command line.
@@ -31,7 +30,7 @@ def main() -> None:
     """
 
     parser = ArgumentParser(
-        prog="pac-man.py", description="Pac-Man game."
+        prog="__main__.py", description="Pac-Man game."
     )
 
     parser.add_argument("config", help="path to the JSON config file")
@@ -50,21 +49,21 @@ def main() -> None:
     session = Session(config)
 
     rs = screen_manager.register_screens
-    rs(ScreenName.MAIN, MainMenu(screen_manager, assets))
-    rs(ScreenName.PLAY, Play(
+    rs(ScreenName.MAIN, MainScreen(screen_manager, assets))
+    rs(ScreenName.GAME_SCREEN, GameScreen(
         screen_manager,
         high_score_manager,
         session,
         assets
     ))
-    rs(ScreenName.INSTRUCTION, Instructions(screen_manager, assets))
-    rs(ScreenName.HIGH_SCORE, HighScore(
+    rs(ScreenName.INSTRUCTIONS, InstructionsScreen(screen_manager, assets))
+    rs(ScreenName.HIGH_SCORE, HighScoreScreen(
         screen_manager,
         high_score_manager,
         assets
     ))
-    rs(ScreenName.PAUSE, Pause(screen_manager, session, assets))
-    rs(ScreenName.ENDGAME, EndGame(
+    rs(ScreenName.PAUSE, PauseScreen(screen_manager, session, assets))
+    rs(ScreenName.ENDGAME, EndGameScreen(
         screen_manager,
         high_score_manager,
         session,

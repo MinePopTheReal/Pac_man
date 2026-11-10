@@ -1,10 +1,11 @@
 from src.game_state.movement import is_on_cell, advance, direction_home
-from src.game_state.direction_ghost import direction_toward
+from src.game_state.ghost_direction import direction_toward
+from src.maze.maze_generator import generate_maze
 from src.game_state.collision import collides
+from src.maze.pacgum_type import PacgumType
 from src.parsing.models import GameConfig
-from src.maze.loader import generate_maze
 from src.game_state.cheats import Cheats
-from src.maze import Grid, PacgumsType
+from src.maze import Grid
 from src.entity import (
     Speedy,
     Shadow,
@@ -44,7 +45,7 @@ class GameStatus(Enum):
     death animation, which ends with GameState.end_death().
     """
 
-    PLAYING = auto()
+    GAME_SCREENING = auto()
     DYING = auto()
     PAUSED = auto()
     LOST = auto()
@@ -67,8 +68,8 @@ class GameState:
 
     Attributes you can read to draw the game (do not change them):
         grid (Grid): The current maze; grid.get_all_cells() gives every
-            (y, x, cell) with its walls and content.
-        pacman (Pacman): position (y, x) in cells, direction.
+            (x, y, cell) with its walls and content.
+        pacman (Pacman): position (x, y) in cells, direction.
         ghosts (list[Ghost]): position, direction and state of each
             ghost (HUNTER: normal, HUNTED: can be eaten, EATEN: going
             back to its corner).
@@ -78,15 +79,15 @@ class GameState:
         level_time_left (float): Seconds left in this level.
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
-        status (GameStatus): PLAYING, DYING, PAUSED, LOST or WON.
+        status (GameStatus): GAME_SCREENING, DYING, PAUSED, LOST or WON.
         cheats (Cheats): Which cheats are on, for example
             cheats.enabled or cheats.invincible.
         started (bool): False until Pac-Man makes his first move in this
             level or after a lost life; ghosts and the level timer wait
             until then (useful to show a "Ready!" message).
 
-    Positions are (y, x) = (row, column) in cells, not pixels: multiply
-    by the tile size to draw, and swap to (x, y) for the screen.
+    Positions are (x, y) = (row, column) in cells, not pixels: multiply
+    by the tile size to draw, and swap to (y, x) for the screen.
     """
 
     def __init__(self, config: GameConfig) -> None:
@@ -106,7 +107,7 @@ class GameState:
         self.eaten_ghosts: int = 0
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
-        self.status: GameStatus = GameStatus.PLAYING
+        self.status: GameStatus = GameStatus.GAME_SCREENING
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
@@ -124,8 +125,8 @@ class GameState:
         Returns:
             Pacman: Pac-Man, not moving yet.
         """
-        y, x = self.grid.center_grid
-        pacman = Pacman(Direction.NONE, (float(y), float(x)), PACMAN_SPEED)
+        x, y = self.grid.center_grid
+        pacman = Pacman(Direction.NONE, (float(x), float(y)), PACMAN_SPEED)
         return pacman
 
     def _spawn_ghosts(self) -> list[Ghost]:
@@ -141,10 +142,10 @@ class GameState:
         classes_name: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
 
         for class_name, corner in zip(classes_name, self.grid.corners_grid):
-            y, x = corner
+            x, y = corner
             ghost = class_name(
                 Direction.NONE,
-                (float(y), float(x)),
+                (float(x), float(y)),
                 GhostState.HUNTER,
                 GHOST_SPEED,
             )
@@ -159,15 +160,15 @@ class GameState:
         again for Pac-Man's first move. Pac-Man's speed is kept, so the
         speed cheat stays on.
         """
-        y, x = self.grid.center_grid
-        self.pacman.position = (float(y), float(x))
+        x, y = self.grid.center_grid
+        self.pacman.position = (float(x), float(y))
         self.pacman.direction = Direction.NONE
         self.wanted_direction = Direction.NONE
 
         for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
-            y, x = corner
+            x, y = corner
             ghost.direction = Direction.NONE
-            ghost.position = (float(y), float(x))
+            ghost.position = (float(x), float(y))
             ghost.state = GhostState.HUNTER
             ghost.respawn_timer = 0.0
         self.time_hunt_ghosts = 0.0
@@ -217,8 +218,8 @@ class GameState:
         """
         lst_maps: list[list[list[int]]] = []
         for corner in self.grid.corners_grid:
-            y, x = corner
-            lst_maps.append(self.grid.distances_from_cell(y, x))
+            x, y = corner
+            lst_maps.append(self.grid.distances_from_cell(x, y))
         return lst_maps
 
     def _check_ghost_collision(self) -> None:
@@ -253,8 +254,8 @@ class GameState:
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
                 ghost.state = GhostState.HUNTED
-                dy, dx = ghost.direction.value
-                ghost.direction = Direction((-dy, -dx))
+                dx, dy = ghost.direction.value
+                ghost.direction = Direction((-dx, -dy))
 
     def _start_death(self) -> None:
         """Put the game in DYING and wait for end_death()."""
@@ -309,12 +310,12 @@ class GameState:
 
         Ghosts use this map to chase or flee from Pac-Man.
         """
-        py, px = self.pacman.position
-        y = round(py)
+        px, py = self.pacman.position
         x = round(px)
-        if self.pacman_map_cell != (y, x):
-            self.pacman_map = self.grid.distances_from_cell(y, x)
-            self.pacman_map_cell = (y, x)
+        y = round(py)
+        if self.pacman_map_cell != (x, y):
+            self.pacman_map = self.grid.distances_from_cell(x, y)
+            self.pacman_map_cell = (x, y)
 
     def _chase_map(
         self,
@@ -336,25 +337,25 @@ class GameState:
         Returns:
             list[list[int]]: The distance map to follow.
         """
-        shad_y, shad_x = self.ghosts[0].position
+        shad_x, shad_y = self.ghosts[0].position
         target = ghost.position_target(
             self.pacman_map_cell,
             self.pacman.direction,
-            (round(shad_y), round(shad_x)),
+            (round(shad_x), round(shad_y)),
             corner,
         )
-        ty, tx = target
+        tx, ty = target
         ty = min(max(ty, 0), self.grid.height - 1)
         tx = min(max(tx, 0), self.grid.width - 1)
 
-        if (ty, tx) == self.pacman_map_cell:
+        if (tx, ty) == self.pacman_map_cell:
             return self.pacman_map
 
-        if (ty, tx) == corner:
+        if (tx, ty) == corner:
             return corner_map
 
-        gy, gx = ghost.position
-        map_toward_target = self.grid.distances_from_cell(ty, tx)
+        gx, gy = ghost.position
+        map_toward_target = self.grid.distances_from_cell(tx, ty)
 
         if map_toward_target[int(gy)][int(gx)] == -1:
             return self.pacman_map
@@ -403,16 +404,16 @@ class GameState:
             self.cheats.slow = not self.cheats.slow
 
     def switch_pause(self) -> None:
-        """Pause the game, or resume it if it is paused.
+        """PauseScreen the game, or resume it if it is paused.
 
         Call it when the pause key is pressed. While paused, nothing
         moves and the timers stop. It does nothing when the game is
         over (LOST or WON), so a finished game cannot be resumed.
         """
-        if self.status == GameStatus.PLAYING:
+        if self.status == GameStatus.GAME_SCREENING:
             self.status = GameStatus.PAUSED
         elif self.status == GameStatus.PAUSED:
-            self.status = GameStatus.PLAYING
+            self.status = GameStatus.GAME_SCREENING
 
     def select_direction(self, direction: Direction) -> None:
         """Tell which way the player wants Pac-Man to go.
@@ -440,7 +441,7 @@ class GameState:
             self.status = GameStatus.LOST
         else:
             self._reset_position()
-            self.status = GameStatus.PLAYING
+            self.status = GameStatus.GAME_SCREENING
 
     def _ghost_wanted(
         self,
@@ -465,21 +466,21 @@ class GameState:
         if not is_on_cell(ghost.position):
             return ghost.direction
 
-        y, x = ghost.position
+        x, y = ghost.position
         if ghost.state == GhostState.EATEN:
-            return direction_home(int(y), int(x), corner_map, self.grid)
+            return direction_home(int(x), int(y), corner_map, self.grid)
         if ghost.state == GhostState.HUNTED:
             return direction_toward(
                 self.grid,
-                int(y),
                 int(x),
+                int(y),
                 ghost.direction,
                 self.pacman_map,
                 True,
             )
         chase_map = self._chase_map(ghost, corner_map, corner)
         return direction_toward(
-            self.grid, int(y), int(x), ghost.direction, chase_map, False
+            self.grid, int(x), int(y), ghost.direction, chase_map, False
         )
 
     def _pacman_eats(self) -> bool:
@@ -492,12 +493,12 @@ class GameState:
             bool: True if the level changed, so the frame must stop here.
         """
         if is_on_cell(self.pacman.position):
-            y, x = self.pacman.position
-            y, x = int(y), int(x)
+            x, y = self.pacman.position
+            x, y = int(x), int(y)
             eaten = self.grid.pacgums.get((x, y))
-            if eaten == PacgumsType.PACGUM:
+            if eaten == PacgumType.PACGUM:
                 self._update_score(self.config.points_pacgum)
-            elif eaten == PacgumsType.SUPER_PACGUM:
+            elif eaten == PacgumType.SUPER_PACGUM:
                 self._update_score(self.config.points_super_pacgum)
                 self.eaten_ghosts = 0
                 self._start_ghosts_hunt()
@@ -549,13 +550,13 @@ class GameState:
 
         Moves Pac-Man and the ghosts, eats pacgums, handles collisions,
         timers, the next level and the end of the game. Does nothing when
-        the status is not PLAYING (for example during a pause). Ghosts
+        the status is not GAME_SCREENING (for example during a pause). Ghosts
         and the level timer wait until Pac-Man makes his first move.
 
         Args:
             dt (float): Seconds since the last frame (about 0.016 at 60 FPS).
         """
-        if self.status != GameStatus.PLAYING:
+        if self.status != GameStatus.GAME_SCREENING:
             return
 
         if not self.started:
@@ -565,7 +566,7 @@ class GameState:
                 return
 
         self._update_level_timer(dt)
-        if self.status != GameStatus.PLAYING:
+        if self.status != GameStatus.GAME_SCREENING:
             return
 
         advance(self.pacman, self.wanted_direction, dt, self.grid)
