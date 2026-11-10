@@ -21,16 +21,10 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install flake8 mypy
-
-      - name: Show environment versions
-        run: |
-          python --version
-          python -m mypy --version
-          python -c "import pydantic; print('Pydantic:', pydantic.__version__)"
+        run: run: uv sync --frozen
 
       - name: Run flake8
-        run: flake8 src/
+        run: uv run flake8 src/
 
       - name: Run mypy
-        run: mypy src/ --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+        run: uv run mypy src/ --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
