@@ -155,7 +155,10 @@ def advance(
 
 
 def direction_home(
-    x: int, y: int, maze: list[list[int]], grid: Grid
+    x: int,
+    y: int,
+    maze: list[list[int]],
+    grid: Grid
 ) -> Direction:
     """Give the direction that brings an eaten ghost closer to its corner.
 
