@@ -1,9 +1,6 @@
 from src.rendering.sprite_sheet_manager import SpriteSheetManager, Rotation
-from src.game_state.game_state import GameState, Direction, GameStatus
-from src.rendering.assets import WALL_SIZE, ENTITIES_SIZE
+from src.game.game_state import GameState, Direction, GameStatus
 from src.maze.pacgum_type import PacgumType
-from src.entity.ghost import GhostState
-from src.rendering.layer import Layer
 from src.rendering.sprites_names import (
     EYES_BY_DIRECTION,
     GHOSTS_BY_DIRECTION,
@@ -14,6 +11,9 @@ from src.rendering.sprites_names import (
     GHOST_FEAR_BLUE,
     GHOST_FEAR_WHITE,
 )
+from src.entity.ghost import GhostState
+from src.rendering.layer import Layer
+
 
 # Time remaining until the end of 'Hunted' for the ghosts to start flashing
 FEAR_BLINK_TIME = 3
@@ -35,9 +35,11 @@ class EntitiesRenderer:
         layer: Layer,
         spritesheet: SpriteSheetManager,
         number_of_tiles_per_cell: int,
-        zoom: int,
+        wall_size: int,
+        entity_size: int,
     ):
-        self.zoom: int = zoom
+        self.wall_size = wall_size
+        self.entity_size = entity_size
         self.layer: Layer = layer
         self.game_state: GameState = game_state
         self.spritesheet: SpriteSheetManager = spritesheet
@@ -61,10 +63,10 @@ class EntitiesRenderer:
             frame (int, optional): frame number (the frame's position in
             the animation). Defaults to -1.
         """
-        cell_px = WALL_SIZE * self.number_of_tiles_per_cell
+        cell_px = self.wall_size * self.number_of_tiles_per_cell
         offset = (
-            (cell_px - ENTITIES_SIZE) / 2
-            + ENTITIES_SIZE / self.spritesheet.spritesheet_config.tile_size
+            (cell_px - self.entity_size) / 2
+            + self.entity_size / self.spritesheet.spritesheet_config.tile_size
         )
 
         new_x = int(maze_x * cell_px + offset)
@@ -76,7 +78,7 @@ class EntitiesRenderer:
             Rotation.R0,
             new_x,
             new_y,
-            ENTITIES_SIZE,
+            self.entity_size,
             self.frame if frame == -1 else frame,
         )
 
@@ -97,9 +99,8 @@ class EntitiesRenderer:
             frame = min(
                 self._death_frame,
                 len(
-                    self.spritesheet.sprites_bytes[ENTITIES_SIZE][sprite_name][
-                        Rotation.R0
-                    ]
+                    self.spritesheet.sprites_bytes[self.entity_size][
+                        sprite_name][Rotation.R0]
                 )
                 - 1,
             )
@@ -176,7 +177,7 @@ class EntitiesRenderer:
         if (
             self._death_frame
             > len(
-                self.spritesheet.sprites_bytes[ENTITIES_SIZE][PACMAN_DEATH][
+                self.spritesheet.sprites_bytes[self.entity_size][PACMAN_DEATH][
                     Rotation.R0
                 ]
             )

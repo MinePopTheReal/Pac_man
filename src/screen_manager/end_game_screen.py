@@ -1,9 +1,9 @@
 from src.rendering.widget.input_field import InputField, MAX_NAME_LENGTH
 from src.utils.high_score_manager import HighScoreManager
 from src.screen_manager.screen import Screen, Navigator
-from src.game_state.game_state import GameStatus
 from src.rendering.widget.label import Label
-from src.game_state.session import Session
+from src.game.game_state import GameStatus
+from src.game.session import Session
 from src.rendering.assets import (
     Assets,
     H3_PX_SIZE,

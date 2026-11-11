@@ -1,17 +1,19 @@
-from src.rendering.assets import Assets, H4_PX_SIZE, MAJOR_COLOR, SCALE_FACTOR
-from src.game_state.game_state import Direction, GameStatus
-from src.screen_manager.screen_manager import ScreenName
+from src.rendering.widget.maze_view import MazeView, TILES_PER_CELL
+from src.rendering.assets import Assets, H4_PX_SIZE, MAJOR_COLOR
 from src.utils.high_score_manager import HighScoreManager
+from src.screen_manager.screen_manager import ScreenName
 from src.screen_manager.screen import Screen, Navigator
-from src.rendering.widget.maze_view import MazeView
-from src.game_state.session import Session
+from src.game.game_state import Direction, GameStatus
+from src.message.errors import RenderError
 from src.rendering.widget.hud import Hud
+from src.game.session import Session
 
 
 from pyglet.window import key
 
 
 HUD_MARGIN_PX = 10
+TOP_AND_BOTTOM_MARGIN = 75
 
 DIRECTION_KEYS = {
     key.W: Direction.UP,
@@ -50,27 +52,55 @@ class GameScreen(Screen):
         the game of the session. The maze is centered in the window and
         the HUD is placed just above it.
         """
-        center_x = self.assets.window_width // 2
-        center_y = self.assets.window_height // 2
+        win_w = self.assets.window_width
+        win_h = self.assets.window_height
+        config = self.session.config
 
-        self.maze_view = MazeView(
-            self.session.game_state,
-            self.assets,
-            self.session.config,
-            x=center_x,
-            y=center_y,
-        )
-
-        maze_view_top = self.maze_view.bottom + self.maze_view.height
         self.hud = Hud(
             H4_PX_SIZE,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
-            x=center_x,
-            y=int(maze_view_top + HUD_MARGIN_PX * SCALE_FACTOR),
+            x=0,
+            y=0,
             anchor_x=0.5,
             anchor_y=0,
         )
+        margin = self.hud.zoom // 2
+
+        tiles_w = config.width * TILES_PER_CELL
+        tiles_h = config.height * TILES_PER_CELL
+        free_h = win_h - self.hud.height - margin - TOP_AND_BOTTOM_MARGIN * 2
+
+        wall_size = min(win_w // tiles_w, free_h // tiles_h)
+        min_wall_size = \
+            self.assets.wall_spritesheet.spritesheet_config.tile_size
+
+        if (wall_size < min_wall_size or self.hud.width > win_w):
+            raise RenderError(
+                f"Maze {config.width}x{config.height} too large for a "
+                f"{win_w}x{win_h} window"
+            )
+        entity_size = wall_size * 2
+
+        self.maze_view = MazeView(
+            self.session.game_state,
+            self.assets,
+            config,
+            wall_size,
+            entity_size,
+            x=0, y=0,
+        )
+
+        block_h = self.maze_view.height + margin + self.hud.height
+        block_bottom = (win_h - block_h) // 2
+
+        self.maze_view.x = win_w // 2
+        self.maze_view.y = block_bottom + int(
+            self.maze_view.anchor_y * self.maze_view.height
+        )
+
+        self.hud.x = win_w // 2
+        self.hud.y = block_bottom + self.maze_view.height + margin
 
     def _cheat_action(self, symbol: int) -> None:
         """Run the cheat linked to a key, if there is one.

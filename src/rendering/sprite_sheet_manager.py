@@ -1,7 +1,8 @@
 from src.parsing.config_parser import ConfigParser
+from src.utils.file_manager import FileManager
 from src.parsing.models import SpriteSheet
 from src.message.errors import RenderError
-from src.utils.file_manager import FileManager
+
 
 from numpy import asarray, ndarray, rot90, uint16, uint8, array, arange
 from enum import IntEnum

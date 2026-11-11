@@ -30,7 +30,9 @@ class Layer:
         """
         self.buffer = bytearray(int(self.pitch * self.height))
         self.buffer_view = frombuffer(self.buffer, dtype=uint8).reshape(
-            self.height, self.width, self.bytes_per_pixel
+            self.height,
+            self.width,
+            self.bytes_per_pixel
         )[::-1]
 
     def clear(self) -> None:

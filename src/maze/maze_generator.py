@@ -40,7 +40,9 @@ def convert_number_to_walls(number: int) -> set[Direction]:
 
 
 def transform_maze_to_grid(
-    maze: list[list[int]], nb_pacgums: int, seed: int
+    maze: list[list[int]],
+    nb_pacgums: int,
+    seed: int
 ) -> Grid:
     """Build a Grid from the maze returned by the generator.
 

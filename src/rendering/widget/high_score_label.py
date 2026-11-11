@@ -1,8 +1,8 @@
 from src.rendering.sprite_sheet_manager import SpriteSheetManager
 from src.rendering.widget.input_field import MAX_NAME_LENGTH
-from src.game_state.game_state import MAX_SCORE_DIGITS
 from src.utils.high_score_manager import MAX_HIGH_SCORE
 from src.rendering.text_drawing import draw_string
+from src.game.game_state import MAX_SCORE_DIGITS
 from src.rendering.widget.widget import Widget
 from src.rendering.layer import Layer
 

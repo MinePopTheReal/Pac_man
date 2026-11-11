@@ -28,7 +28,11 @@ def is_on_cell(coord: tuple[float, float]) -> bool:
 
 
 def choose_direction(
-    x: int, y: int, wanted: Direction, current: Direction, grid: Grid
+    x: int,
+    y: int,
+    wanted: Direction,
+    current: Direction,
+    grid: Grid
 ) -> Direction:
     """Choose where a character standing on a cell goes next.
 
@@ -55,7 +59,8 @@ def choose_direction(
 
 
 def next_cell(
-    coord: tuple[float, float], direction: Direction
+    coord: tuple[float, float],
+    direction: Direction
 ) -> tuple[float, float]:
     """Return the next cell on the way, in the given direction.
 
@@ -108,7 +113,10 @@ def try_turn_around(pacman: Character, wanted: Direction) -> None:
 
 
 def advance(
-    character: Character, wanted: Direction, dt: float, grid: Grid
+    character: Character,
+    wanted: Direction,
+    dt: float,
+    grid: Grid
 ) -> None:
     """Move a character for one frame, without going through walls.
 

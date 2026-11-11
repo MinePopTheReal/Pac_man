@@ -1,5 +1,6 @@
 from src.maze.grid import Direction
 
+
 """
 All the necessary sprite names and makes it easier to access them
 """

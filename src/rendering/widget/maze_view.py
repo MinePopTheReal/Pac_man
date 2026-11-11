@@ -1,10 +1,10 @@
-from src.rendering.assets import Assets, WALL_SIZE, ENTITIES_SIZE
 from src.rendering.entities_renderer import EntitiesRenderer
-from src.rendering.wall_renderer import WallRenderer
 from src.rendering.sprite_sheet_manager import Rotation
-from src.game_state.game_state import GameState
+from src.rendering.wall_renderer import WallRenderer
 from src.rendering.widget.widget import Widget
+from src.game.game_state import GameState
 from src.parsing.models import GameConfig
+from src.rendering.assets import Assets
 from src.rendering.layer import Layer
 
 
@@ -30,17 +30,17 @@ class MazeView(Widget):
         game_state: GameState,
         assets: Assets,
         config: GameConfig,
+        wall_size: int,
+        entity_size: int,
         x: int,
-        y: int,
-        # hud_height: int
+        y: int
     ) -> None:
 
-        width = config.width * TILES_PER_CELL * WALL_SIZE
-        height = config.height * TILES_PER_CELL * WALL_SIZE
-        # hud_height =
+        self.wall_size = wall_size
+        self.entity_size = entity_size
 
-        # wall_size = min(self.assets.window_width //
-        # (3*width), self.assets.window_height - hud_height -// (3*height))
+        width = config.width * TILES_PER_CELL * wall_size
+        height = config.height * TILES_PER_CELL * wall_size
         super().__init__(width, height, x=x, y=y, anchor_x=0.5, anchor_y=0.5)
 
         self.game_state = game_state
@@ -62,7 +62,8 @@ class MazeView(Widget):
             self.entities_layer,
             assets.entities_spritesheet,
             assets.wall_spritesheet.bytes_number_per_pixel,
-            ENTITIES_SIZE,
+            self.wall_size,
+            self.entity_size,
         )
 
     def update(self, dt: float) -> None:
@@ -89,10 +90,10 @@ class MazeView(Widget):
         """
         self.assets.wall_spritesheet.preloading_sprites(
             [Rotation.R0, Rotation.R90, Rotation.R180, Rotation.R270],
-            WALL_SIZE,
+            self.wall_size,
         )
         self.assets.entities_spritesheet.preloading_sprites(
-            [Rotation.R0], ENTITIES_SIZE
+            [Rotation.R0], self.entity_size
         )
 
     def _build_maze(self) -> None:
@@ -102,7 +103,9 @@ class MazeView(Widget):
         only when the level changes.
         """
         self.wall_renderer.create_maze_render(
-            self.game_state.grid.cells, self.wall_layer.buffer_view, WALL_SIZE
+            self.game_state.grid.cells,
+            self.wall_layer.buffer_view,
+            self.wall_size
         )
         self._current_level = self.game_state.level
         self.wall_layer.mark_dirty()

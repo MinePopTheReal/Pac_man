@@ -1,3 +1,7 @@
+from src.screen_manager.screen import Screen, Navigator
+from src.rendering.widget.label import Label
+from src.rendering.widget.menu import Menu
+from src.game.session import Session
 from src.rendering.assets import (
     Assets,
     H1_PX_SIZE,
@@ -6,10 +10,6 @@ from src.rendering.assets import (
     MINOR_COLOR,
     SCALE_FACTOR
 )
-from src.screen_manager.screen import Screen, Navigator
-from src.game_state.session import Session
-from src.rendering.widget.label import Label
-from src.rendering.widget.menu import Menu
 
 
 from pyglet.window import key as keys

@@ -1,15 +1,15 @@
-from src.game_state.movement import (
+from src.game.ghost_direction import direction_toward
+from src.maze.maze_generator import generate_maze
+from src.maze.pacgum_type import PacgumType
+from src.parsing.models import GameConfig
+from src.game.collision import collides
+from src.game.cheats import Cheats
+from src.game.movement import (
     is_on_cell,
     advance,
     direction_home,
     try_turn_around
 )
-from src.game_state.ghost_direction import direction_toward
-from src.maze.maze_generator import generate_maze
-from src.game_state.collision import collides
-from src.maze.pacgum_type import PacgumType
-from src.parsing.models import GameConfig
-from src.game_state.cheats import Cheats
 from src.maze import Grid
 from src.entity import (
     Speedy,
