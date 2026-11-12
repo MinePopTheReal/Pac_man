@@ -21,7 +21,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: run: uv sync --frozen
+        run: uv sync --frozen
 
       - name: Run flake8
         run: uv run flake8 src/
