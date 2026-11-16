@@ -50,7 +50,7 @@ class GameStatus(Enum):
     death animation, which ends with GameState.end_death().
     """
 
-    GAME_SCREENING = auto()
+    PLAYING = auto()
     DYING = auto()
     PAUSED = auto()
     LOST = auto()
@@ -84,7 +84,7 @@ class GameState:
         level_time_left (float): Seconds left in this level.
         time_hunt_ghosts (float): Seconds left while ghosts can be
             eaten, 0.0 when no super-pacgum effect is running.
-        status (GameStatus): GAME_SCREENING, DYING, PAUSED, LOST or WON.
+        status (GameStatus): PLAYING, DYING, PAUSED, LOST or WON.
         previous_status (GameStatus): The status before the last pause,
             given back when the game is resumed.
         cheats (Cheats): Which cheats are on, for example
@@ -114,7 +114,7 @@ class GameState:
         self.eaten_ghosts: int = 0
         self.score: int = 0
         self.wanted_direction: Direction = Direction.NONE
-        self.status: GameStatus = GameStatus.GAME_SCREENING
+        self.status: GameStatus = GameStatus.PLAYING
         self.previous_status: GameStatus = self.status
         self.pacman = self._spawn_pacman()
         self.ghosts = self._spawn_ghosts()
@@ -416,12 +416,12 @@ class GameState:
 
         Call it when the pause key is pressed. While paused, nothing
         moves and the timers stop. Resuming gives back the status the
-        game had before the pause (GAME_SCREENING or DYING), so a pause during
+        game had before the pause (PLAYING or DYING), so a pause during
         Pac-Man's death puts the death animation on hold. It does
         nothing when the game is over (LOST or WON), so a finished game
         cannot be resumed.
         """
-        if self.status in (GameStatus.GAME_SCREENING, GameStatus.DYING):
+        if self.status in (GameStatus.PLAYING, GameStatus.DYING):
             self.previous_status = self.status
             self.status = GameStatus.PAUSED
         elif self.status == GameStatus.PAUSED:
@@ -453,7 +453,7 @@ class GameState:
             self.status = GameStatus.LOST
         else:
             self._reset_position()
-            self.status = GameStatus.GAME_SCREENING
+            self.status = GameStatus.PLAYING
 
     def _ghost_wanted(
         self,
@@ -562,13 +562,13 @@ class GameState:
 
         Moves Pac-Man and the ghosts, eats pacgums, handles collisions,
         timers, the next level and the end of the game. Does nothing when
-        the status is not GAME_SCREENING (for example during a pause). Ghosts
+        the status is not PLAYING (for example during a pause). Ghosts
         and the level timer wait until Pac-Man makes his first move.
 
         Args:
             dt (float): Seconds since the last frame (about 0.016 at 60 FPS).
         """
-        if self.status != GameStatus.GAME_SCREENING:
+        if self.status != GameStatus.PLAYING:
             return
 
         if not self.started:
@@ -578,7 +578,7 @@ class GameState:
                 return
 
         self._update_level_timer(dt)
-        if self.status != GameStatus.GAME_SCREENING:
+        if self.status != GameStatus.PLAYING:
             return
 
         try_turn_around(self.pacman, self.wanted_direction)

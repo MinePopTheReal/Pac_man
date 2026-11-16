@@ -208,7 +208,7 @@ class EntitiesRenderer:
             self._draw_pacgums()
             self._draw_pacman()
 
-        elif self.game_state.status == GameStatus.GAME_SCREENING:
+        elif self.game_state.status == GameStatus.PLAYING:
             self._draw_pacgums()
             self._draw_ghosts()
             self._draw_pacman()

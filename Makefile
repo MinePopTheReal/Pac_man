@@ -16,7 +16,7 @@ install:
 		$(UV) sync
 
 debug:
-	$(UV) run python3 -m pdb -m $(SRC_DIR) "$(CONFIG_PATH)"
+	$(UV) run python3 -m $(PDB) -m $(SRC_DIR) "$(CONFIG_PATH)"
 
 clean:
 		rm -rf $(TEMP_FILE)
