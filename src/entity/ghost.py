@@ -1,7 +1,8 @@
-from src.entity.characters import Character, Direction
-from enum import Enum, auto
+from src.entity.character import Character, Direction
+
 from abc import abstractmethod
-import math
+from enum import Enum, auto
+from math import dist
 
 # How many cells in front of Pac-Man Speedy aims at.
 SPEEDY_AHEAD = 4
@@ -18,6 +19,7 @@ class GhostState(Enum):
     HUNTED: runs away, can be eaten (after a super-pacgum).
     EATEN: going back to its corner, then waits before hunting again.
     """
+
     HUNTER = auto()
     HUNTED = auto()
     EATEN = auto()
@@ -35,15 +37,21 @@ class Ghost(Character):
         respawn_timer (float): Seconds left before an eaten ghost hunts
             again, once it is back in its corner.
     """
-    name: str = "ghost"
 
-    def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+    name: str = ""
+
+    def __init__(
+        self,
+        direction: Direction,
+        position: tuple[float, float],
+        state: GhostState,
+        speed: float,
+    ) -> None:
         """Create a ghost.
 
         Args:
             direction (Direction): Starting direction.
-            position (tuple[float, float]): Starting (y, x) position, in cells.
+            position (tuple[float, float]): Starting (x, y) position, in cells.
             state (GhostState): Starting state.
             speed (float): Speed in cells per second.
         """
@@ -52,110 +60,149 @@ class Ghost(Character):
         self.respawn_timer: float = 0.0
 
     @abstractmethod
-    def position_target(self, pac_cell: tuple[int, int],
-                        pac_direction: Direction,
-                        shadow_cell: tuple[int, int],
-                        corner: tuple[int, int]) -> tuple[int, int]:
+    def position_target(
+        self,
+        pac_cell: tuple[int, int],
+        pac_direction: Direction,
+        shadow_cell: tuple[int, int],
+        corner: tuple[int, int],
+    ) -> tuple[int, int]:
         """Give the cell this ghost aims at while it is hunting.
 
         The cell may be a wall or outside the maze: GameState checks it.
 
         Args:
-            pac_cell (tuple[int, int]): Pac-Man's (y, x) cell.
+            pac_cell (tuple[int, int]): Pac-Man's (x, y) cell.
             pac_direction (Direction): The direction Pac-Man is moving in.
-            shadow_cell (tuple[int, int]): Shadow's (y, x) cell.
+            shadow_cell (tuple[int, int]): Shadow's (x, y) cell.
             corner (tuple[int, int]): This ghost's own corner.
 
         Returns:
-            tuple[int, int]: The (y, x) cell to aim at.
+            tuple[int, int]: The (x, y) cell to aim at.
         """
         pass
 
 
 class Shadow(Ghost):
     """Blinky: follows Pac-Man closely."""
+
     name: str = "blinky"
 
-    def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+    def __init__(
+        self,
+        direction: Direction,
+        position: tuple[float, float],
+        state: GhostState,
+        speed: float,
+    ) -> None:
         """Create the ghost (see Ghost.__init__)."""
 
         super().__init__(direction, position, state, speed)
 
-    def position_target(self, pac_cell: tuple[int, int],
-                        pac_direction: Direction,
-                        shadow_cell: tuple[int, int],
-                        corner: tuple[int, int]) -> tuple[int, int]:
+    def position_target(
+        self,
+        pac_cell: tuple[int, int],
+        pac_direction: Direction,
+        shadow_cell: tuple[int, int],
+        corner: tuple[int, int],
+    ) -> tuple[int, int]:
         """Aim straight at Pac-Man's cell."""
         return pac_cell
 
 
 class Speedy(Ghost):
     """Pinky: tries to cut Pac-Man off."""
+
     name: str = "pinky"
 
-    def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+    def __init__(
+        self,
+        direction: Direction,
+        position: tuple[float, float],
+        state: GhostState,
+        speed: float,
+    ) -> None:
         """Create the ghost (see Ghost.__init__)."""
 
         super().__init__(direction, position, state, speed)
 
-    def position_target(self, pac_cell: tuple[int, int],
-                        pac_direction: Direction,
-                        shadow_cell: tuple[int, int],
-                        corner: tuple[int, int]) -> tuple[int, int]:
+    def position_target(
+        self,
+        pac_cell: tuple[int, int],
+        pac_direction: Direction,
+        shadow_cell: tuple[int, int],
+        corner: tuple[int, int],
+    ) -> tuple[int, int]:
         """Aim SPEEDY_AHEAD cells in front of Pac-Man."""
-        y, x = pac_cell
-        dy, dx = pac_direction.value
-        return (y + dy * SPEEDY_AHEAD, x + dx * SPEEDY_AHEAD)
+        x, y = pac_cell
+        dx, dy = pac_direction.value
+        return (x + dx * SPEEDY_AHEAD, y + dy * SPEEDY_AHEAD)
 
 
 class Bashful(Ghost):
     """Inky: traps Pac-Man together with Shadow."""
+
     name: str = "inky"
 
-    def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+    def __init__(
+        self,
+        direction: Direction,
+        position: tuple[float, float],
+        state: GhostState,
+        speed: float,
+    ) -> None:
         """Create the ghost (see Ghost.__init__)."""
 
         super().__init__(direction, position, state, speed)
 
-    def position_target(self, pac_cell: tuple[int, int],
-                        pac_direction: Direction,
-                        shadow_cell: tuple[int, int],
-                        corner: tuple[int, int]) -> tuple[int, int]:
+    def position_target(
+        self,
+        pac_cell: tuple[int, int],
+        pac_direction: Direction,
+        shadow_cell: tuple[int, int],
+        corner: tuple[int, int],
+    ) -> tuple[int, int]:
         """Aim at the side of Pac-Man opposite to Shadow.
 
         The target is Shadow's position mirrored through the cell
         BASHFUL_AHEAD cells in front of Pac-Man.
         """
-        y, x = pac_cell
-        dy, dx = pac_direction.value
-        piv_y = y + dy * BASHFUL_AHEAD
+        x, y = pac_cell
+        dx, dy = pac_direction.value
         piv_x = x + dx * BASHFUL_AHEAD
-        shad_y, shad_x = shadow_cell
-        return (2 * piv_y - shad_y, 2 * piv_x - shad_x)
+        piv_y = y + dy * BASHFUL_AHEAD
+        shad_x, shad_y = shadow_cell
+        return (2 * piv_x - shad_x, 2 * piv_y - shad_y)
 
 
 class Pokey(Ghost):
     """Clyde: chases Pac-Man, but runs home when too close."""
+
     name: str = "clyde"
 
-    def __init__(self, direction: Direction, position: tuple[float, float],
-                 state: GhostState, speed: float) -> None:
+    def __init__(
+        self,
+        direction: Direction,
+        position: tuple[float, float],
+        state: GhostState,
+        speed: float,
+    ) -> None:
         """Create the ghost (see Ghost.__init__)."""
 
         super().__init__(direction, position, state, speed)
 
-    def position_target(self, pac_cell: tuple[int, int],
-                        pac_direction: Direction,
-                        shadow_cell: tuple[int, int],
-                        corner: tuple[int, int]) -> tuple[int, int]:
+    def position_target(
+        self,
+        pac_cell: tuple[int, int],
+        pac_direction: Direction,
+        shadow_cell: tuple[int, int],
+        corner: tuple[int, int],
+    ) -> tuple[int, int]:
         """Aim at Pac-Man when far from him, else at the own corner.
 
         "Far" means more than POKEY_SHY_DISTANCE cells, in straight line.
         """
-        distance = math.dist(self.position, pac_cell)
+        distance = dist(self.position, pac_cell)
         if distance > POKEY_SHY_DISTANCE:
             return pac_cell
         return corner

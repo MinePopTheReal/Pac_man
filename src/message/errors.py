@@ -1,10 +1,11 @@
-from src.message.colors import TerminalColors as TC
+from src.message.terminal_colors import TerminalColors as TC
 
 
 class Error(Exception):
     """
     The entire logic behind the creation of custom errors.
     """
+
     default_type = "Not defined"
 
     def __init__(
@@ -28,7 +29,7 @@ class Error(Exception):
 
 
 class RenderError(Error):
-    """Exception raised by the command line interface."""
+    """Exception raised by the render."""
 
     default_type = "Render"
 
@@ -44,4 +45,10 @@ class GridError(Error):
 
     default_type = "Grid"
 
-# add your own error
+
+class ScreenError(Error):
+    """
+    Exception raised when the screen manager is used before first_screen()
+    """
+
+    default_type = "Screen"

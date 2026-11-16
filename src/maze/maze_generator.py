@@ -1,17 +1,23 @@
-from mazegenerator import MazeGenerator
-from src.entity.characters import Direction
-from src.maze.grid import Grid
-from src.maze.cell import Cell, CellContents
+from src.message.warning_message import WarningMessage
+from src.maze.pacgum_type import PacgumType
+from src.entity.character import Direction
 from src.message.errors import GridError
-from src.message.warning import WarningMessage
-import random
+from src.maze.cell import Cell
+from src.maze.grid import Grid
+
+
+from mazegenerator import MazeGenerator
+from random import Random
+
 
 # Wall encoding of the mazegenerator package: one bit per side,
 # set to 1 when there is a wall (N = 1, E = 2, S = 4, W = 8).
-WALL_BITS = {Direction.UP: 1,
-             Direction.DOWN: 4,
-             Direction.RIGHT: 2,
-             Direction.LEFT: 8}
+WALL_BITS = {
+    Direction.UP: 1,
+    Direction.DOWN: 4,
+    Direction.RIGHT: 2,
+    Direction.LEFT: 8,
+}
 # Cell closed on its 4 sides: part of the '42' pattern, unreachable.
 CLOSED_CELL = 15
 
@@ -33,8 +39,11 @@ def convert_number_to_walls(number: int) -> set[Direction]:
     return walls
 
 
-def transform_maze_to_grid(maze: list[list[int]], nb_pacgums: int,
-                           seed: int) -> Grid:
+def transform_maze_to_grid(
+    maze: list[list[int]],
+    nb_pacgums: int,
+    seed: int
+) -> Grid:
     """Build a Grid from the maze returned by the generator.
 
     The 4 corners get a super-pacgum. The pacgums are then placed at
@@ -59,32 +68,33 @@ def transform_maze_to_grid(maze: list[list[int]], nb_pacgums: int,
         row: list[Cell] = []
         for x, number in enumerate(number_row):
             walls = convert_number_to_walls(number)
-            content = CellContents.EMPTY
-            row.append(Cell(walls, content))
+            row.append(Cell(walls))
             if number != CLOSED_CELL:
-                free_cell.append((y, x))
+                free_cell.append((x, y))
         cells.append(row)
 
     grid = Grid(cells)
-    for y, x in grid.corners_grid:
-        cell = grid.get_cell(y, x)
-        cell.content = CellContents.SUPER_PACGUM
-        free_cell.remove((y, x))
-    y, x = grid.center_grid
-    free_cell.remove((y, x))
+    for x, y in grid.corners_grid:
+        grid.pacgums[(x, y)] = PacgumType.SUPER_PACGUM
+        free_cell.remove((x, y))
+    x, y = grid.center_grid
+    free_cell.remove((x, y))
 
     if nb_pacgums > len(free_cell):
-        print(WarningMessage(f"The number of pacgums ({nb_pacgums}) exceeds "
-                             f"the number of free cells ({len(free_cell)}), "
-                             f"using {len(free_cell)} instead."))
+        print(
+            WarningMessage(
+                f"The number of pacgums ({nb_pacgums}) exceeds "
+                f"the number of free cells ({len(free_cell)}), "
+                f"using {len(free_cell)} instead."
+            )
+        )
         nb_pacgums = len(free_cell)
 
-    rng = random.Random(seed) if seed != 0 else random.Random()
+    rng = Random(seed) if seed != 0 else Random()
     lst_cell_pac = rng.sample(free_cell, nb_pacgums)
 
-    for y, x in lst_cell_pac:
-        cell = grid.get_cell(y, x)
-        cell.content = CellContents.PACGUM
+    for x, y in lst_cell_pac:
+        grid.pacgums[(x, y)] = PacgumType.PACGUM
 
     return grid
 
@@ -106,13 +116,15 @@ def generate_maze(height: int, width: int, seed: int, nb_pacgums: int) -> Grid:
         GridError: If the generator fails (e.g. invalid size).
     """
     try:
-        generator = MazeGenerator(size=(width, height),
-                                  perfect=False,
-                                  seed=seed)
+        generator = MazeGenerator(
+            size=(width, height), perfect=False, seed=seed
+        )
     except Exception as e:
-        raise GridError("Maze generation failed "
-                        f"(width={width}, height={height}, "
-                        f"seed={seed}): {e}") from e
+        raise GridError(
+            "Maze generation failed "
+            f"(width={width}, height={height}, "
+            f"seed={seed}): {e}"
+        ) from e
 
     maze = generator.maze
     grid = transform_maze_to_grid(maze, nb_pacgums, seed)

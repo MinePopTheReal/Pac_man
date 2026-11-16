@@ -1,13 +1,28 @@
-from src.entity import (Speedy, Shadow, Bashful, Pokey,
-                        Pacman, Direction, Ghost, GhostState)
-from src.maze import Grid, CellContents
+from src.game.ghost_direction import direction_toward
+from src.maze.maze_generator import generate_maze
+from src.maze.pacgum_type import PacgumType
 from src.parsing.models import GameConfig
-from src.game_state.collision import collides
-from src.maze.loader import generate_maze
-from src.game_state.movement import (is_on_cell, advance, direction_home,
-                                     try_turn_around)
-from src.game_state.cheats import Cheats
-from src.game_state.direction_ghost import direction_toward
+from src.game.collision import collides
+from src.game.cheats import Cheats
+from src.game.movement import (
+    is_on_cell,
+    advance,
+    direction_home,
+    try_turn_around
+)
+from src.maze import Grid
+from src.entity import (
+    Speedy,
+    Shadow,
+    Bashful,
+    Pokey,
+    Pacman,
+    Direction,
+    Ghost,
+    GhostState,
+)
+
+
 from enum import Enum, auto
 
 
@@ -23,6 +38,9 @@ SPEED_REDUCTION = 0.5
 HUNTED_SPEED_FACTOR = 0.5
 # ... and by this while it goes back to its corner (EATEN).
 EATEN_SPEED_FACTOR = 2.0
+# score limit
+MAX_SCORE_DIGITS = 7
+MAX_SCORE = 10 ** MAX_SCORE_DIGITS - 1
 
 
 class GameStatus(Enum):
@@ -31,6 +49,7 @@ class GameStatus(Enum):
     DYING means Pac-Man has just been caught: the game waits for the
     death animation, which ends with GameState.end_death().
     """
+
     PLAYING = auto()
     DYING = auto()
     PAUSED = auto()
@@ -54,8 +73,8 @@ class GameState:
 
     Attributes you can read to draw the game (do not change them):
         grid (Grid): The current maze; grid.get_all_cells() gives every
-            (y, x, cell) with its walls and content.
-        pacman (Pacman): position (y, x) in cells, direction.
+            (x, y, cell) with its walls and content.
+        pacman (Pacman): position (x, y) in cells, direction.
         ghosts (list[Ghost]): position, direction and state of each
             ghost (HUNTER: normal, HUNTED: can be eaten, EATEN: going
             back to its corner).
@@ -74,9 +93,10 @@ class GameState:
             level or after a lost life; ghosts and the level timer wait
             until then (useful to show a "Ready!" message).
 
-    Positions are (y, x) = (row, column) in cells, not pixels: multiply
-    by the tile size to draw, and swap to (x, y) for the screen.
+    Positions are (x, y) = (row, column) in cells, not pixels: multiply
+    by the tile size to draw, and swap to (y, x) for the screen.
     """
+
     def __init__(self, config: GameConfig) -> None:
         """Start a new game at level 1.
 
@@ -101,7 +121,11 @@ class GameState:
         self.corner_maps: list[list[list[int]]] = self._maps_for_corners()
         self.pacman_map_cell: tuple[int, int] = (-1, -1)
         self.pacman_map: list[list[int]] = []
+
         self._update_pacman_map()
+
+    def _update_score(self, addition: int) -> None:
+        self.score = min(self.score + addition, MAX_SCORE)
 
     def _spawn_pacman(self) -> Pacman:
         """Create Pac-Man in the middle of the maze.
@@ -109,8 +133,8 @@ class GameState:
         Returns:
             Pacman: Pac-Man, not moving yet.
         """
-        y, x = self.grid.center_grid
-        pacman = Pacman(Direction.NONE, (float(y), float(x)), PACMAN_SPEED)
+        x, y = self.grid.center_grid
+        pacman = Pacman(Direction.NONE, (float(x), float(y)), PACMAN_SPEED)
         return pacman
 
     def _spawn_ghosts(self) -> list[Ghost]:
@@ -123,12 +147,16 @@ class GameState:
             list[Ghost]: The 4 ghosts, all HUNTER.
         """
         lst_ghosts: list[Ghost] = []
-        classes: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
+        classes_name: list[type[Ghost]] = [Shadow, Pokey, Bashful, Speedy]
 
-        for classe, corner in zip(classes, self.grid.corners_grid):
-            y, x = corner
-            ghost = classe(Direction.NONE, (float(y), float(x)),
-                           GhostState.HUNTER, GHOST_SPEED)
+        for class_name, corner in zip(classes_name, self.grid.corners_grid):
+            x, y = corner
+            ghost = class_name(
+                Direction.NONE,
+                (float(x), float(y)),
+                GhostState.HUNTER,
+                GHOST_SPEED,
+            )
             lst_ghosts.append(ghost)
         return lst_ghosts
 
@@ -140,15 +168,15 @@ class GameState:
         again for Pac-Man's first move. Pac-Man's speed is kept, so the
         speed cheat stays on.
         """
-        y, x = self.grid.center_grid
-        self.pacman.position = (float(y), float(x))
+        x, y = self.grid.center_grid
+        self.pacman.position = (float(x), float(y))
         self.pacman.direction = Direction.NONE
         self.wanted_direction = Direction.NONE
 
         for ghost, corner in zip(self.ghosts, self.grid.corners_grid):
-            y, x = corner
+            x, y = corner
             ghost.direction = Direction.NONE
-            ghost.position = (float(y), float(x))
+            ghost.position = (float(x), float(y))
             ghost.state = GhostState.HUNTER
             ghost.respawn_timer = 0.0
         self.time_hunt_ghosts = 0.0
@@ -163,8 +191,9 @@ class GameState:
             Grid: The new maze.
         """
         seed = self.config.seed if self.level == 1 else 0
-        return generate_maze(self.config.height, self.config.width, seed,
-                             self.config.pacgum)
+        return generate_maze(
+            self.config.height, self.config.width, seed, self.config.pacgum
+        )
 
     def _build_level(self) -> None:
         """Prepare the current level: new maze, characters back in place.
@@ -197,8 +226,8 @@ class GameState:
         """
         lst_maps: list[list[list[int]]] = []
         for corner in self.grid.corners_grid:
-            y, x = corner
-            lst_maps.append(self.grid.distances_from_cell(y, x))
+            x, y = corner
+            lst_maps.append(self.grid.distances_from_cell(x, y))
         return lst_maps
 
     def _check_ghost_collision(self) -> None:
@@ -222,7 +251,7 @@ class GameState:
             elif ghost.state == GhostState.HUNTED:
                 if collides(self.pacman.position, ghost.position):
                     points_ghost = self.config.points_ghost
-                    self.score += points_ghost * (2**self.eaten_ghosts)
+                    self._update_score(points_ghost * (2 ** self.eaten_ghosts))
                     self.eaten_ghosts += 1
                     ghost.state = GhostState.EATEN
                     ghost.respawn_timer = self.config.timer_respawn_ghost
@@ -233,8 +262,8 @@ class GameState:
         for ghost in self.ghosts:
             if ghost.state == GhostState.HUNTER:
                 ghost.state = GhostState.HUNTED
-                dy, dx = ghost.direction.value
-                ghost.direction = Direction((-dy, -dx))
+                dx, dy = ghost.direction.value
+                ghost.direction = Direction((-dx, -dy))
 
     def _start_death(self) -> None:
         """Put the game in DYING and wait for end_death()."""
@@ -289,16 +318,19 @@ class GameState:
 
         Ghosts use this map to chase or flee from Pac-Man.
         """
-        py, px = self.pacman.position
-        y = round(py)
+        px, py = self.pacman.position
         x = round(px)
-        if self.pacman_map_cell != (y, x):
-            self.pacman_map = self.grid.distances_from_cell(y, x)
-            self.pacman_map_cell = (y, x)
+        y = round(py)
+        if self.pacman_map_cell != (x, y):
+            self.pacman_map = self.grid.distances_from_cell(x, y)
+            self.pacman_map_cell = (x, y)
 
-    def _chase_map(self, ghost: Ghost,
-                   corner_map: list[list[int]],
-                   corner: tuple[int, int]) -> list[list[int]]:
+    def _chase_map(
+        self,
+        ghost: Ghost,
+        corner_map: list[list[int]],
+        corner: tuple[int, int],
+    ) -> list[list[int]]:
         """Give the distance map a hunting ghost should follow.
 
         The map leads to the ghost's own target (see position_target). If
@@ -313,23 +345,25 @@ class GameState:
         Returns:
             list[list[int]]: The distance map to follow.
         """
-        shad_y, shad_x = self.ghosts[0].position
-        target = ghost.position_target(self.pacman_map_cell,
-                                       self.pacman.direction,
-                                       (round(shad_y), round(shad_x)),
-                                       corner)
-        ty, tx = target
+        shad_x, shad_y = self.ghosts[0].position
+        target = ghost.position_target(
+            self.pacman_map_cell,
+            self.pacman.direction,
+            (round(shad_x), round(shad_y)),
+            corner,
+        )
+        tx, ty = target
         ty = min(max(ty, 0), self.grid.height - 1)
         tx = min(max(tx, 0), self.grid.width - 1)
 
-        if (ty, tx) == self.pacman_map_cell:
+        if (tx, ty) == self.pacman_map_cell:
             return self.pacman_map
 
-        if (ty, tx) == corner:
+        if (tx, ty) == corner:
             return corner_map
 
-        gy, gx = ghost.position
-        map_toward_target = self.grid.distances_from_cell(ty, tx)
+        gx, gy = ghost.position
+        map_toward_target = self.grid.distances_from_cell(tx, ty)
 
         if map_toward_target[int(gy)][int(gx)] == -1:
             return self.pacman_map
@@ -378,7 +412,7 @@ class GameState:
             self.cheats.slow = not self.cheats.slow
 
     def switch_pause(self) -> None:
-        """Pause the game, or resume it if it is paused.
+        """PauseScreen the game, or resume it if it is paused.
 
         Call it when the pause key is pressed. While paused, nothing
         moves and the timers stop. Resuming gives back the status the
@@ -421,8 +455,12 @@ class GameState:
             self._reset_position()
             self.status = GameStatus.PLAYING
 
-    def _ghost_wanted(self, ghost: Ghost, corner_map: list[list[int]],
-                      corner: tuple[int, int]) -> Direction:
+    def _ghost_wanted(
+        self,
+        ghost: Ghost,
+        corner_map: list[list[int]],
+        corner: tuple[int, int],
+    ) -> Direction:
         """Choose where a ghost wants to go, depending on its state.
 
         EATEN ghosts go back to their corner, HUNTED ghosts run away from
@@ -440,15 +478,22 @@ class GameState:
         if not is_on_cell(ghost.position):
             return ghost.direction
 
-        y, x = ghost.position
+        x, y = ghost.position
         if ghost.state == GhostState.EATEN:
-            return direction_home(int(y), int(x), corner_map, self.grid)
+            return direction_home(int(x), int(y), corner_map, self.grid)
         if ghost.state == GhostState.HUNTED:
-            return direction_toward(self.grid, int(y), int(x), ghost.direction,
-                                    self.pacman_map, True)
+            return direction_toward(
+                self.grid,
+                int(x),
+                int(y),
+                ghost.direction,
+                self.pacman_map,
+                True,
+            )
         chase_map = self._chase_map(ghost, corner_map, corner)
-        return direction_toward(self.grid, int(y), int(x), ghost.direction,
-                                chase_map, False)
+        return direction_toward(
+            self.grid, int(x), int(y), ghost.direction, chase_map, False
+        )
 
     def _pacman_eats(self) -> bool:
         """Eat what is on Pac-Man's cell and add the points.
@@ -460,19 +505,20 @@ class GameState:
             bool: True if the level changed, so the frame must stop here.
         """
         if is_on_cell(self.pacman.position):
-            y, x = self.pacman.position
-            cell = self.grid.get_cell(int(y), int(x))
-            eaten = cell.update_cell_content()
-            if eaten == CellContents.PACGUM:
-                self.score += self.config.points_pacgum
-            elif eaten == CellContents.SUPER_PACGUM:
-                self.score += self.config.points_super_pacgum
+            x, y = self.pacman.position
+            x, y = int(x), int(y)
+            eaten = self.grid.pacgums.get((x, y))
+            if eaten == PacgumType.PACGUM:
+                self._update_score(self.config.points_pacgum)
+            elif eaten == PacgumType.SUPER_PACGUM:
+                self._update_score(self.config.points_super_pacgum)
                 self.eaten_ghosts = 0
                 self._start_ghosts_hunt()
-            if (eaten != CellContents.EMPTY
-               and self.grid.remaining_pacgums() == 0):
-                self._next_level()
-                return True
+            if eaten is not None:
+                self.grid.pacgums.pop((x, y))
+                if self.grid.remaining_pacgums() == 0:
+                    self._next_level()
+                    return True
         return False
 
     def _ghost_speed(self, ghost: Ghost) -> float:
@@ -504,8 +550,9 @@ class GameState:
             dt (float): Seconds since the last frame.
         """
         if not self.cheats.ghosts_frozen:
-            for ghost, corner_map, corner in zip(self.ghosts, self.corner_maps,
-                                                 self.grid.corners_grid):
+            for ghost, corner_map, corner in zip(
+                self.ghosts, self.corner_maps, self.grid.corners_grid
+            ):
                 wanted = self._ghost_wanted(ghost, corner_map, corner)
                 ghost.speed = self._ghost_speed(ghost)
                 advance(ghost, wanted, dt, self.grid)

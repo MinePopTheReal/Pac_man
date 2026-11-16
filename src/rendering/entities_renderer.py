@@ -1,9 +1,7 @@
-from src.utils.sprite_sheet_manager import SpriteSheetManager, Rotation
-from src.game_state.game_state import GameState, Direction, GameStatus
-from src.entity.ghost import GhostState
-from src.maze.grid import CellContents
-from src.rendering.layer import Layer
-from src.rendering.sprites_name import (
+from src.rendering.sprite_sheet_manager import SpriteSheetManager, Rotation
+from src.game.game_state import GameState, Direction, GameStatus
+from src.maze.pacgum_type import PacgumType
+from src.rendering.sprites_names import (
     EYES_BY_DIRECTION,
     GHOSTS_BY_DIRECTION,
     PACGUM,
@@ -13,6 +11,8 @@ from src.rendering.sprites_name import (
     GHOST_FEAR_BLUE,
     GHOST_FEAR_WHITE,
 )
+from src.entity.ghost import GhostState
+from src.rendering.layer import Layer
 
 
 # Time remaining until the end of 'Hunted' for the ghosts to start flashing
@@ -28,23 +28,22 @@ class EntitiesRenderer:
     This class is used to place each entity in the buffer and
     to update the animations and positions with each frame.
     """
+
     def __init__(
         self,
         game_state: GameState,
         layer: Layer,
         spritesheet: SpriteSheetManager,
-        maze_tile_size: int,
         number_of_tiles_per_cell: int,
-        zoom: int,
+        wall_size: int,
+        entity_size: int,
     ):
-        self.zoom: int = zoom
+        self.wall_size = wall_size
+        self.entity_size = entity_size
         self.layer: Layer = layer
         self.game_state: GameState = game_state
         self.spritesheet: SpriteSheetManager = spritesheet
         self.number_of_tiles_per_cell: int = number_of_tiles_per_cell
-        self.maze_tile_size: int = maze_tile_size
-
-        self.offset_px = 4.5
 
         self.start_to_die: int = -1
         self.frame = 0
@@ -64,26 +63,14 @@ class EntitiesRenderer:
             frame (int, optional): frame number (the frame's position in
             the animation). Defaults to -1.
         """
-        new_x, new_y = (
-            int(
-                (
-                    maze_x
-                    * self.maze_tile_size
-                    * self.number_of_tiles_per_cell
-                    + self.offset_px
-                )
-                * self.zoom
-            ),
-            int(
-                (
-                    maze_y
-                    * self.maze_tile_size
-                    * self.number_of_tiles_per_cell
-                    + self.offset_px
-                )
-                * self.zoom
-            ),
+        cell_px = self.wall_size * self.number_of_tiles_per_cell
+        offset = (
+            (cell_px - self.entity_size) / 2
+            + self.entity_size / self.spritesheet.spritesheet_config.tile_size
         )
+
+        new_x = int(maze_x * cell_px + offset)
+        new_y = int(maze_y * cell_px + offset)
 
         self.spritesheet.copy_tile_into_buffer(
             self.layer.buffer_view,
@@ -91,7 +78,7 @@ class EntitiesRenderer:
             Rotation.R0,
             new_x,
             new_y,
-            self.zoom,
+            self.entity_size,
             self.frame if frame == -1 else frame,
         )
 
@@ -101,7 +88,7 @@ class EntitiesRenderer:
         Pac-Man's state and adds it to the buffer.
         """
         direction = self.game_state.pacman.direction
-        pos_y, pos_x = self.game_state.pacman.position
+        pos_x, pos_y = self.game_state.pacman.position
         frame = -1
 
         if (
@@ -111,7 +98,10 @@ class EntitiesRenderer:
             sprite_name = PACMAN_DEATH
             frame = min(
                 self._death_frame,
-                len(self.spritesheet.sprites_bytes[sprite_name][Rotation.R0])
+                len(
+                    self.spritesheet.sprites_bytes[self.entity_size][
+                        sprite_name][Rotation.R0]
+                )
                 - 1,
             )
 
@@ -134,7 +124,7 @@ class EntitiesRenderer:
         on their state and adds them to the buffer.
         """
         for ghost in self.game_state.ghosts:
-            pos_y, pos_x = ghost.position
+            pos_x, pos_y = ghost.position
 
             if ghost.state == GhostState.HUNTED:
                 blinking = (
@@ -149,27 +139,21 @@ class EntitiesRenderer:
 
             self._draw_sprite(sprite_name, pos_x, pos_y)
 
-    # TODO Modify this function once the pacgums are stored somewhere
     def _draw_pacgums(self) -> None:
         """
         Manages the sprites and animations for Pacgums
         """
-        for y in range(len(self.game_state.grid.cells)):
-            for x in range(len(self.game_state.grid.cells[y])):
-                if (
-                    self.game_state.grid.cells[y][x].content
-                    == CellContents.PACGUM
-                ):
-                    sprite_name = PACGUM
-                elif (
-                    self.game_state.grid.cells[y][x].content
-                    == CellContents.SUPER_PACGUM
-                    and self.frame % 2 == 0
-                ):
-                    sprite_name = SUPER_PACGUM
-                else:
-                    continue
-                self._draw_sprite(sprite_name, x, y)
+        for (x, y), pacgum_type in self.game_state.grid.pacgums.items():
+            if (pacgum_type == PacgumType.PACGUM):
+                sprite_name = PACGUM
+            elif (
+                pacgum_type == PacgumType.SUPER_PACGUM
+                and self.frame % 2 == 0
+            ):
+                sprite_name = SUPER_PACGUM
+            else:
+                continue
+            self._draw_sprite(sprite_name, x, y)
 
     @property
     def _death_frame(self) -> int:
@@ -192,7 +176,11 @@ class EntitiesRenderer:
             self.start_to_die = self.frame
         if (
             self._death_frame
-            > len(self.spritesheet.sprites_bytes[PACMAN_DEATH][Rotation.R0])
+            > len(
+                self.spritesheet.sprites_bytes[self.entity_size][PACMAN_DEATH][
+                    Rotation.R0
+                ]
+            )
             - 1
         ):
             self.game_state.end_death()
@@ -206,9 +194,10 @@ class EntitiesRenderer:
         Args:
             dt (float): time delta
         """
-        self.frame += 1
-        if self.game_state.status == GameStatus.DYING:
-            self._update_death()
+        if self.game_state.status != GameStatus.PAUSED:
+            self.frame += 1
+            if self.game_state.status == GameStatus.DYING:
+                self._update_death()
 
     def draw_entities(self) -> None:
         """

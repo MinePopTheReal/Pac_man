@@ -1,18 +1,27 @@
-from src.maze.cell import Cell, CellContents
+from src.maze.pacgum_type import PacgumType
+from src.entity.character import Direction
 from src.message.errors import GridError
-from src.entity.characters import Direction
+from src.maze.cell import Cell
+
+
 from collections import deque
 
 
-LST_DIRECTION = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
+LST_DIRECTION = [
+    Direction.UP,
+    Direction.DOWN,
+    Direction.LEFT,
+    Direction.RIGHT
+]
 
 
 class Grid:
     """The maze as a grid of cells.
 
-    Cells are accessed as grid[y][x]: y is the row (0 at the top),
-    x is the column (0 on the left).
+    Cells are accessed as grid[y][x]: x is the row (0 at the top),
+    y is the column (0 on the left).
     """
+
     def __init__(self, cells: list[list[Cell]]) -> None:
         """Create the cells and compute its size.
 
@@ -24,61 +33,48 @@ class Grid:
         self.height = len(self.cells)
         self.width = len(self.cells[0])
 
-    def in_grid(self, y: int, x: int) -> bool:
+        self.pacgums: dict[tuple[int, int], PacgumType] = {}
+
+    def in_grid(self, x: int, y: int) -> bool:
         """Check if a position is inside the grid.
 
         Args:
-            y (int): The row.
-            x (int): The column.
+            x (int): The row.
+            y (int): The column.
 
         Returns:
-            bool: True if (y, x) is a cell of the grid, False otherwise.
+            bool: True if (x, y) is a cell of the grid, False otherwise.
         """
-        if 0 <= y < self.height and 0 <= x < self.width:
+        if 0 <= x < self.width and 0 <= y < self.height:
             return True
         return False
 
-    def get_cell(self, y: int, x: int) -> Cell:
+    def get_cell(self, x: int, y: int) -> Cell:
         """Return the cell at the given position.
 
         Args:
-            y (int): The row.
-            x (int): The column.
+            x (int): The row.
+            y (int): The column.
 
         Returns:
-            Cell: The cell at (y, x).
+            Cell: The cell at (x, y).
 
         Raises:
-            GridError: If (y, x) is outside the grid.
+            GridError: If (x, y) is outside the grid.
         """
-        if not self.in_grid(y, x):
-            raise GridError(f"coordinates ({y},{x}) are not in the grid, "
-                            f"grid size is {self.height} * {self.width}")
+        if not self.in_grid(x, y):
+            raise GridError(
+                f"coordinates ({x},{y}) are not in the grid, "
+                f"grid size is {self.height} * {self.width}"
+            )
         return self.cells[y][x]
 
-    def get_all_cells(self) -> list[tuple[int, int, Cell]]:
-        """Return every cell of the grid with its position.
-
-        Cells are listed row by row, from top to bottom, and from left
-        to right in each row. The cells are the grid's own objects, not
-        copies.
-
-        Returns:
-            list[tuple[int, int, Cell]]: One (y, x, cell) tuple per cell.
-        """
-        all_cells: list[tuple[int, int, Cell]] = []
-
-        for y, row in enumerate(self.cells):
-            for x, cell in enumerate(row):
-                all_cells.append((y, x, cell))
-        return all_cells
-
-    def has_wall(self, y: int, x: int, direction: Direction) -> bool:
-        """Check if the cell at (y, x) has a wall on the given side.
+    def has_wall(self, x: int, y: int, direction: Direction) -> bool:
+        """Check if the cell at (x, y) has a wall on the given side.
 
         Args:
-            y (int): The row.
-            x (int): The column.
+            x (int): The row.
+            y (int): The column.
             direction (Direction): The side to check.
 
         Returns:
@@ -86,20 +82,20 @@ class Grid:
                 Direction.NONE always returns False.
 
         Raises:
-            GridError: If (y, x) is outside the grid.
+            GridError: If (x, y) is outside the grid.
         """
-        cell = self.get_cell(y, x)
+        cell = self.get_cell(x, y)
         return cell.there_is_wall(direction)
 
-    def can_move(self, y: int, x: int, direction: Direction) -> bool:
-        """Check if a character can go from (y, x) to the next cell.
+    def can_move(self, x: int, y: int, direction: Direction) -> bool:
+        """Check if a character can go from (x, y) to the next cell.
 
         The move is allowed if there is no wall on that side of the cell
         and the next cell is inside the grid.
 
         Args:
-            y (int): The row of the current cell.
-            x (int): The column of the current cell.
+            x (int): The row of the current cell.
+            y (int): The column of the current cell.
             direction (Direction): The direction of the move.
 
         Returns:
@@ -108,19 +104,19 @@ class Grid:
                 lead to another cell.
 
         Raises:
-            GridError: If (y, x) is outside the grid.
+            GridError: If (x, y) is outside the grid.
         """
         if direction == Direction.NONE:
             return False
 
-        if self.has_wall(y, x, direction):
+        if self.has_wall(x, y, direction):
             return False
 
-        dy, dx = direction.value
+        dx, dy = direction.value
         ny = y + dy
         nx = x + dx
 
-        return self.in_grid(ny, nx)
+        return self.in_grid(nx, ny)
 
     @property
     def center_grid(self) -> tuple[int, int]:
@@ -131,11 +127,11 @@ class Grid:
         the middle is chosen (e.g. row 1 for a height of 4).
 
         Returns:
-            tuple[int, int]: The (y, x) position of the middle cell.
+            tuple[int, int]: The (x, y) position of the middle cell.
         """
         center_y = (self.height - 1) // 2
         center_x = (self.width - 1) // 2
-        return (center_y, center_x)
+        return (center_x, center_y)
 
     @property
     def corners_grid(self) -> list[tuple[int, int]]:
@@ -145,13 +141,13 @@ class Grid:
         always the same: top left, top right, bottom left, bottom right.
 
         Returns:
-            list[tuple[int, int]]: The (y, x) positions of the 4 corners.
+            list[tuple[int, int]]: The (x, y) positions of the 4 corners.
         """
         lst_corners: list[tuple[int, int]]
         top_left = (0, 0)
-        top_right = (0, self.width - 1)
-        bot_left = (self.height - 1, 0)
-        bot_right = (self.height - 1, self.width - 1)
+        top_right = (self.width - 1, 0)
+        bot_left = (0, self.height - 1)
+        bot_right = (self.width - 1, self.height - 1)
         lst_corners = [top_left, top_right, bot_left, bot_right]
         return lst_corners
 
@@ -164,28 +160,22 @@ class Grid:
         Returns:
             int: The number of pacgums and super-pacgums left.
         """
-        count_pacgums = 0
-        for row in self.cells:
-            for cell in row:
-                if cell.content != CellContents.EMPTY:
-                    count_pacgums += 1
-        return count_pacgums
+        return len(self.pacgums)
 
-    def distances_from_cell(self, y0: int, x0: int) -> list[list[int]]:
-        dist = [[-1 for _ in range(self.width)]
-                for _ in range(self.height)]
+    def distances_from_cell(self, x0: int, y0: int) -> list[list[int]]:
+        dist = [[-1 for _ in range(self.width)] for _ in range(self.height)]
         dist[y0][x0] = 0
-        queue: deque[tuple[int, int]] = deque([(y0, x0)])
+        queue: deque[tuple[int, int]] = deque([(x0, y0)])
 
         while queue:
-            y, x = queue.popleft()
+            x, y = queue.popleft()
             for direction in LST_DIRECTION:
-                if self.can_move(y, x, direction):
-                    dy, dx = direction.value
+                if self.can_move(x, y, direction):
+                    dx, dy = direction.value
                     ny = y + dy
                     nx = x + dx
                     if dist[ny][nx] == -1:
                         dist[ny][nx] = dist[y][x] + 1
-                        queue.append((ny, nx))
+                        queue.append((nx, ny))
 
         return dist
