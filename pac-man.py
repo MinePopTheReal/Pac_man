@@ -10,4 +10,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(Error("You have stopped the program"))
     except Exception as e:
-        print(Error(f"Unexpected error: {e}", "NoSuchDisplayException"))
+        print(Error(f"Unexpected error: {e}", f"{type(e).__name__}"))
