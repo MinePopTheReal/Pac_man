@@ -133,7 +133,6 @@ class EndGameScreen(Screen):
 
         elif key == keys.ENTER:
             self._validate()
-            self.session.new_game()
 
         elif key == keys.ESCAPE:
             self.session.new_game()
@@ -151,6 +150,7 @@ class EndGameScreen(Screen):
         """
         if not self.high_score_manager.is_valid_name(self.name):
             return
+        self.session.new_game()
         self.high_score_manager.add_name_score(
             self.name, self.session.game_state.score
         )
