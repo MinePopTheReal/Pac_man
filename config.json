@@ -27,7 +27,7 @@
     "seed": 42,
 
     # Time limit of each level, in seconds (min 1, default: 90)
-    "level_max_time": 90,
+    "level_max_time": 120,
 
     # Width of the maze, in cells (min 14, max 50, default: 15)
     "width": 15,
