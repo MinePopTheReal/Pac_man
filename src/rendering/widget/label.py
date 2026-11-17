@@ -1,0 +1,39 @@
+from src.rendering.widget.widget import Widget, make_text_layer, Align
+from src.rendering.sprite_sheet_manager import SpriteSheetManager
+
+
+class Label(Widget):
+    """Widget that shows a fixed text, which can have several lines.
+
+    The text is drawn once, when the label is created, into its own
+    layer. The size of the label is the size of that layer, so it fits
+    the text exactly. To show another text, create a new label.
+    """
+    def __init__(
+        self,
+        text: str,
+        zoom: int,
+        font: SpriteSheetManager,
+        color: tuple[int, int, int],
+        *,
+        x: int = 0,
+        y: int = 0,
+        anchor_x: float = 0.0,
+        anchor_y: float = 0.0,
+        blink_period: float | None = None,
+        align: Align = "center",
+    ) -> None:
+        self.layer = make_text_layer(text, zoom, font, color, align)
+        super().__init__(
+            self.layer.width,
+            self.layer.height,
+            x=x,
+            y=y,
+            anchor_x=anchor_x,
+            anchor_y=anchor_y,
+            blink_period=blink_period,
+        )
+
+    def _render(self) -> None:
+        """Put the layer of the label in the window."""
+        self.layer.draw(self.left, self.bottom)
