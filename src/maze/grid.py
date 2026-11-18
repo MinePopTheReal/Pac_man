@@ -1,5 +1,5 @@
 from src.maze.pacgum_type import PacgumType
-from src.entity.character import Direction
+from src.entity.direction import Direction
 from src.message.errors import GridError
 from src.maze.cell import Cell
 

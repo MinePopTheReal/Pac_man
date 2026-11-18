@@ -1,5 +1,5 @@
 from src.maze.grid import Grid, LST_DIRECTION
-from src.entity.character import Direction
+from src.entity.direction import Direction
 
 
 import math

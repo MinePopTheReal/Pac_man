@@ -1,9 +1,9 @@
+from src.screen_manager.screen import Screen, Navigator, ScreenName
 from src.rendering.widget.maze_view import MazeView, TILES_PER_CELL
-from src.rendering.assets import Assets, H4_PX_SIZE, MAJOR_COLOR
+from src.rendering.assets import Assets, Layout, MAJOR_COLOR
 from src.utils.high_score_manager import HighScoreManager
-from src.screen_manager.screen_manager import ScreenName
-from src.screen_manager.screen import Screen, Navigator
-from src.game.game_state import Direction, GameStatus
+from src.game.game_state import GameStatus
+from src.entity.direction import Direction
 from src.message.errors import RenderError
 from src.rendering.widget.hud import Hud
 from src.game.session import Session
@@ -40,8 +40,9 @@ class GameScreen(Screen):
         high_score: HighScoreManager,
         session: Session,
         assets: Assets,
+        layout: Layout
     ) -> None:
-        super().__init__(navigator, assets)
+        super().__init__(navigator, assets, layout)
         self.high_score = high_score
         self.session = session
 
@@ -57,7 +58,7 @@ class GameScreen(Screen):
         config = self.session.config
 
         self.hud = Hud(
-            H4_PX_SIZE,
+            self.layout.h4_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=0,

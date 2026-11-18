@@ -1,6 +1,7 @@
-from src.entity.pacman import Pacman
 from src.entity.ghost import Shadow, Speedy, Bashful, Pokey, Ghost, GhostState
-from src.entity.character import Character, Direction
+from src.entity.character import Character
+from src.entity.direction import Direction
+from src.entity.pacman import Pacman
 
 __all__ = [
     "Pacman",

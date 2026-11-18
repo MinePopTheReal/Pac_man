@@ -7,9 +7,9 @@ on every cell it crosses, so it can never skip a wall check. The only
 exception is turning back (see try_turn_around), which never crosses
 a wall.
 """
-from src.entity.character import Direction, Character
 from src.maze.grid import Grid, LST_DIRECTION
-
+from src.entity.character import Character
+from src.entity.direction import Direction
 
 from math import floor, ceil
 

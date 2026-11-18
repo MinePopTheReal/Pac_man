@@ -2,10 +2,7 @@ from src.screen_manager.screen import Screen, Navigator
 from src.rendering.widget.label import Label
 from src.rendering.assets import (
     Assets,
-    H1_PX_SIZE,
-    H4_PX_SIZE,
-    H5_PX_SIZE,
-    SCALE_FACTOR,
+    Layout,
     MINOR_COLOR,
     MAJOR_COLOR,
 )
@@ -20,14 +17,15 @@ class InstructionsScreen(Screen):
     def __init__(
         self,
         navigator: Navigator,
-        assets: Assets
+        assets: Assets,
+        layout: Layout
     ) -> None:
         """Screen that explains the rules and the controls of the game.
 
         The texts are fixed. The player leaves the screen with Escape or
         Enter.
         """
-        super().__init__(navigator, assets)
+        super().__init__(navigator, assets, layout)
         self.rules: str = (
             "EAT ALL THE PACGUMS TO\n"
             "CLEAR THE LEVEL.\n\n"
@@ -81,11 +79,11 @@ class InstructionsScreen(Screen):
         """
         self.title = Label(
             self.TITLE,
-            H1_PX_SIZE,
+            self.layout.h1_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
+            y=int(self.assets.window_height - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -93,11 +91,11 @@ class InstructionsScreen(Screen):
         title_bottom = self.title.y - self.title.height
         self.sub_title_rules = Label(
             "rules",
-            H4_PX_SIZE,
+            self.layout.h4_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(title_bottom - 150 * SCALE_FACTOR),
+            y=int(title_bottom - 150 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -107,11 +105,11 @@ class InstructionsScreen(Screen):
         )
         self.rules_label = Label(
             self.rules,
-            H5_PX_SIZE,
+            self.layout.h5_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(sub_title_rules_bottom - 20 * SCALE_FACTOR),
+            y=int(sub_title_rules_bottom - 20 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -119,11 +117,11 @@ class InstructionsScreen(Screen):
         rules_bottom = self.rules_label.y - self.rules_label.height
         self.sub_title_controls = Label(
             "controls",
-            H4_PX_SIZE,
+            self.layout.h4_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(rules_bottom - 50 * SCALE_FACTOR),
+            y=int(rules_bottom - 50 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -133,11 +131,11 @@ class InstructionsScreen(Screen):
         )
         self.controls_label = Label(
             self.controls,
-            H5_PX_SIZE,
+            self.layout.h5_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(sub_title_controls_bottom - 20 * SCALE_FACTOR),
+            y=int(sub_title_controls_bottom - 20 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
             align="left",
