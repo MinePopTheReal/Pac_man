@@ -9,7 +9,7 @@ from src.screen_manager.game_screen import GameScreen
 from src.screen_manager.main_screen import MainScreen
 from src.parsing.config_parser import ConfigParser
 from src.screen_manager.screen import ScreenName
-from src.game.game_state import GameConfig
+from src.parsing.models import GameConfig
 from src.rendering.display import Display
 from src.game.session import Session
 from src.message.errors import Error

@@ -1,5 +1,5 @@
-from src.rendering.widget.input_field import InputField, MAX_NAME_LENGTH
-from src.utils.high_score_manager import HighScoreManager
+from src.utils.high_score_manager import HighScoreManager, MAX_NAME_LENGTH
+from src.rendering.widget.input_field import InputField
 from src.screen_manager.screen import Screen, Navigator
 from src.rendering.widget.label import Label
 from src.game.game_state import GameStatus

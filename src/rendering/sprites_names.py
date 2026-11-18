@@ -1,4 +1,4 @@
-from src.maze.grid import Direction
+from src.entity.direction import Direction
 
 
 """

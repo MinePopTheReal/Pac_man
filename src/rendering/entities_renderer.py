@@ -1,6 +1,7 @@
 from src.rendering.sprite_sheet_manager import SpriteSheetManager, Rotation
-from src.game.game_state import GameState, Direction, GameStatus
+from src.game.game_state import GameState, GameStatus
 from src.maze.pacgum_type import PacgumType
+from src.entity.direction import Direction
 from src.rendering.sprites_names import (
     EYES_BY_DIRECTION,
     GHOSTS_BY_DIRECTION,

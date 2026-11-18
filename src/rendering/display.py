@@ -4,10 +4,11 @@ from src.message.warning_message import WarningMessage
 from src.message.errors import RenderError
 
 
-from pyglet import window, clock
+from pyglet.window import Window
+from pyglet import clock
 
 
-class Display(window.Window):
+class Display(Window):
     """
     Main class for managing the display; it centralizes input,
     determines what to display, and updates the screens

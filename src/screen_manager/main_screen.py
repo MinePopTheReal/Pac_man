@@ -1,5 +1,4 @@
-from src.screen_manager.screen_manager import ScreenName
-from src.screen_manager.screen import Screen, Navigator
+from src.screen_manager.screen import Screen, Navigator, ScreenName
 from src.rendering.widget.label import Label
 from src.rendering.widget.menu import Menu
 from src.rendering.assets import (
