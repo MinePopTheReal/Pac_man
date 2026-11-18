@@ -1,3 +1,17 @@
+from src.screen_manager.instructions_screen import InstructionsScreen
+from src.screen_manager.high_score_screen import HighScoreScreen
+from src.screen_manager.end_game_screen import EndGameScreen
+from src.screen_manager.screen_manager import ScreenManager
+from src.rendering.assets import Assets, ACTUAL_RESOLUTION
+from src.utils.high_score_manager import HighScoreManager
+from src.screen_manager.pause_screen import PauseScreen
+from src.screen_manager.game_screen import GameScreen
+from src.screen_manager.main_screen import MainScreen
+from src.parsing.config_parser import ConfigParser
+from src.screen_manager.screen import ScreenName
+from src.game.game_state import GameConfig
+from src.rendering.display import Display
+from src.game.session import Session
 from src.message.errors import Error
 
 
@@ -14,20 +28,6 @@ def main() -> None:
     starts the pyglet event loop. It returns when the window is closed
     or when the player quits from the menu.
     """
-    from src.screen_manager.instructions_screen import InstructionsScreen
-    from src.screen_manager.high_score_screen import HighScoreScreen
-    from src.screen_manager.end_game_screen import EndGameScreen
-    from src.screen_manager.screen_manager import ScreenManager
-    from src.rendering.assets import Assets, ACTUAL_RESOLUTION
-    from src.utils.high_score_manager import HighScoreManager
-    from src.screen_manager.pause_screen import PauseScreen
-    from src.screen_manager.game_screen import GameScreen
-    from src.screen_manager.main_screen import MainScreen
-    from src.parsing.config_parser import ConfigParser
-    from src.screen_manager.screen import ScreenName
-    from src.game.game_state import GameConfig
-    from src.rendering.display import Display
-    from src.game.session import Session
 
     parser = ArgumentParser(
         prog="pac-man.py", description="Pac-Man game."
