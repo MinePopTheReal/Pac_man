@@ -37,10 +37,10 @@ class PauseScreen(Screen):
     TITLE = "pause"
 
     def __init__(
-        self, 
-        navigator: Navigator, 
-        session: Session, 
-        assets: Assets, 
+        self,
+        navigator: Navigator,
+        session: Session,
+        assets: Assets,
         layout: Layout
     ):
         super().__init__(navigator, assets, layout)

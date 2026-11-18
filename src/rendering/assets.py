@@ -23,6 +23,7 @@ SCREEN_MARGIN = 0.95
 REFERENCE_RESOLUTION = (3840 * SCREEN_MARGIN, 2160 * SCREEN_MARGIN)
 MINIMAL_RESOLUTION = (854 * SCREEN_MARGIN, 480 * SCREEN_MARGIN)
 
+
 @cache
 def get_actual_resolution() -> tuple[int, int]:
     """Return the screen resolution, or raise RenderError if no screen."""
@@ -33,6 +34,7 @@ def get_actual_resolution() -> tuple[int, int]:
             "No display available: cannot read the screen resolution"
         ) from e
     return screen.width, screen.height
+
 
 @dataclass(frozen=True)
 class Layout:
@@ -66,6 +68,7 @@ def compute_layout() -> Layout:
         int(25 * scale),
         int(10 * scale),
     )
+
 
 class Assets:
     """

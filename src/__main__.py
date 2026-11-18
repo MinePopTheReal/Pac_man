@@ -51,7 +51,7 @@ def main() -> None:
 
     rs = screen_manager.register_screens
     rs(ScreenName.MAIN, MainScreen(
-        screen_manager, 
+        screen_manager,
         assets,
         layout
     ))
@@ -63,7 +63,7 @@ def main() -> None:
         layout
     ))
     rs(ScreenName.INSTRUCTIONS, InstructionsScreen(
-        screen_manager, 
+        screen_manager,
         assets,
         layout
     ))
@@ -73,8 +73,9 @@ def main() -> None:
         assets,
         layout
     ))
-    rs(ScreenName.PAUSE, PauseScreen(screen_manager, 
-        session, 
+    rs(ScreenName.PAUSE, PauseScreen(
+        screen_manager,
+        session,
         assets,
         layout
     ))
