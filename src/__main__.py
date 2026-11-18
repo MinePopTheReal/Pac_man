@@ -30,7 +30,7 @@ def main() -> None:
     """
 
     parser = ArgumentParser(
-        prog="__main__.py", description="Pac-Man game."
+        prog="pac-man.py", description="Pac-Man game."
     )
 
     parser.add_argument("config", help="path to the JSON config file")
@@ -82,3 +82,5 @@ if __name__ == "__main__":
         print(e)
     except KeyboardInterrupt:
         print(Error("You have stopped the program"))
+    except Exception as e:
+        print(Error(f"Unexpected error: {e}", f"{type(e).__name__}"))

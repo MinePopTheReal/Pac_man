@@ -52,3 +52,11 @@ class ScreenError(Error):
     """
 
     default_type = "Screen"
+
+
+class FileError(Error):
+    """
+    An exception is thrown when errors occur in the file
+    """
+
+    default_type = "File"

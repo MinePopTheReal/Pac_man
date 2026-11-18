@@ -1,4 +1,4 @@
-from src.message.errors import Error
+from src.message.errors import FileError
 
 
 from PIL import Image, UnidentifiedImageError
@@ -29,16 +29,16 @@ class FileManager:
 
             return data
         except IsADirectoryError as e:
-            raise Error(f"The path points to a folder: {file_path}") from e
+            raise FileError(f"The path points to a folder: {file_path}") from e
 
         except FileNotFoundError as e:
-            raise Error(f"File not found: {file_path}") from e
+            raise FileError(f"File not found: {file_path}") from e
 
         except PermissionError as e:
-            raise Error(f"Permission denied: {file_path}") from e
+            raise FileError(f"Permission denied: {file_path}") from e
 
         except OSError as e:
-            raise Error(f"Unable to read file: {file_path}") from e
+            raise FileError(f"Unable to read file: {file_path}") from e
 
     @staticmethod
     def write(obj: Any, file_path: str) -> None:
@@ -58,22 +58,22 @@ class FileManager:
                 dump(obj, f, indent=4, ensure_ascii=False)
 
         except IsADirectoryError as e:
-            raise Error(f"The path points to a folder: {file_path}") from e
+            raise FileError(f"The path points to a folder: {file_path}") from e
 
         except FileNotFoundError as e:
-            raise Error(f"File not found: {file_path}") from e
+            raise FileError(f"File not found: {file_path}") from e
 
         except PermissionError as e:
-            raise Error(f"Permission denied: {file_path}") from e
+            raise FileError(f"Permission denied: {file_path}") from e
 
         except UnicodeEncodeError as e:
-            raise Error("Error when encode") from e
+            raise FileError("Error when encode") from e
 
         except TypeError as e:
-            raise Error("Object is not JSON serializable") from e
+            raise FileError("Object is not JSON serializable") from e
 
         except OSError as e:
-            raise Error(f"Unable to write file: {file_path}") from e
+            raise FileError(f"Unable to write file: {file_path}") from e
 
     @staticmethod
     def read_image(image_path: str, format: str) -> Image.Image:
@@ -96,16 +96,16 @@ class FileManager:
 
             return image
         except FileNotFoundError as e:
-            raise Error(f"Spritesheet not found: {image_path}") from e
+            raise FileError(f"Spritesheet not found: {image_path}") from e
 
         except PermissionError as e:
-            raise Error(f"Permission denied: {image_path}") from e
+            raise FileError(f"Permission denied: {image_path}") from e
 
         except IsADirectoryError as e:
-            raise Error(f"Not a file: {image_path}") from e
+            raise FileError(f"Not a file: {image_path}") from e
 
         except UnidentifiedImageError as e:
-            raise Error(f"Not a valid image: {image_path}") from e
+            raise FileError(f"Not a valid image: {image_path}") from e
 
         except (
             OSError,
@@ -113,4 +113,5 @@ class FileManager:
             ValueError,
             Image.DecompressionBombError
         ) as e:
-            raise Error(f"Corrupted or unsupported image: {image_path}") from e
+            raise FileError("Corrupted or unsupported image: "
+                            f"{image_path}") from e

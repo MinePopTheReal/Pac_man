@@ -2,7 +2,7 @@ from src.message.warning_message import WarningMessage
 from src.utils.file_manager import FileManager
 from src.parsing.models import GameConfig
 from src.message.errors import Error
-
+from src.game.game_state import MAX_SCORE
 
 from json import loads, JSONDecodeError
 
@@ -30,7 +30,7 @@ class HighScoreManager:
         The file must contain a JSON list of objects with a "name" and a
         "score". If the file is missing, is not valid JSON, or does not
         contain a list, a warning is printed and nothing is loaded. An
-        entry that is not valid (wrong type, invalid name, negative
+        entry that is not valid (wrong type, invalid name, negative or above
         score) is ignored, and the other entries are still loaded. Only
         the best MAX_HIGH_SCORE scores are kept.
 
@@ -87,7 +87,8 @@ class HighScoreManager:
     def add_name_score(self, name: str, score: int) -> None:
         """Add a score to the list, if it is valid.
 
-        Does nothing if the name is not valid or the score is negative.
+        Does nothing if the name is not valid or the score is negative
+        or above MAX_SCORE.
         Otherwise the list is sorted again from the best score to the
         worst and cut to MAX_HIGH_SCORE entries, so a score that is too
         low for the list is dropped. When two scores are equal, the one
@@ -97,9 +98,10 @@ class HighScoreManager:
 
         Args:
             name (str): The name of the player.
-            score (int): The score, which must not be negative.
+            score (int): The score, which must not be negative
+                          or above MAX_SCORE.
         """
-        if not self.is_valid_name(name) or score < 0:
+        if not self.is_valid_name(name) or not (0 <= score <= MAX_SCORE):
             return
 
         self.lst_scores.append((name.strip(), score))
