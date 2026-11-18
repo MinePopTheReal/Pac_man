@@ -1,9 +1,9 @@
 from src.message.errors import Error
+from src.__main__ import main
 
 
 if __name__ == "__main__":
     try:
-        from src.__main__ import main
         main()
     except Error as e:
         print(e)

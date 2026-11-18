@@ -3,11 +3,9 @@ from src.rendering.widget.label import Label
 from src.rendering.widget.menu import Menu
 from src.rendering.assets import (
     Assets,
-    H3_PX_SIZE,
-    H1_PX_SIZE,
+    Layout,
     MAJOR_COLOR,
     MINOR_COLOR,
-    SCALE_FACTOR
 )
 
 
@@ -43,9 +41,10 @@ class MainScreen(Screen):
     def __init__(
         self,
         navigator: Navigator,
-        assets: Assets
+        assets: Assets,
+        layout: Layout
     ) -> None:
-        super().__init__(navigator, assets)
+        super().__init__(navigator, assets, layout)
         self.options: list[MainOptions] = list(MainOptions)
 
     def update_screen(self, dt: float) -> None:
@@ -84,11 +83,11 @@ class MainScreen(Screen):
         """
         self.title = Label(
             self.TITLE,
-            H1_PX_SIZE,
+            self.layout.h1_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
+            y=int(self.assets.window_height - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1
         )
@@ -96,12 +95,12 @@ class MainScreen(Screen):
         title_bottom = self.title.y - self.title.height
         self.menu = Menu(
             [option.value for option in self.options],
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(title_bottom - 800 * SCALE_FACTOR),
+            y=int(title_bottom - 800 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=0
         )
@@ -109,11 +108,11 @@ class MainScreen(Screen):
         menu_bottom = self.menu.y - self.menu.height
         self.helper_text = Label(
             "press enter",
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(menu_bottom + 200 * SCALE_FACTOR),
+            y=int(menu_bottom + 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
             blink_period=0.2

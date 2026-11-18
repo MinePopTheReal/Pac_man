@@ -4,11 +4,9 @@ from src.rendering.widget.menu import Menu
 from src.game.session import Session
 from src.rendering.assets import (
     Assets,
-    H1_PX_SIZE,
-    H3_PX_SIZE,
+    Layout,
     MAJOR_COLOR,
-    MINOR_COLOR,
-    SCALE_FACTOR
+    MINOR_COLOR
 )
 
 
@@ -38,8 +36,14 @@ class PauseScreen(Screen):
     """
     TITLE = "pause"
 
-    def __init__(self, navigator: Navigator, session: Session, assets: Assets):
-        super().__init__(navigator, assets)
+    def __init__(
+        self, 
+        navigator: Navigator, 
+        session: Session, 
+        assets: Assets, 
+        layout: Layout
+    ):
+        super().__init__(navigator, assets, layout)
         self.session = session
 
         self.options: list[PauseOption] = list(PauseOption)
@@ -72,11 +76,11 @@ class PauseScreen(Screen):
         """
         self.title = Label(
             self.TITLE,
-            H1_PX_SIZE,
+            self.layout.h1_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
+            y=int(self.assets.window_height - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1
         )
@@ -84,12 +88,12 @@ class PauseScreen(Screen):
         title_bottom = self.title.y - self.title.height
         self.menu = Menu(
             [option.value for option in self.options],
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(title_bottom - 800 * SCALE_FACTOR),
+            y=int(title_bottom - 800 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=0
         )
