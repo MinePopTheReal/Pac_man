@@ -1,31 +1,32 @@
-from src.rendering.assets import ACTUAL_RESOLUTION, MINIMAL_RESOLUTION
+from src.rendering.assets import MINIMAL_RESOLUTION
 from src.screen_manager.screen_manager import ScreenManager
 from src.message.warning_message import WarningMessage
 from src.message.errors import RenderError
 
 
-from pyglet import window, clock
+from pyglet.window import Window
+from pyglet import clock
 
 
-class Display(window.Window):
+class Display(Window):
     """
     Main class for managing the display; it centralizes input,
     determines what to display, and updates the screens
     """
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager, width: int, height: int):
         """
         Runs the screen update and returns errors and warnings based on
         the resolution to alert the user to a potential display issue
         """
         clock.schedule_interval(self.update, 1 / 60)
         if (
-            ACTUAL_RESOLUTION[0] < MINIMAL_RESOLUTION[0]
-            or ACTUAL_RESOLUTION[1] < MINIMAL_RESOLUTION[1]
+            width < MINIMAL_RESOLUTION[0]
+            or height < MINIMAL_RESOLUTION[1]
         ):
             raise RenderError(
                 "Your resolution is too low. " "The game is unplayable"
             )
-        if (ACTUAL_RESOLUTION[0] / 16) * 9 != ACTUAL_RESOLUTION[1]:
+        if (width / 16) * 9 != height:
             print(
                 WarningMessage(
                     "Your resolution is not 16:9. "
@@ -34,8 +35,8 @@ class Display(window.Window):
             )
 
         super().__init__(
-            width=round(ACTUAL_RESOLUTION[0]),
-            height=round(ACTUAL_RESOLUTION[1]),
+            width=round(width),
+            height=round(height),
             caption="Pac-Man",
         )
 

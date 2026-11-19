@@ -1,4 +1,4 @@
-from src.rendering.assets import Assets
+from src.rendering.assets import Assets, Layout
 
 
 from abc import ABC, abstractmethod
@@ -54,9 +54,15 @@ class Screen(ABC):
     updated each frame and draws itself. The screen manager calls these
     methods on the screen at the top of its stack.
     """
-    def __init__(self, navigator: Navigator, assets: Assets) -> None:
+    def __init__(
+        self,
+        navigator: Navigator,
+        assets: Assets,
+        layout: Layout
+    ) -> None:
         self.navigator = navigator
         self.assets = assets
+        self.layout = layout
 
     @abstractmethod
     def build_widget(self) -> None:

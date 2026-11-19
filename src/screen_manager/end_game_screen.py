@@ -1,17 +1,10 @@
-from src.rendering.widget.input_field import InputField, MAX_NAME_LENGTH
-from src.utils.high_score_manager import HighScoreManager
+from src.utils.high_score_manager import HighScoreManager, MAX_NAME_LENGTH
+from src.rendering.assets import Assets, Layout, MINOR_COLOR, MAJOR_COLOR
+from src.rendering.widget.input_field import InputField
 from src.screen_manager.screen import Screen, Navigator
 from src.rendering.widget.label import Label
 from src.game.game_state import GameStatus
 from src.game.session import Session
-from src.rendering.assets import (
-    Assets,
-    H3_PX_SIZE,
-    H1_PX_SIZE,
-    MINOR_COLOR,
-    MAJOR_COLOR,
-    SCALE_FACTOR,
-)
 
 
 from pyglet.window import key as keys
@@ -29,8 +22,9 @@ class EndGameScreen(Screen):
         high_score_manager: HighScoreManager,
         session: Session,
         assets: Assets,
+        layout: Layout
     ) -> None:
-        super().__init__(navigator, assets)
+        super().__init__(navigator, assets, layout)
         self.high_score_manager = high_score_manager
         self.session = session
 
@@ -48,11 +42,11 @@ class EndGameScreen(Screen):
             "victory"
             if self.session.game_state.status == GameStatus.WON
             else "game over",
-            H1_PX_SIZE,
+            self.layout.h1_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
+            y=int(self.assets.window_height - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -61,11 +55,11 @@ class EndGameScreen(Screen):
         your_score = self.session.game_state.score
         self.your_score_label = Label(
             f"your score: {your_score}",
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(title_bottom - 500 * SCALE_FACTOR),
+            y=int(title_bottom - 500 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=0,
         )
@@ -79,11 +73,11 @@ class EndGameScreen(Screen):
             best_score = self.high_score_manager.lst_scores[0][1]
         self.best_score_label = Label(
             f"best score: {best_score}",
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=your_score_bottom - H3_PX_SIZE // 2,
+            y=your_score_bottom - self.layout.h3_px_size // 2,
             anchor_x=0.5,
             anchor_y=0,
         )
@@ -93,12 +87,12 @@ class EndGameScreen(Screen):
         )
         self.input_field = InputField(
             self.prompt,
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(best_score_bottom - 100 * SCALE_FACTOR),
+            y=int(best_score_bottom - 100 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
@@ -133,7 +127,6 @@ class EndGameScreen(Screen):
 
         elif key == keys.ENTER:
             self._validate()
-            self.session.new_game()
 
         elif key == keys.ESCAPE:
             self.session.new_game()
@@ -154,6 +147,7 @@ class EndGameScreen(Screen):
         self.high_score_manager.add_name_score(
             self.name, self.session.game_state.score
         )
+        self.session.new_game()
         self.high_score_manager.save_high_score()
         self.navigator.back_to_menu()
 

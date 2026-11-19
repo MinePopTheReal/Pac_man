@@ -1,5 +1,5 @@
-from src.__main__ import main
 from src.message.errors import Error
+from src.__main__ import main
 
 
 if __name__ == "__main__":
@@ -9,3 +9,5 @@ if __name__ == "__main__":
         print(e)
     except KeyboardInterrupt:
         print(Error("You have stopped the program"))
+    except Exception as e:
+        print(Error(f"Unexpected error: {e}", f"{type(e).__name__}"))

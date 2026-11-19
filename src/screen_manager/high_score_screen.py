@@ -4,14 +4,12 @@ from src.screen_manager.screen import Screen, Navigator
 from src.rendering.widget.label import Label
 from src.rendering.assets import Assets
 from src.rendering.assets import (
-    H1_PX_SIZE,
-    H3_PX_SIZE,
+    Layout,
     MAJOR_COLOR,
     MINOR_COLOR,
     TOP1_COLOR,
     TOP2_COLOR,
     TOP3_COLOR,
-    SCALE_FACTOR,
 )
 
 
@@ -32,8 +30,9 @@ class HighScoreScreen(Screen):
         navigator: Navigator,
         high_score: HighScoreManager,
         assets: Assets,
+        layout: Layout
     ) -> None:
-        super().__init__(navigator, assets)
+        super().__init__(navigator, assets, layout)
         self.high_score = high_score
 
     def input(self, key: int) -> None:
@@ -56,25 +55,25 @@ class HighScoreScreen(Screen):
         """
         self.title = Label(
             self.TITLE,
-            H1_PX_SIZE,
+            self.layout.h1_px_size,
             self.assets.font_spritesheet,
             MAJOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(self.assets.window_height - 200 * SCALE_FACTOR),
+            y=int(self.assets.window_height - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
 
         title_bottom = self.title.y - self.title.height
         self.high_score_label = HighScoreLabel(
-            H3_PX_SIZE,
+            self.layout.h3_px_size,
             self.assets.font_spritesheet,
             TOP1_COLOR,
             TOP2_COLOR,
             TOP3_COLOR,
             MINOR_COLOR,
             x=self.assets.window_width // 2,
-            y=int(title_bottom - 200 * SCALE_FACTOR),
+            y=int(title_bottom - 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
         )
