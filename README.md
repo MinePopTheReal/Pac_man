@@ -431,7 +431,7 @@ We worked on GitHub:
   **pull request** is required to merge into `develop` and `main`;
 - a **GitHub Action** (`Norm`) runs `flake8` and `mypy` on `src/`, to
   check the code before it is merged (the same checks as `make lint`).
-Project management folder: `<link to the project management folder>`
+Project management folder: [project_management](./project_management/)
  
 Work split: aslimani did the gameplay (entities, maze, game rules,
 ghost AI, game configuration model); tmalpert did the
