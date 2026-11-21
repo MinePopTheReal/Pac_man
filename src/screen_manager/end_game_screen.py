@@ -108,6 +108,9 @@ class EndGameScreen(Screen):
         Args:
             key (int): The code of the key (see pyglet.window.key).
         """
+        if keys.NUM_0 <= key <= keys.NUM_9:
+            position = key - keys.NUM_0
+            key = keys._0 + position
         if (
             keys.A <= key <= keys.Z
             or keys._0 <= key <= keys._9
