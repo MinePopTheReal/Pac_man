@@ -376,7 +376,7 @@ class GameState:
         Cheats already on stay on when the cheat mode is turned off.
         """
         self.cheats.enabled = not self.cheats.enabled
-        
+
         if not self.cheats.enabled:
             self.cheats = Cheats()
             self.pacman.speed = PACMAN_SPEED
