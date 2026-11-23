@@ -115,7 +115,7 @@ class MainScreen(Screen):
             y=int(menu_bottom + 200 * self.layout.scale_factor),
             anchor_x=0.5,
             anchor_y=1,
-            blink_period=0.2
+            blink_period=0.4
         )
 
     def _validate(self, selected: int) -> None:

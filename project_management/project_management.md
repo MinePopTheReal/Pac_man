@@ -13,10 +13,10 @@ All screenshots were taken at the **end of the project**, so they show its final
 We split the project along its natural boundary: **what the player sees** (rendering and
 user interface) and **how the game behaves** (rules and game logic).
 
-| Member (GitHub) | Main area | Short description |
-|---|---|---|
-| `tmalpert` | **Graphics** | Rendering, sprites, HUD, display of the screens |
-| `aslimani` | **Logic** | Game rules, entities behavior, game state, tests and debug |
+| Member (GitHub) |  Main area   |                     Short description                      |
+|-----------------|--------------|------------------------------------------------------------|
+|   `tmalpert`    | **Graphics** | Rendering, sprites, HUD, display of the screens            |
+|   `aslimani`    |  **Logic**   | Game rules, entities behavior, game state, tests and debug |
 
 "Main area" means the part each of us owns. It does not mean we never touched the other
 side: we helped each other, reviewed each other's work and adjusted the split when

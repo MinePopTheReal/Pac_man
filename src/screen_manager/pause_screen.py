@@ -1,4 +1,4 @@
-from src.screen_manager.screen import Screen, Navigator
+from src.screen_manager.screen import Screen, Navigator, ScreenName
 from src.rendering.widget.label import Label
 from src.rendering.widget.menu import Menu
 from src.game.session import Session
@@ -21,6 +21,7 @@ class PauseOption(Enum):
     the entries is the order of the menu, from top to bottom.
     """
     RESUME = 'Resume'
+    RULES = 'rules'
     MENU = 'Back to menu'
 
 
@@ -113,6 +114,8 @@ class PauseScreen(Screen):
             case PauseOption.RESUME:
                 self.session.game_state.switch_pause()
                 self.navigator.pop()
+            case PauseOption.RULES:
+                self.navigator.push(ScreenName.INSTRUCTIONS)
             case PauseOption.MENU:
                 self.session.new_game()
                 self.navigator.back_to_menu()
