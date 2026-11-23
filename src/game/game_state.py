@@ -27,9 +27,9 @@ from enum import Enum, auto
 
 
 # Speeds are in cells per second.
-PACMAN_SPEED = 4.0
+PACMAN_SPEED = 3.0
 
-GHOST_SPEED = 3.0
+GHOST_SPEED = 2.15
 # Cheat: Pac-Man speed is multiplied by this.
 SPEED_MULTIPLIER = 2.0
 # Cheat: ghost speed is multiplied by this.
@@ -376,6 +376,10 @@ class GameState:
         Cheats already on stay on when the cheat mode is turned off.
         """
         self.cheats.enabled = not self.cheats.enabled
+        
+        if not self.cheats.enabled:
+            self.cheats = Cheats()
+            self.pacman.speed = PACMAN_SPEED
 
     def switch_invincible(self) -> None:
         """Cheat: turn invincibility on or off (ghosts cannot kill Pac-Man)."""

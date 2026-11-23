@@ -93,7 +93,7 @@ class Widget:
         if self.blink_period:
             self.timer += dt
             self.visible = (
-                self.timer % (2 * self.blink_period)
+                self.timer % (1.65 * self.blink_period)
             ) < self.blink_period
 
     def draw(self) -> None:
