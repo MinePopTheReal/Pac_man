@@ -23,7 +23,7 @@ class HighScoreManager:
     a warning is printed and the list is simply left empty.
     """
     def __init__(self, config: GameConfig) -> None:
-        self.path_file = app_dir() / config.high_score_filename
+        self.path_file = str(app_dir() / config.high_score_filename)
         self.lst_scores: list[tuple[str, int]] = []
 
     def load_high_score(self) -> None:

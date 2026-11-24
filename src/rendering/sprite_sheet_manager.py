@@ -60,7 +60,10 @@ class SpriteSheetManager:
             sprite configuration
         """
         parser = ConfigParser()
-        spritesheet = parser.load_config(bundle_dir() / config_path, SpriteSheet)
+        spritesheet = parser.load_config(
+            str(bundle_dir() / config_path),
+            SpriteSheet
+        )
         return spritesheet
 
     def _load_spritesheet(self, image_path: str) -> ndarray:
@@ -73,7 +76,10 @@ class SpriteSheetManager:
             ndarray: Return an array containing all the pixels in the
             sprite sheet
         """
-        image = FileManager.read_image(bundle_dir() / image_path, self.format)
+        image = FileManager.read_image(
+            str(bundle_dir() / image_path),
+            self.format
+        )
 
         pixels = asarray(image)
         return pixels

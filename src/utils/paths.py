@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-print(ROOT)
+
 
 def bundle_dir() -> Path:
     """Fichiers embarqués en lecture seule (assets)."""
