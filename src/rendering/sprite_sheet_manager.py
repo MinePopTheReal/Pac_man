@@ -2,6 +2,7 @@ from src.parsing.config_parser import ConfigParser
 from src.utils.file_manager import FileManager
 from src.parsing.models import SpriteSheet
 from src.message.errors import RenderError
+from src.utils.paths import bundle_dir
 
 
 from numpy import asarray, ndarray, rot90, uint16, uint8, array, arange
@@ -59,7 +60,7 @@ class SpriteSheetManager:
             sprite configuration
         """
         parser = ConfigParser()
-        spritesheet = parser.load_config(config_path, SpriteSheet)
+        spritesheet = parser.load_config(bundle_dir() / config_path, SpriteSheet)
         return spritesheet
 
     def _load_spritesheet(self, image_path: str) -> ndarray:
@@ -72,7 +73,7 @@ class SpriteSheetManager:
             ndarray: Return an array containing all the pixels in the
             sprite sheet
         """
-        image = FileManager.read_image(image_path, self.format)
+        image = FileManager.read_image(bundle_dir() / image_path, self.format)
 
         pixels = asarray(image)
         return pixels

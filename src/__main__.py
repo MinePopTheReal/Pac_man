@@ -13,7 +13,7 @@ from src.parsing.models import GameConfig
 from src.rendering.display import Display
 from src.game.session import Session
 from src.message.errors import Error
-
+from src.utils.paths import app_dir
 
 from argparse import ArgumentParser
 from pyglet import app
@@ -36,7 +36,7 @@ def main() -> None:
     parser.add_argument("config", help="path to the JSON config file")
     args = parser.parse_args()
 
-    config = ConfigParser().load_config(args.config, GameConfig)
+    config = ConfigParser().load_config(app_dir() / args.config, GameConfig)
     layout = compute_layout()
 
     screen_manager = ScreenManager()
