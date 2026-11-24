@@ -4,3 +4,7 @@ maze_generator/
 .venv/
 .vscode/
 debug/
+
+build/
+dist/ 
+high_score/

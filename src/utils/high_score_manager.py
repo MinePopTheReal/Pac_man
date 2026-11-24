@@ -1,8 +1,10 @@
 from src.message.warning_message import WarningMessage
 from src.utils.file_manager import FileManager
 from src.parsing.models import GameConfig
-from src.message.errors import Error
 from src.game.game_state import MAX_SCORE
+from src.message.errors import Error
+from src.utils.paths import app_dir
+
 
 from json import loads, JSONDecodeError
 
@@ -21,7 +23,7 @@ class HighScoreManager:
     a warning is printed and the list is simply left empty.
     """
     def __init__(self, config: GameConfig) -> None:
-        self.path_file = config.high_score_filename
+        self.path_file = str(app_dir() / config.high_score_filename)
         self.lst_scores: list[tuple[str, int]] = []
 
     def load_high_score(self) -> None:
