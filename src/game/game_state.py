@@ -129,7 +129,7 @@ class GameState:
 
         Args:
             addition (int): the desired value
-        """        
+        """
         self.score = min(self.score + addition, MAX_SCORE)
 
     def _spawn_pacman(self) -> Pacman:
