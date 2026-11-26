@@ -1,4 +1,4 @@
-TEMP_FILE := .mypy_cache
+TEMP_FILE := .mypy_cache dist build
 
 MYPY_FLAG := --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
@@ -23,7 +23,7 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 package:
-	uv run pyinstaller --noconfirm --name pac-man --add-data "assets:assets" pac-man.py
+	$(UV) run pyinstaller --noconfirm --name pac-man --add-data "assets:assets" pac-man.py
 	cp config.json dist/pac-man/
 	cp PACKAGE_README.txt dist/pac-man/README.txt
 	rm -f dist/pac-man-linux.zip

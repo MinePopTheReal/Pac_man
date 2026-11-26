@@ -125,6 +125,11 @@ class GameState:
         self._update_pacman_map()
 
     def _update_score(self, addition: int) -> None:
+        """Allows you to update the score by adding the desired value
+
+        Args:
+            addition (int): the desired value
+        """        
         self.score = min(self.score + addition, MAX_SCORE)
 
     def _spawn_pacman(self) -> Pacman:

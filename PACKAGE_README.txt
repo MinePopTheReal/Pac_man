@@ -3,7 +3,7 @@ PAC-MAN
 
 HOW TO RUN
 ----------
-Run the "pac-man" executable located in this folder.
+Run the "./pac-man <config_filename>" (by default config.json) executable located in this folder.
 
 CONTROLS
 --------
@@ -18,8 +18,18 @@ In game:
 
 CHEATS
 ------
-The available cheats and their keys are listed in the "Rules" menu
-(accessible from the pause menu).
+Enable cheat mode with C
+
+Available cheat:
+|          Method          |                       Effect                       | key |
+|--------------------------|----------------------------------------------------|-----|
+|  `switch_cheat_mode()`   | turn the cheat mode on / off                       |  c  |
+|  `switch_invincible()`   | ghosts cannot kill Pac-Man (he can still eat them) |  1  |
+| `switch_ghosts_frozen()` | ghosts stop moving                                 |  2  |
+|      `skip_level()`      | finish the level at once (wins after the last one) |  3  |
+|    `add_extra_life()`    | one more life                                      |  4  |
+| `switch_speed_pacman()`  | Pac-Man twice as fast                              |  5  |
+|  `switch_slow_ghosts()`  | ghosts twice as slow                               |  6  |
 
 CONFIGURATION
 -------------
