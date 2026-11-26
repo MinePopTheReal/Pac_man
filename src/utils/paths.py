@@ -6,12 +6,12 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def bundle_dir() -> Path:
-    """Fichiers embarqués en lecture seule (assets)."""
+    """Read-only embedded files (assets)."""
     return Path(getattr(sys, "_MEIPASS", ROOT))
 
 
 def app_dir() -> Path:
-    """Fichiers modifiables : config.json, high_score/."""
+    """Editable files: config.json, high_score/."""
     if getattr(sys, "frozen", False):
         return Path(sys.executable).parent
     return ROOT

@@ -163,6 +163,21 @@ class Grid:
         return len(self.pacgums)
 
     def distances_from_cell(self, x0: int, y0: int) -> list[list[int]]:
+        """Compute the shortest distance from a cell to every other cell.
+
+        Runs a breadth-first search (BFS) from (x0, y0), moving only
+        through passages allowed by `can_move` (walls are respected).
+
+        Args:
+            x0: Column index of the starting cell.
+            y0: Row index of the starting cell.
+
+        Returns:
+            A grid of size `height` x `width`, indexed as `dist[y][x]`,
+            where each value is the minimum number of steps from the
+            starting cell. Unreachable cells are set to -1, and the
+            starting cell is 0.
+        """
         dist = [[-1 for _ in range(self.width)] for _ in range(self.height)]
         dist[y0][x0] = 0
         queue: deque[tuple[int, int]] = deque([(x0, y0)])
